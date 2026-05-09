@@ -94,6 +94,7 @@ Output: `publish/CbtExam/CbtExam.exe`
 6. Share the URL with students (e.g., `http://192.168.1.100:5000?code=A1B2C3`)
 7. Monitor students in real-time via **Monitor** tab
 8. View results via **Results** tab after exam ends
+9. Use **End All** to force-stop all active sessions (auto-submits pending students)
 
 ### Students
 
@@ -102,6 +103,7 @@ Output: `publish/CbtExam/CbtExam.exe`
 3. Click **Join Exam**
 4. Answer all questions using the navigator panel
 5. Click **Submit Exam** when done (or it auto-submits when time expires)
+6. Use **Save & Exit** to continue later from Resume
 
 ---
 
@@ -145,12 +147,18 @@ Output: `publish/CbtExam/CbtExam.exe`
 | GET | /api/sessions | List sessions |
 | POST | /api/sessions/start | Start session |
 | POST | /api/sessions/{id}/stop | Stop session |
+| POST | /api/sessions/end-all | End all active sessions |
+| POST | /api/sessions/export | Export JSON snapshots/log bundles |
 | GET | /api/sessions/{id}/students | Get student statuses |
 | GET | /api/sessions/{id}/results | Get results |
 | POST | /api/student/join | Student joins exam |
 | GET | /api/student/{id}/questions | Get shuffled questions |
 | POST | /api/student/submit | Submit answers |
+| POST | /api/student/progress | Save per-question progress |
+| GET | /api/student/{id}/progress | Load saved progress |
 | POST | /api/student/tabswitch | Report tab switch |
+| POST | /api/student/heartbeat | Device state heartbeat |
+| POST | /api/student/snapshot | Camera snapshot upload |
 
 ---
 
@@ -181,6 +189,28 @@ The shuffling engine:
 - Keyboard shortcuts (Ctrl+C, F12, etc.) blocked
 - Refresh warning via `beforeunload` event
 - All violations visible in Monitor tab
+- Optional camera snapshot capture from student exam page
+- Device heartbeat includes connection state and battery telemetry
+
+---
+
+## Security Notes
+
+- Admin endpoints (`/api/exams`, `/api/sessions`) require header `X-Admin-Key`.
+- Default admin key is `admin123`; set `CBT_ADMIN_KEY` in environment for production.
+- Student-facing endpoints remain accessible for browser exam clients.
+
+---
+
+## Smoke Checklist
+
+1. Launch desktop app and confirm server URL appears in Settings.
+2. Create an exam, import questions JSON, start a session.
+3. Join from student browser, answer a few questions, use Save & Exit.
+4. Rejoin and resume; submit and verify score/result page.
+5. Confirm monitor shows live answered count/current question/connection/battery.
+6. Click End All and verify unsubmitted students become submitted.
+7. Run Export and verify files under `database/` plus dated artifacts in `database/results` and `database/logs`.
 
 ---
 
