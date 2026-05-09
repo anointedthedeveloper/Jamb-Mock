@@ -184,7 +184,7 @@
                 </UniformGrid>
             </Grid>
 
-            <Border Background="White" CornerRadius="14" BorderBrush="#E5E7EB" BorderThickness="1" Padding="18">
+            <Border Background="White" CornerRadius="14" BorderBrush="#E5E7EB" BorderThickness="1" Padding="18" Visibility="Collapsed">
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.06" Color="#111827"/>
                 </Border.Effect>

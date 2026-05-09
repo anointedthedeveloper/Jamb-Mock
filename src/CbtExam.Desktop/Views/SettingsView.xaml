@@ -50,9 +50,10 @@
                         <StackPanel>
                             <TextBlock Text="Appearance" FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,16"/>
                             <TextBlock Text="Theme" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,6"/>
-                            <ComboBox Margin="0,0,0,12"><ComboBoxItem Content="Light" IsSelected="True"/></ComboBox>
+                            <ComboBox ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding SelectedTheme}" Margin="0,0,0,12"/>
                             <TextBlock Text="Primary Color" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,6"/>
-                            <Border Width="32" Height="24" CornerRadius="6" Background="#059669" HorizontalAlignment="Left"/>
+                            <ComboBox ItemsSource="{Binding AccentOptions}" SelectedItem="{Binding SelectedAccent}" Margin="0,0,0,12"/>
+                            <Button Content="Apply Theme" Command="{Binding ApplyThemeCommand}" Style="{StaticResource PrimaryBtn}" Width="140"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>

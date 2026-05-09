@@ -254,6 +254,24 @@ public class CreateExamViewModel(ApiClient api) : BaseViewModel, IRefreshable
             var list = JsonSerializer.Deserialize<List<QuestionCreateDto>>(JsonImport,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (list is null || list.Count == 0) { Status = "No questions found in JSON."; IsSuccess = false; return; }
+            var duplicateNumbers = list.GroupBy(x => x.QuestionNumber).Where(g => g.Key > 0 && g.Count() > 1).Select(g => g.Key).ToList();
+            if (duplicateNumbers.Count > 0)
+            {
+                Status = $"Invalid format: duplicate questionNumber ({string.Join(", ", duplicateNumbers)}).";
+                IsSuccess = false;
+                return;
+            }
+            foreach (var item in list)
+            {
+                if (string.IsNullOrWhiteSpace(item.Text) || item.Options is null || item.Options.Count < 2 ||
+                    item.Options.Any(o => string.IsNullOrWhiteSpace(o)) ||
+                    !item.Options.Contains(item.CorrectAnswer, StringComparer.OrdinalIgnoreCase))
+                {
+                    Status = "Invalid format: each row must have text, >=2 options, and correctAnswer matching one option.";
+                    IsSuccess = false;
+                    return;
+                }
+            }
             var resp = await api.ImportQuestionsAsync(CreatedExamId.Value, list);
             if (!resp.IsSuccessStatusCode) { Status = "Import failed."; IsSuccess = false; return; }
             Questions.Clear();
@@ -300,8 +318,24 @@ public class ExamsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 
     private List<ExamDto> _all = [];
 
+    private string _title = "", _subject = "";
+    private int _duration = 60;
+    private bool _shuffleQ = true, _shuffleO = true;
+    private bool _showCreateForm;
+    public string Title { get => _title; set => Set(ref _title, value); }
+    public string Subject { get => _subject; set => Set(ref _subject, value); }
+    public int Duration { get => _duration; set => Set(ref _duration, value); }
+    public bool ShuffleQuestions { get => _shuffleQ; set => Set(ref _shuffleQ, value); }
+    public bool ShuffleOptions { get => _shuffleO; set => Set(ref _shuffleO, value); }
+    public bool ShowCreateForm { get => _showCreateForm; set => Set(ref _showCreateForm, value); }
+
+    private string _createStatus = string.Empty;
+    public string CreateStatus { get => _createStatus; set => Set(ref _createStatus, value); }
+
     public RelayCommand RefreshCommand => new(async () => await LoadAsync());
     public RelayCommand<ExamDto> DeleteCommand => new(async e => await DeleteAsync(e));
+    public RelayCommand ToggleCreateCommand => new(() => { ShowCreateForm = !ShowCreateForm; CreateStatus = string.Empty; });
+    public RelayCommand CreateExamCommand => new(async () => await CreateExamAsync());
 
     public async Task LoadAsync()
     {
@@ -326,6 +360,28 @@ public class ExamsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     {
         if (exam is null) return;
         await api.DeleteExamAsync(exam.Id);
+        await LoadAsync();
+    }
+
+    private async Task CreateExamAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Title))
+        {
+            CreateStatus = "Title is required.";
+            return;
+        }
+
+        var resp = await api.CreateExamAsync(new ExamCreateDto(Title, Subject, Duration, ShuffleQuestions, ShuffleOptions));
+        if (!resp.IsSuccessStatusCode)
+        {
+            CreateStatus = "Could not create exam. Ensure server is running.";
+            return;
+        }
+
+        Title = Subject = string.Empty;
+        Duration = 60;
+        ShowCreateForm = false;
+        CreateStatus = string.Empty;
         await LoadAsync();
     }
 }
@@ -612,6 +668,25 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
     private string _copyStatus = string.Empty;
     public string CopyStatus { get => _copyStatus; set => Set(ref _copyStatus, value); }
 
+    public ObservableCollection<string> ThemeOptions { get; } = ["Light", "Dark"];
+    public ObservableCollection<string> AccentOptions { get; } = ["Teal", "Blue", "Purple", "Emerald"];
+
+    private string _selectedTheme = "Light";
+    public string SelectedTheme { get => _selectedTheme; set => Set(ref _selectedTheme, value); }
+
+    private string _selectedAccent = "Teal";
+    public string SelectedAccent { get => _selectedAccent; set => Set(ref _selectedAccent, value); }
+
+    public RelayCommand ApplyThemeCommand => new(() =>
+    {
+        if (App.Current is CbtExam.Desktop.App app)
+        {
+            app.ApplyTheme(SelectedTheme, SelectedAccent);
+            CopyStatus = $"Theme applied: {SelectedTheme} / {SelectedAccent}";
+            Task.Delay(1800).ContinueWith(_ => App.Current.Dispatcher.Invoke(() => CopyStatus = string.Empty));
+        }
+    });
+
     public RelayCommand CopyUrlCommand => new(() =>
     {
         if (!string.IsNullOrEmpty(ServerUrl))
@@ -646,4 +721,118 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
     public void NotifyServerStopped()           => ServerUrl = string.Empty;
 
     public Task LoadAsync() => Task.CompletedTask;
+}
+
+public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
+{
+    public ObservableCollection<StudentAdminDto> Students { get; } = [];
+    private List<StudentAdminDto> _all = [];
+
+    private StudentAdminDto? _selected;
+    public StudentAdminDto? Selected { get => _selected; set => Set(ref _selected, value); }
+
+    private string _search = string.Empty;
+    public string Search
+    {
+        get => _search;
+        set { Set(ref _search, value); Filter(); }
+    }
+
+    private string _fullName = string.Empty;
+    public string FullName { get => _fullName; set => Set(ref _fullName, value); }
+
+    private string _studentId = string.Empty;
+    public string StudentId { get => _studentId; set => Set(ref _studentId, value); }
+
+    private string _newPassword = string.Empty;
+    public string NewPassword { get => _newPassword; set => Set(ref _newPassword, value); }
+
+    private bool _isActive = true;
+    public bool IsActive { get => _isActive; set => Set(ref _isActive, value); }
+
+    private string _status = string.Empty;
+    public string Status { get => _status; set => Set(ref _status, value); }
+
+    public RelayCommand RefreshCommand => new(async () => await LoadAsync());
+    public RelayCommand SaveCommand => new(async () => await SaveAsync());
+    public RelayCommand DeleteCommand => new(async () => await DeleteAsync());
+    public RelayCommand PasswordCommand => new(async () => await UpdatePasswordAsync());
+    public RelayCommand PrintCommand => new(PrintStudents);
+    public RelayCommand<StudentAdminDto> PickCommand => new(s => Pick(s));
+
+    public async Task LoadAsync()
+    {
+        _all = await api.GetStudentRosterAsync() ?? [];
+        Filter();
+    }
+
+    private void Filter()
+    {
+        var q = Search.Trim();
+        var list = string.IsNullOrWhiteSpace(q)
+            ? _all
+            : _all.Where(s => s.FullName.Contains(q, StringComparison.OrdinalIgnoreCase) || s.StudentId.Contains(q, StringComparison.OrdinalIgnoreCase)).ToList();
+        Students.Clear();
+        foreach (var s in list) Students.Add(s);
+    }
+
+    private async Task SaveAsync()
+    {
+        var resp = await api.UpsertStudentAsync(new StudentUpsertDto(Selected?.Id, FullName, StudentId, IsActive));
+        Status = resp.IsSuccessStatusCode ? "Student saved." : "Could not save student.";
+        await LoadAsync();
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (Selected is null) return;
+        var resp = await api.DeleteStudentAsync(Selected.Id);
+        Status = resp.IsSuccessStatusCode ? "Student deleted." : "Could not delete student.";
+        await LoadAsync();
+    }
+
+    private async Task UpdatePasswordAsync()
+    {
+        if (Selected is null || string.IsNullOrWhiteSpace(NewPassword)) return;
+        var resp = await api.UpdateStudentPasswordAsync(new StudentPasswordUpdateDto(Selected.Id, NewPassword));
+        Status = resp.IsSuccessStatusCode ? "Password updated." : "Could not update password.";
+        NewPassword = string.Empty;
+    }
+
+    private void Pick(StudentAdminDto? s)
+    {
+        if (s is null) return;
+        Selected = s;
+        FullName = s.FullName;
+        StudentId = s.StudentId;
+        IsActive = s.IsActive;
+    }
+
+    private void PrintStudents()
+    {
+        var doc = new System.Windows.Documents.FlowDocument();
+        doc.Blocks.Add(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("Student List")));
+        foreach (var s in Students)
+            doc.Blocks.Add(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run($"{s.FullName} ({s.StudentId})")));
+        var pd = new System.Windows.Controls.PrintDialog();
+        if (pd.ShowDialog() == true)
+            pd.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator, "Student List");
+    }
+}
+
+public record NotificationItem(string Title, string Message, DateTime CreatedAt, string Level);
+
+public class NotificationsViewModel : BaseViewModel, IRefreshable
+{
+    public ObservableCollection<NotificationItem> Items { get; } = [];
+    public int UnreadCount => Items.Count;
+    public Task LoadAsync() => Task.CompletedTask;
+
+    public void Add(NotificationItem item)
+    {
+        Items.Insert(0, item);
+        if (Items.Count > 100)
+            Items.RemoveAt(Items.Count - 1);
+        OnPropertyChanged(nameof(UnreadCount));
+    }
 }

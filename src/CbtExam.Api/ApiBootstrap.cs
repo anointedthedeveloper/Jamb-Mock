@@ -67,7 +67,8 @@ public static class ApiBootstrap
         app.Use(async (ctx, next) =>
         {
             if (!ctx.Request.Path.StartsWithSegments("/api/exams") &&
-                !ctx.Request.Path.StartsWithSegments("/api/sessions"))
+                !ctx.Request.Path.StartsWithSegments("/api/sessions") &&
+                !ctx.Request.Path.StartsWithSegments("/api/students"))
             {
                 await next();
                 return;

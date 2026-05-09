@@ -6,7 +6,7 @@
         Title="CBT Exam System - Admin" Height="720" Width="1240"
         MinHeight="640" MinWidth="1080"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BgBrush}"
+        Background="{DynamicResource BgBrush}"
         FontFamily="Segoe UI"
         Loaded="Window_Loaded">
 
@@ -58,7 +58,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="White" BorderBrush="#E5E7EB" BorderThickness="0,0,1,0"
+        <Border Grid.Column="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0"
                 Style="{StaticResource SidebarOnlyWhenOpen}">
             <DockPanel>
                 <Border DockPanel.Dock="Top" Padding="16,18" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1">
@@ -126,6 +126,10 @@
                         <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Reports"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE9D9;" Style="{StaticResource SideIcon}"/><TextBlock Text="Reports" Style="{StaticResource SideLabel}"/></StackPanel>
                     </Button>
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Notifications" HorizontalAlignment="Stretch" ToolTip="Notifications">
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Notifications"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE7ED;" Style="{StaticResource SideIcon}"/><TextBlock Text="Notifications" Style="{StaticResource SideLabel}"/></StackPanel>
+                    </Button>
                     <Button Command="{Binding NavigateCommand}" CommandParameter="Settings" HorizontalAlignment="Stretch" ToolTip="Settings">
                         <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Settings"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE713;" Style="{StaticResource SideIcon}"/><TextBlock Text="Settings" Style="{StaticResource SideLabel}"/></StackPanel>
@@ -134,7 +138,7 @@
             </DockPanel>
         </Border>
 
-        <Border Grid.Column="0" Background="White" BorderBrush="#E5E7EB" BorderThickness="0,0,1,0"
+        <Border Grid.Column="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0"
                 Style="{StaticResource RailOnlyWhenClosed}">
             <DockPanel>
                 <Button DockPanel.Dock="Top" Command="{Binding ToggleSidebarCommand}" Content="&#xE72A;"
@@ -146,6 +150,7 @@
                     <Button Content="&#xE787;" ToolTip="Sessions" Command="{Binding NavigateCommand}" CommandParameter="Sessions" Style="{StaticResource RailBtn}"/>
                     <Button Content="&#xE9D2;" ToolTip="Results" Command="{Binding NavigateCommand}" CommandParameter="Results" Style="{StaticResource RailBtn}"/>
                     <Button Content="&#xE9D9;" ToolTip="Reports" Command="{Binding NavigateCommand}" CommandParameter="Reports" Style="{StaticResource RailBtn}"/>
+                    <Button Content="&#xE7ED;" ToolTip="Notifications" Command="{Binding NavigateCommand}" CommandParameter="Notifications" Style="{StaticResource RailBtn}"/>
                     <Button Content="&#xE713;" ToolTip="Settings" Command="{Binding NavigateCommand}" CommandParameter="Settings" Style="{StaticResource RailBtn}"/>
                 </StackPanel>
             </DockPanel>
@@ -157,7 +162,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="White" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1" Padding="26,0">
+            <Border Grid.Row="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="26,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -165,7 +170,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Grid Grid.Column="1" VerticalAlignment="Center" Height="42">
-                        <TextBox Padding="40,8,12,8"/>
+                        <TextBox Text="{Binding GlobalSearch, UpdateSourceTrigger=PropertyChanged}" Padding="40,8,12,8"/>
                         <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#6B7280"
                                    VerticalAlignment="Center" HorizontalAlignment="Left" Margin="14,0,0,0"/>
                         <TextBlock Text="Search anything..." Foreground="#6B7280" FontSize="13"
@@ -173,16 +178,19 @@
                                    IsHitTestVisible="False"/>
                     </Grid>
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
-                        <Button Style="{StaticResource NavBtn}" Padding="10" ToolTip="Theme">
+                        <Button Style="{StaticResource NavBtn}" Padding="10" ToolTip="Search" Command="{Binding SearchCommand}">
+                            <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                        </Button>
+                        <Button Style="{StaticResource NavBtn}" Padding="10" ToolTip="Theme" Command="{Binding ToggleThemeCommand}">
                             <TextBlock Text="&#xE706;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
                         <Grid Margin="8,0">
-                            <Button Style="{StaticResource NavBtn}" Padding="10" ToolTip="Notifications">
+                            <Button Style="{StaticResource NavBtn}" Padding="10" ToolTip="Notifications" Command="{Binding OpenNotificationsCommand}">
                                 <TextBlock Text="&#xE7ED;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                             </Button>
                             <Border Width="18" Height="18" CornerRadius="9" Background="#F59E0B"
                                     HorizontalAlignment="Right" VerticalAlignment="Top">
-                                <TextBlock Text="3" Foreground="White" FontSize="10" FontWeight="Bold"
+                                <TextBlock Text="{Binding NotificationCount}" Foreground="White" FontSize="10" FontWeight="Bold"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </Grid>
@@ -207,11 +215,23 @@
                     <DataTemplate DataType="{x:Type vm:ExamsViewModel}"><views:ExamsView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:SessionViewModel}"><views:SessionView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:MonitorViewModel}"><views:MonitorView/></DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:StudentsViewModel}"><views:StudentsView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:DevicesViewModel}"><views:DevicesView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:ResultsViewModel}"><views:ResultsView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:ReportsViewModel}"><views:ReportsView/></DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:NotificationsViewModel}"><views:NotificationsView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:SettingsViewModel}"><views:SettingsView/></DataTemplate>
                 </ContentControl.Resources>
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Setter Property="Opacity" Value="1"/>
+                        <Style.Triggers>
+                            <Trigger Property="Content" Value="{x:Null}">
+                                <Setter Property="Opacity" Value="0"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
             </ContentControl>
         </Grid>
     </Grid>

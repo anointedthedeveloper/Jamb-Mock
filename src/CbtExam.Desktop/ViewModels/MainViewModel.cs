@@ -39,6 +39,13 @@ public class MainViewModel : BaseViewModel
     public RelayCommand ToggleSidebarCommand { get; }
     public RelayCommand ToggleServerCommand { get; }
     public RelayCommand<string> NavigateCommand { get; }
+    public RelayCommand SearchCommand { get; }
+    public RelayCommand ToggleThemeCommand { get; }
+    public RelayCommand OpenNotificationsCommand { get; }
+
+    private string _globalSearch = string.Empty;
+    public string GlobalSearch { get => _globalSearch; set => Set(ref _globalSearch, value); }
+    public int NotificationCount => Notifications.UnreadCount;
 
     // Pages
     public DashboardViewModel  Dashboard    { get; }
@@ -46,9 +53,11 @@ public class MainViewModel : BaseViewModel
     public ExamsViewModel      Exams        { get; }
     public SessionViewModel    Sessions     { get; }
     public MonitorViewModel    Monitor      { get; }
+    public StudentsViewModel   Students     { get; }
     public DevicesViewModel    Devices      { get; }
     public ResultsViewModel    Results      { get; }
     public ReportsViewModel    Reports      { get; }
+    public NotificationsViewModel Notifications { get; }
     public SettingsViewModel   Settings     { get; }
 
     public MainViewModel()
@@ -62,9 +71,11 @@ public class MainViewModel : BaseViewModel
         Exams      = new ExamsViewModel(Api);
         Sessions   = new SessionViewModel(Api);
         Monitor    = new MonitorViewModel(Api, _monitorRealtime);
+        Students   = new StudentsViewModel(Api);
         Devices    = new DevicesViewModel(Api);
         Results    = new ResultsViewModel(Api);
         Reports    = new ReportsViewModel(Api);
+        Notifications = new NotificationsViewModel();
         Settings   = new SettingsViewModel(_server);
 
         _currentPage = Dashboard;
@@ -72,6 +83,19 @@ public class MainViewModel : BaseViewModel
         ToggleSidebarCommand = new RelayCommand(() => SidebarOpen = !SidebarOpen);
         ToggleServerCommand = new RelayCommand(async () => await ToggleServerAsync());
         NavigateCommand     = new RelayCommand<string>(Navigate);
+        SearchCommand = new RelayCommand(ApplyGlobalSearch);
+        ToggleThemeCommand = new RelayCommand(() =>
+        {
+            Settings.SelectedTheme = Settings.SelectedTheme == "Dark" ? "Light" : "Dark";
+            Settings.ApplyThemeCommand.Execute(null);
+        });
+        OpenNotificationsCommand = new RelayCommand(() => Navigate("Notifications"));
+
+        _monitorRealtime.StudentUpdated += payload =>
+        {
+            Notifications.Add(new NotificationItem("Student activity", $"{payload.Count} student updates received.", DateTime.Now, "info"));
+            OnPropertyChanged(nameof(NotificationCount));
+        };
     }
 
     // Called from MainWindow.Loaded — auto-start on launch
@@ -80,7 +104,10 @@ public class MainViewModel : BaseViewModel
         await StartServerAsync();
         // Only load dashboard data if server actually started
         if (ServerRunning)
+        {
             await Dashboard.LoadAsync();
+            await Students.LoadAsync();
+        }
     }
 
     private async Task StartServerAsync()
@@ -136,16 +163,24 @@ public class MainViewModel : BaseViewModel
             "Dashboard"  => Dashboard,
             "CreateExam" => CreateExam,
             "Exams"      => Exams,
-            "Students"   => Monitor,
+            "Students"   => Students,
             "Sessions"   => Sessions,
             "Monitor"    => Monitor,
             "Devices"    => Devices,
             "Results"    => Results,
             "Reports"    => Reports,
+            "Notifications" => Notifications,
             "Settings"   => Settings,
             _            => Dashboard
         };
         if (CurrentPage is IRefreshable r) _ = r.LoadAsync();
+    }
+
+    private void ApplyGlobalSearch()
+    {
+        Exams.Search = GlobalSearch;
+        Students.Search = GlobalSearch;
+        Navigate("Exams");
     }
 }
 

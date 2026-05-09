@@ -45,14 +45,42 @@
                         <ComboBox Grid.Column="1" Margin="0,0,12,0">
                             <ComboBoxItem Content="All subjects" IsSelected="True"/>
                         </ComboBox>
-                        <Button Grid.Column="2" Command="{Binding RefreshCommand}" Style="{StaticResource PrimaryBtn}"
+                        <Button Grid.Column="2" Command="{Binding ToggleCreateCommand}" Style="{StaticResource PrimaryBtn}"
                                 Background="#F8FAFC" Foreground="#111827" Padding="15,10">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE71C;" FontFamily="Segoe MDL2 Assets" Margin="0,0,8,0"/>
-                                <TextBlock Text="Filters"/>
+                                <TextBlock Text="+" FontSize="16" Margin="0,0,8,0"/>
+                                <TextBlock Text="Create Exam"/>
                             </StackPanel>
                         </Button>
                     </Grid>
+
+                    <Border Visibility="{Binding ShowCreateForm, Converter={StaticResource BoolToVis}}"
+                            Background="#F8FAFC" CornerRadius="12" BorderBrush="#E5E7EB" BorderThickness="1"
+                            Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="New Exam" FontSize="14" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
+                                <TextBox Grid.Column="1" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
+                                <TextBox Grid.Column="2" Text="{Binding Duration, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <CheckBox Content="Shuffle Questions" IsChecked="{Binding ShuffleQuestions}" Margin="0,0,20,0"/>
+                                <CheckBox Content="Shuffle Options" IsChecked="{Binding ShuffleOptions}"/>
+                                <Button Content="Save Exam" Command="{Binding CreateExamCommand}" Style="{StaticResource PrimaryBtn}"
+                                        Background="#0F6FEA" Padding="16,8" Margin="24,0,8,0"/>
+                                <Button Content="Cancel" Command="{Binding ToggleCreateCommand}" Style="{StaticResource PrimaryBtn}"
+                                        Background="#E5E7EB" Foreground="#111827" Padding="16,8"/>
+                                <TextBlock Text="{Binding CreateStatus, Mode=OneWay}" Foreground="{StaticResource DangerBrush}"
+                                           VerticalAlignment="Center" Margin="12,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
 
                     <Border Background="#F8FAFC" CornerRadius="10,10,0,0" Height="42">
                         <Grid>
@@ -81,7 +109,7 @@
                                            Foreground="#059669" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <TextBlock Text="No exams found" FontSize="15" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Create an exam from Dashboard or adjust your search."
+                            <TextBlock Text="Create an exam here or adjust your search."
                                        FontSize="13" Foreground="#64748B" Margin="0,6,0,0"/>
                         </StackPanel>
                     </Border>
