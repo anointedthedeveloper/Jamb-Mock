@@ -86,7 +86,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Image Source="pack://application:,,,/res/jamb.png" Width="42" Height="42" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <Image Source="pack://application:,,,/appicon.ico" Width="42" Height="42" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="CBT Exam" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
                             <TextBlock Text="Admin Console" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
@@ -247,7 +247,7 @@
                 </Grid.RowDefinitions>
                 <!-- Logo + expand toggle -->
                 <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,14,0,6">
-                    <Image Source="pack://application:,,,/res/jamb.png" Width="36" Height="36"
+                    <Image Source="pack://application:,,,/appicon.ico" Width="36" Height="36"
                            RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                     <Button Command="{Binding ToggleSidebarCommand}" Content="&#xE76C;"
                             ToolTip="Expand sidebar" Style="{StaticResource RailBtn}" HorizontalAlignment="Center"/>
