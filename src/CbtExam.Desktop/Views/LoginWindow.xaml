@@ -197,7 +197,7 @@
                                 <Style TargetType="Image">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding SchoolLogoPath}" Value="{x:Null}">
-                                            <Setter Property="Source" Value="pack://application:,,,/CbtExam.Desktop;component/res/jamb.png"/>
+                                            <Setter Property="Source" Value="pack://application:,,,/res/jamb.png"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>

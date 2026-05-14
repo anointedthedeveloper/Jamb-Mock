@@ -28,9 +28,7 @@ public partial class App : Application
         {
             var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
             if (ex is not null)
-                line += $"\n  {ex.GetType().Name}: {ex.Message}";
-            if (ex?.InnerException is not null)
-                line += $"\n  Inner: {ex.InnerException.Message}";
+                line += $"\n  Exception: {ex.ToString()}";
             File.AppendAllText(LogFile, line + "\n");
         }
         catch { }
