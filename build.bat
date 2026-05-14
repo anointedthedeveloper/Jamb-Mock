@@ -9,22 +9,25 @@ echo.
 set PROJECT=src\CbtExam.Desktop\CbtExam.Desktop.csproj
 set OUTPUT=publish\CbtExam
 
-echo [1/3] Restoring packages...
-dotnet restore %PROJECT% --runtime win-x64 -p:PublishSingleFile=true
-if %errorlevel% neq 0 ( echo FAILED: restore & exit /b 1 )
-
+echo [1/3] Closing running instances of CbtExam.exe (if any)...
+taskkill /F /IM CbtExam.exe /T >nul 2>&1
 echo.
-echo [2/3] Publishing self-contained single EXE...
+
+echo [2/3] Building and Publishing self-contained single EXE...
 dotnet publish %PROJECT% ^
   --configuration Release ^
   --runtime win-x64 ^
   --self-contained true ^
   -p:PublishSingleFile=true ^
   -p:IncludeNativeLibrariesForSelfExtract=true ^
-  --no-restore ^
   --output %OUTPUT%
 
-if %errorlevel% neq 0 ( echo FAILED: publish & exit /b 1 )
+if %errorlevel% neq 0 (
+    echo.
+    echo FAILED: publish
+    pause
+    exit /b 1
+)
 
 echo.
 echo [3/3] Done!
