@@ -282,29 +282,75 @@
             <Border Grid.Row="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="26,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="360"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="1" VerticalAlignment="Center" Height="42" Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource FieldBorder}" BorderThickness="1" CornerRadius="6" Padding="0,2,0,2">
+                    
+                    <!-- Breadcrumb and Quick Actions -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentPath}" FontWeight="SemiBold" FontSize="18" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                        
+                        <Button Background="{DynamicResource FieldBg}" Foreground="{DynamicResource TextPrimaryBrush}" BorderBrush="{DynamicResource FieldBorder}" BorderThickness="1" Padding="12,6" VerticalAlignment="Center" Click="QuickActions_Click" Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Quick Actions" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="10" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <Button.ContextMenu>
+                                <ContextMenu Placement="Bottom">
+                                    <MenuItem Header="Add Student" />
+                                    <MenuItem Header="Generate Receipt" />
+                                    <MenuItem Header="Reset Server" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Live Metric Ticker -->
+                    <Border Grid.Column="1" Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12,4" Margin="24,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#10B981" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding LiveMetricText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Search Box -->
+                    <Border Grid.Column="2" VerticalAlignment="Center" Height="36" Width="200" Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource FieldBorder}" BorderThickness="1" CornerRadius="18" Padding="12,0" Margin="0,0,24,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                             <TextBox x:Name="SearchBox" Grid.Column="1" Text="{Binding GlobalSearch, UpdateSourceTrigger=PropertyChanged}"
-                                     VerticalAlignment="Center" Padding="8,6,8,6" Background="Transparent" BorderThickness="0"
+                                     VerticalAlignment="Center" Padding="8,0" Background="Transparent" BorderThickness="0"
                                      GotFocus="SearchBox_GotFocus" LostFocus="SearchBox_LostFocus" TextChanged="SearchBox_TextChanged"/>
-                            <Button x:Name="ClearSearchButton" Grid.Column="2" Content="✕" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                    Visibility="Hidden" Click="ClearSearchButton_Click" Padding="8,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="SearchPlaceholder" Grid.Column="1" Text="Search anything..." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13"
-                                       VerticalAlignment="Center" HorizontalAlignment="Left" Margin="8,0,0,0"
-                                       IsHitTestVisible="False"/>
+                            <Button x:Name="ClearSearchButton" Grid.Column="2" Content="✕" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                    Visibility="Hidden" Click="ClearSearchButton_Click" Padding="4,0" VerticalAlignment="Center">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="Transparent">
+                                            <ContentPresenter/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <TextBlock x:Name="SearchPlaceholder" Grid.Column="1" Text="Search..." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13"
+                                       VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
                         </Grid>
                     </Border>
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
+
+                    <!-- User Profile and Actions -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Style="{StaticResource NavBtn}" Padding="10" ToolTip="Theme" Command="{Binding ToggleThemeCommand}">
                             <TextBlock Text="&#xE706;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>

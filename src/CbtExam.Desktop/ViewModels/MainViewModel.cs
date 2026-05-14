@@ -2,6 +2,7 @@ using CbtExam.Desktop.Services;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace CbtExam.Desktop.ViewModels;
 
@@ -16,6 +17,23 @@ public class MainViewModel : BaseViewModel
 
     private string _currentPageKey = "Dashboard";
     public string CurrentPageKey { get => _currentPageKey; set => Set(ref _currentPageKey, value); }
+
+    private string _currentPath = "Dashboard";
+    public string CurrentPath { get => _currentPath; set => Set(ref _currentPath, value); }
+
+    private string _liveMetricText = "Live Activity Feed initialized...";
+    public string LiveMetricText { get => _liveMetricText; set => Set(ref _liveMetricText, value); }
+
+    private DispatcherTimer? _liveMetricTimer;
+    private int _metricIndex = 0;
+    private readonly string[] _mockMetrics = new[]
+    {
+        "Server latency: 12ms",
+        "Student ID 402 just submitted",
+        "Active connections: 45",
+        "Database sync: OK",
+        "System health: 99.8% uptime"
+    };
 
     private bool _serverRunning;
     public bool ServerRunning
@@ -111,6 +129,22 @@ public class MainViewModel : BaseViewModel
             Notifications.Add(new NotificationItem("Student activity", $"{payload.Count} student updates received.", DateTime.Now, "info"));
             OnPropertyChanged(nameof(NotificationCount));
         };
+
+        StartLiveMetricTimer();
+    }
+
+    private void StartLiveMetricTimer()
+    {
+        _liveMetricTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(5)
+        };
+        _liveMetricTimer.Tick += (s, e) =>
+        {
+            LiveMetricText = _mockMetrics[_metricIndex];
+            _metricIndex = (_metricIndex + 1) % _mockMetrics.Length;
+        };
+        _liveMetricTimer.Start();
     }
 
     // Called from MainWindow.Loaded — auto-start on launch
@@ -176,6 +210,23 @@ public class MainViewModel : BaseViewModel
     private void Navigate(string? page)
     {
         CurrentPageKey = page ?? "Dashboard";
+        
+        CurrentPath = CurrentPageKey switch
+        {
+            "Dashboard" => "Dashboard",
+            "Exams" => "Dashboard > Exams",
+            "Questions" => "Dashboard > Questions",
+            "Students" => "Dashboard > Students",
+            "Sessions" => "Dashboard > Active Sessions",
+            "Results" => "Dashboard > Results",
+            "Reports" => "Dashboard > Reports",
+            "Notifications" => "Dashboard > Notifications",
+            "Settings" => "Dashboard > Settings",
+            "SearchResults" => "Dashboard > Search Results",
+            "ErrorGuide" => "Dashboard > Error Guide",
+            _ => $"Dashboard > {CurrentPageKey}"
+        };
+
         CurrentPage = page switch
         {
             "Dashboard"  => Dashboard,
