@@ -9,6 +9,7 @@
         WindowState="Maximized"
         Background="{DynamicResource BgBrush}"
         FontFamily="Segoe UI"
+        Icon="pack://application:,,,/appicon.ico"
         Loaded="Window_Loaded">
 
     <Window.DataContext>
@@ -306,9 +307,11 @@
                             </StackPanel>
                             <Button.ContextMenu>
                                 <ContextMenu Placement="Bottom">
-                                    <MenuItem Header="Add Student" />
-                                    <MenuItem Header="Generate Receipt" />
-                                    <MenuItem Header="Reset Server" />
+                                    <MenuItem Header="Register Student" Command="{Binding NavigateCommand}" CommandParameter="Students"/>
+                                    <MenuItem Header="Import Questions" Command="{Binding NavigateCommand}" CommandParameter="Questions"/>
+                                    <MenuItem Header="Manage Sessions" Command="{Binding NavigateCommand}" CommandParameter="Sessions"/>
+                                    <Separator/>
+                                    <MenuItem Header="Toggle Local Server" Command="{Binding ToggleServerCommand}"/>
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>

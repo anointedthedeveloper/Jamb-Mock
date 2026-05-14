@@ -20,9 +20,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
   </ItemGroup>
-  <!-- Copy app icon -->
   <ItemGroup>
-    <Content Include="..\..\appicon.ico" Link="appicon.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Resource Include="..\..\appicon.ico" Link="appicon.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="..\..\res\jamb.png" Link="res/jamb.png" />
