@@ -32,6 +32,14 @@
                             Padding="12,9" Margin="0,0,8,0" ToolTip="Refresh">
                         <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets"/>
                     </Button>
+                    <Button Command="{Binding AddSubjectCommand}" Style="{StaticResource PrimaryBtn}"
+                            Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                            Padding="14,9" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0"/>
+                            <TextBlock Text="New Subject"/>
+                        </StackPanel>
+                    </Button>
                     <Button Command="{Binding BulkUploadCommand}" Style="{StaticResource PrimaryBtn}"
                             Background="#059669" Padding="14,9">
                         <StackPanel Orientation="Horizontal">
