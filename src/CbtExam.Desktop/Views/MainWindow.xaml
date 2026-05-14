@@ -9,7 +9,7 @@
         WindowState="Maximized"
         Background="{DynamicResource BgBrush}"
         FontFamily="Segoe UI"
-        Icon="pack://application:,,,/appicon.ico"
+        Icon="appicon.ico"
         Loaded="Window_Loaded">
 
     <Window.DataContext>
