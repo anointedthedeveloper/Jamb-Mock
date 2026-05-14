@@ -34,10 +34,43 @@
                     <Border Background="White" CornerRadius="14" BorderBrush="#E5E7EB" BorderThickness="1" Padding="18" Margin="0,0,0,18">
                         <StackPanel>
                             <TextBlock Text="General Settings" FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,16"/>
+                            
+                            <!-- School Logo Upload -->
+                            <TextBlock Text="School Logo" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,6"/>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <Border Grid.Column="0" Width="60" Height="60" CornerRadius="8" Background="#F8FAFC" BorderBrush="#E5E7EB" BorderThickness="1">
+                                    <Image Source="{Binding SchoolLogoPath}" Stretch="UniformToFill" Margin="4">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SchoolLogoPath}" Value="{x:Null}">
+                                                        <Setter Property="Source" Value="pack://application:,,,/res/jamb.png"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Border>
+                                
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Upload your institution logo" FontSize="13" Foreground="#374151"/>
+                                    <TextBlock Text="PNG, JPG up to 2MB" FontSize="11" Foreground="#9CA3AF"/>
+                                </StackPanel>
+                                
+                                <Button Grid.Column="2" Content="Browse..." Command="{Binding UploadLogoCommand}" 
+                                        Style="{StaticResource CardBtn}" Padding="16,8" VerticalAlignment="Center"/>
+                            </Grid>
+                            
                             <TextBlock Text="System Name" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,6"/>
-                            <TextBox Text="CBT Exam System" Margin="0,0,0,12"/>
+                            <TextBox Text="{Binding SystemName}" Margin="0,0,0,12"/>
                             <TextBlock Text="Admin Email" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,6"/>
-                            <TextBox Text="admin@example.com" Margin="0,0,0,12"/>
+                            <TextBox Text="{Binding AdminEmail}" Margin="0,0,0,12"/>
                             <TextBlock Text="Server Port" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,6"/>
                             <StackPanel Orientation="Horizontal">
                                 <TextBox Text="{Binding Port}" Width="110" Margin="0,0,10,0"/>

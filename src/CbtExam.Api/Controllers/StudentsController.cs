@@ -20,28 +20,43 @@ public class StudentsController(AppDbContext db) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Upsert(StudentUpsertDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.FullName) || string.IsNullOrWhiteSpace(dto.StudentId))
-            return BadRequest("Full name and student ID are required.");
+        if (string.IsNullOrWhiteSpace(dto.FullName))
+            return BadRequest("Full name is required.");
 
         Student? entity = null;
         if (dto.Id.HasValue)
             entity = await db.Students.FindAsync(dto.Id.Value);
 
+        // Auto-generate StudentId if not provided
+        var studentId = dto.StudentId?.Trim();
+        if (string.IsNullOrWhiteSpace(studentId))
+        {
+            var count = await db.Students.CountAsync();
+            studentId = $"STU-{(count + 1):D4}";
+        }
+
+        // Ensure uniqueness on new records
+        if (entity is null && await db.Students.AnyAsync(s => s.StudentId == studentId))
+            studentId = $"STU-{(await db.Students.CountAsync() + 1):D4}-{Guid.NewGuid().ToString()[..4]}";
+
         if (entity is null)
         {
             entity = new Student
             {
-                FullName = dto.FullName.Trim(),
-                StudentId = dto.StudentId.Trim(),
-                IsActive = dto.IsActive
+                FullName  = dto.FullName.Trim(),
+                StudentId = studentId,
+                IsActive  = dto.IsActive,
+                Password  = string.IsNullOrWhiteSpace(dto.Password) ? "1234" : dto.Password.Trim()
             };
             db.Students.Add(entity);
         }
         else
         {
-            entity.FullName = dto.FullName.Trim();
-            entity.StudentId = dto.StudentId.Trim();
-            entity.IsActive = dto.IsActive;
+            entity.FullName  = dto.FullName.Trim();
+            entity.StudentId = studentId;
+            entity.IsActive  = dto.IsActive;
+            if (!string.IsNullOrWhiteSpace(dto.Password))
+                entity.Password = dto.Password.Trim();
         }
 
         await db.SaveChangesAsync();

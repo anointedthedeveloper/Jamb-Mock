@@ -36,6 +36,9 @@ public class MainViewModel : BaseViewModel
     public bool SidebarOpen { get => _sidebarOpen; set { Set(ref _sidebarOpen, value); OnPropertyChanged(nameof(SidebarWidth)); } }
     public GridLength SidebarWidth => SidebarOpen ? new GridLength(240) : new GridLength(64);
 
+    public event Action? ThemeChanged;
+
+    public RelayCommand CopyServerUrlCommand { get; }
     public RelayCommand ToggleSidebarCommand { get; }
     public RelayCommand ToggleServerCommand { get; }
     public RelayCommand<string> NavigateCommand { get; }
@@ -51,6 +54,9 @@ public class MainViewModel : BaseViewModel
     public DashboardViewModel  Dashboard    { get; }
     public CreateExamViewModel CreateExam   { get; }
     public ExamsViewModel      Exams        { get; }
+    public QuestionsViewModel  Questions    { get; }
+    public SearchResultsViewModel SearchResults { get; private set; }
+    public ErrorGuideViewModel ErrorGuide   { get; private set; } = new();
     public SessionViewModel    Sessions     { get; }
     public MonitorViewModel    Monitor      { get; }
     public StudentsViewModel   Students     { get; }
@@ -69,6 +75,8 @@ public class MainViewModel : BaseViewModel
         Dashboard  = new DashboardViewModel(Api);
         CreateExam = new CreateExamViewModel(Api);
         Exams      = new ExamsViewModel(Api);
+        Questions  = new QuestionsViewModel(Api);
+        SearchResults = new SearchResultsViewModel("");
         Sessions   = new SessionViewModel(Api);
         Monitor    = new MonitorViewModel(Api, _monitorRealtime);
         Students   = new StudentsViewModel(Api);
@@ -81,6 +89,12 @@ public class MainViewModel : BaseViewModel
         _currentPage = Dashboard;
 
         ToggleSidebarCommand = new RelayCommand(() => SidebarOpen = !SidebarOpen);
+        CopyServerUrlCommand = new RelayCommand(() =>
+        {
+            if (!string.IsNullOrEmpty(ServerUrl))
+                System.Windows.Clipboard.SetText(ServerUrl);
+        });
+        Settings.ThemeApplied += () => ThemeChanged?.Invoke();
         ToggleServerCommand = new RelayCommand(async () => await ToggleServerAsync());
         NavigateCommand     = new RelayCommand<string>(Navigate);
         SearchCommand = new RelayCommand(ApplyGlobalSearch);
@@ -88,6 +102,7 @@ public class MainViewModel : BaseViewModel
         {
             Settings.SelectedTheme = Settings.SelectedTheme == "Dark" ? "Light" : "Dark";
             Settings.ApplyThemeCommand.Execute(null);
+            ThemeChanged?.Invoke();
         });
         OpenNotificationsCommand = new RelayCommand(() => Navigate("Notifications"));
 
@@ -115,16 +130,17 @@ public class MainViewModel : BaseViewModel
         try
         {
             StartupStatus = "Starting server…";
+            App.Log("Server start requested");
 
-            // Use the EXE's own directory — works for both dev and single-file publish
-            var exeDir   = Path.GetDirectoryName(Environment.ProcessPath)
-                           ?? AppDomain.CurrentDomain.BaseDirectory;
-            var dbPath   = Path.Combine(exeDir, "cbt_exam.db");
-            var wwwroot  = Path.Combine(exeDir, "wwwroot");
+            var exeDir  = Path.GetDirectoryName(Environment.ProcessPath)
+                          ?? AppDomain.CurrentDomain.BaseDirectory;
+            var dbPath  = Path.Combine(exeDir, "cbt_exam.db");
+            var wwwroot = Path.Combine(exeDir, "wwwroot");
 
-            // Fallback: if wwwroot doesn't exist next to EXE, try BaseDirectory (dev run)
             if (!Directory.Exists(wwwroot))
                 wwwroot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
+
+            App.Log($"DB: {dbPath}  wwwroot: {wwwroot}");
 
             await _server.StartAsync(dbPath, wwwroot, Settings.Port);
             Api.SetBaseUrl(_server.ServerUrl);
@@ -132,9 +148,11 @@ public class MainViewModel : BaseViewModel
             ServerRunning = true;
             StartupStatus = string.Empty;
             Settings.NotifyServerStarted(_server.ServerUrl);
+            App.Log($"Server started at {ServerUrl}");
         }
         catch (Exception ex)
         {
+            App.Log("Server failed to start", ex);
             StartupStatus = ex.Message.Contains("no such table", StringComparison.OrdinalIgnoreCase)
                 ? "Setup required: local database schema is being initialized."
                 : $"Server error: {ex.Message}";
@@ -163,6 +181,7 @@ public class MainViewModel : BaseViewModel
             "Dashboard"  => Dashboard,
             "CreateExam" => CreateExam,
             "Exams"      => Exams,
+            "Questions"  => Questions,
             "Students"   => Students,
             "Sessions"   => Sessions,
             "Monitor"    => Monitor,
@@ -171,6 +190,8 @@ public class MainViewModel : BaseViewModel
             "Reports"    => Reports,
             "Notifications" => Notifications,
             "Settings"   => Settings,
+            "SearchResults" => SearchResults,
+            "ErrorGuide"  => ErrorGuide,
             _            => Dashboard
         };
         if (CurrentPage is IRefreshable r) _ = r.LoadAsync();
@@ -178,9 +199,16 @@ public class MainViewModel : BaseViewModel
 
     private void ApplyGlobalSearch()
     {
-        Exams.Search = GlobalSearch;
-        Students.Search = GlobalSearch;
-        Navigate("Exams");
+        if (string.IsNullOrWhiteSpace(GlobalSearch))
+        {
+            // If search is empty, navigate back to dashboard
+            Navigate("Dashboard");
+            return;
+        }
+        
+        // Create search results view model and navigate to it
+        SearchResults = new SearchResultsViewModel(GlobalSearch);
+        Navigate("SearchResults");
     }
 }
 

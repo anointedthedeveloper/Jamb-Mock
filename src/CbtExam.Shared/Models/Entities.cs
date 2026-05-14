@@ -41,10 +41,22 @@ public class Student
 {
     public int Id { get; set; }
     public string FullName { get; set; } = string.Empty;
-    public string StudentId { get; set; } = string.Empty;
+    public string StudentId { get; set; } = string.Empty;  // username / login ID
     public string Password { get; set; } = "1234";
     public bool IsActive { get; set; } = true;
     public ICollection<StudentExam> StudentExams { get; set; } = new List<StudentExam>();
+}
+
+// Standalone question bank (subject + year, not tied to a specific exam)
+public class QuestionBank
+{
+    public int Id { get; set; }
+    public string Subject { get; set; } = string.Empty;
+    public int Year { get; set; }
+    public int QuestionNumber { get; set; }
+    public string Text { get; set; } = string.Empty;
+    public string OptionsJson { get; set; } = "[]";
+    public string CorrectAnswer { get; set; } = string.Empty;
 }
 
 public class StudentExam

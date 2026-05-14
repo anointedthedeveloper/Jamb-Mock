@@ -27,6 +27,7 @@ public class ApiClient
     public Task<HttpResponseMessage> DeleteExamAsync(int id) => IsReady ? _http.DeleteAsync($"api/exams/{id}") : OfflineResponse();
     public Task<HttpResponseMessage> AddQuestionAsync(int examId, QuestionCreateDto dto) => IsReady ? _http.PostAsJsonAsync($"api/exams/{examId}/questions", dto) : OfflineResponse();
     public Task<HttpResponseMessage> ImportQuestionsAsync(int examId, List<QuestionCreateDto> dto) => IsReady ? _http.PostAsJsonAsync($"api/exams/{examId}/questions/import", dto) : OfflineResponse();
+    public Task<List<QuestionDto>?> GetQuestionsAsync(int examId) => IsReady ? _http.GetFromJsonAsync<List<QuestionDto>>($"api/exams/{examId}/questions") : Task.FromResult<List<QuestionDto>?>([]);
     public Task<HttpResponseMessage> DeleteQuestionAsync(int questionId) => IsReady ? _http.DeleteAsync($"api/exams/questions/{questionId}") : OfflineResponse();
 
     // Sessions
@@ -43,6 +44,25 @@ public class ApiClient
     public Task<HttpResponseMessage> UpsertStudentAsync(StudentUpsertDto dto) => IsReady ? _http.PostAsJsonAsync("api/students", dto) : OfflineResponse();
     public Task<HttpResponseMessage> DeleteStudentAsync(int id) => IsReady ? _http.DeleteAsync($"api/students/{id}") : OfflineResponse();
     public Task<HttpResponseMessage> UpdateStudentPasswordAsync(StudentPasswordUpdateDto dto) => IsReady ? _http.PostAsJsonAsync("api/students/password", dto) : OfflineResponse();
+
+    // Question Bank
+    public Task<List<QuestionBankDto>?> GetQuestionBankAsync(string? subject = null, int? year = null)
+    {
+        if (!IsReady) return Task.FromResult<List<QuestionBankDto>?>([]);
+        var url = "api/questionbank";
+        var qs = new List<string>();
+        if (!string.IsNullOrWhiteSpace(subject)) qs.Add($"subject={Uri.EscapeDataString(subject)}");
+        if (year.HasValue) qs.Add($"year={year.Value}");
+        if (qs.Count > 0) url += "?" + string.Join("&", qs);
+        return _http.GetFromJsonAsync<List<QuestionBankDto>>(url);
+    }
+    public Task<List<string>?> GetQuestionBankSubjectsAsync() => IsReady ? _http.GetFromJsonAsync<List<string>>("api/questionbank/subjects") : Task.FromResult<List<string>?>([]);
+    public Task<List<int>?> GetQuestionBankYearsAsync(string subject) => IsReady ? _http.GetFromJsonAsync<List<int>>($"api/questionbank/years?subject={Uri.EscapeDataString(subject)}") : Task.FromResult<List<int>?>([]);
+    public Task<HttpResponseMessage> AddQuestionBankAsync(QuestionBankCreateDto dto) => IsReady ? _http.PostAsJsonAsync("api/questionbank", dto) : OfflineResponse();
+    public Task<HttpResponseMessage> ImportQuestionBankAsync(List<QuestionBankCreateDto> list) => IsReady ? _http.PostAsJsonAsync("api/questionbank/import", list) : OfflineResponse();
+    public Task<HttpResponseMessage> UpdateQuestionBankAsync(int id, QuestionBankCreateDto dto) => IsReady ? _http.PutAsJsonAsync($"api/questionbank/{id}", dto) : OfflineResponse();
+    public Task<HttpResponseMessage> DeleteQuestionBankAsync(int id) => IsReady ? _http.DeleteAsync($"api/questionbank/{id}") : OfflineResponse();
+    public Task<HttpResponseMessage> GenerateExamFromBankAsync(ExamGenerateDto dto) => IsReady ? _http.PostAsJsonAsync("api/questionbank/generate-exam", dto) : OfflineResponse();
 
     private static Task<HttpResponseMessage> OfflineResponse() =>
         Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)

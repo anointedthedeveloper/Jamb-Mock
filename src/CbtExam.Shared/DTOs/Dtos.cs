@@ -2,10 +2,16 @@ namespace CbtExam.Shared.DTOs;
 
 // --- Exam DTOs ---
 public record ExamCreateDto(string Title, string Subject, int DurationMinutes, bool ShuffleQuestions, bool ShuffleOptions);
-public record ExamDto(int Id, string Title, string Subject, int DurationMinutes, bool ShuffleQuestions, bool ShuffleOptions, DateTime CreatedAt, int QuestionCount);
+public record ExamDto(int Id, string Title, string Subject, int DurationMinutes, bool ShuffleQuestions, bool ShuffleOptions, DateTime CreatedAt, int QuestionCount)
+{
+    // Year is parsed from Subject if stored as "Subject|Year"
+    public string Year => Subject.Contains('|') ? Subject.Split('|')[1] : string.Empty;
+    public string SubjectDisplay => Subject.Contains('|') ? Subject.Split('|')[0] : Subject;
+}
 
 // --- Question DTOs ---
 public record QuestionCreateDto(int QuestionNumber, string Text, List<string> Options, string CorrectAnswer);
+public record QuestionDto(int Id, int ExamId, int QuestionNumber, string Text, string OptionsJson, string CorrectAnswer);
 
 // --- Session DTOs ---
 public record SessionStartDto(int ExamId);
@@ -41,7 +47,10 @@ public record StudentStatusDto(
     string ConnectionState);
 
 // --- Results ---
-public record ResultDto(int StudentExamId, string FullName, string StudentId, int Score, int Total, double Percentage, DateTime? SubmittedAt);
+public record ResultDto(int StudentExamId, string FullName, string StudentId, int Score, int Total, double Percentage, DateTime? SubmittedAt)
+{
+    public bool Passed => Percentage >= 50;
+}
 
 // --- Activity log ---
 public record ActivityLogDto(int StudentExamId, string Activity, DateTime Timestamp);
@@ -53,8 +62,17 @@ public record SnapshotDto(int StudentExamId, string ImageBase64);
 
 // --- Student admin management ---
 public record StudentAdminDto(int Id, string FullName, string StudentId, bool IsActive);
-public record StudentUpsertDto(int? Id, string FullName, string StudentId, bool IsActive);
+public record StudentUpsertDto(int? Id, string FullName, string StudentId, bool IsActive, string? Password = null);
 public record StudentPasswordUpdateDto(int StudentId, string NewPassword);
+public record StudentBulkRowDto(string FullName, string Username, string Password);
+
+// --- Question Bank DTOs ---
+public record QuestionBankCreateDto(string Subject, int Year, int QuestionNumber, string Text, List<string> Options, string CorrectAnswer);
+public record QuestionBankDto(int Id, string Subject, int Year, int QuestionNumber, string Text, string OptionsJson, string CorrectAnswer);
+public record QuestionBankSubjectYearDto(string Subject, List<int> Years, int QuestionCount);
+
+// --- Exam generation from question bank ---
+public record ExamGenerateDto(string Title, int DurationMinutes, bool ShuffleQuestions, bool ShuffleOptions, List<QuestionBankSubjectYearDto> Subjects);
 
 // --- Notifications ---
 public record NotificationDto(string Title, string Message, DateTime CreatedAt, string Level);

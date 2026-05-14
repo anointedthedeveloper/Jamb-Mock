@@ -44,23 +44,38 @@ public static class ApiBootstrap
         var app = builder.Build();
         var adminKey = Environment.GetEnvironmentVariable("CBT_ADMIN_KEY") ?? "admin123";
 
-        // Auto-migrate and seed on startup
+        // Auto-migrate on startup — robust reset on schema mismatch
         using (var scope = app.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            bool created = false;
             try
             {
-                db.Database.Migrate();
-            }
-            catch
-            {
                 db.Database.EnsureCreated();
+                // Verify schema is usable by probing a known table
+                _ = db.Students.Count();
+                created = true;
             }
+            catch { }
 
-            if (!await db.Database.CanConnectAsync())
-                await db.Database.EnsureCreatedAsync();
+            if (!created)
+            {
+                // Schema mismatch — close all connections, delete DB, recreate
+                try { db.Database.CloseConnection(); } catch { }
+                db.Dispose();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                try { if (File.Exists(dbPath)) File.Delete(dbPath); } catch { }
 
+                // Fresh context after delete
+                using var scope2 = app.Services.CreateScope();
+                var db2 = scope2.ServiceProvider.GetRequiredService<AppDbContext>();
+                db2.Database.EnsureCreated();
+                await DataSeeder.SeedAsync(db2);
+                goto skipSeed;
+            }
             await DataSeeder.SeedAsync(db);
+            skipSeed:;
         }
 
         app.UseCors();

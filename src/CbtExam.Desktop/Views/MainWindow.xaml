@@ -50,6 +50,22 @@
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
             <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                CornerRadius="8" Margin="0,2" Padding="0"
+                                Width="44" Height="42">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource NavHoverBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
@@ -62,7 +78,7 @@
         <Border Grid.Column="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0"
                 Style="{StaticResource SidebarOnlyWhenOpen}">
             <DockPanel>
-                <Border DockPanel.Dock="Top" Padding="16,18" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1">
+                <Border DockPanel.Dock="Top" Padding="16,18" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -71,8 +87,8 @@
                         </Grid.ColumnDefinitions>
                         <Image Source="pack://application:,,,/res/jamb.png" Width="42" Height="42" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="CBT Exam System" FontSize="16" FontWeight="Bold" Foreground="#111827"/>
-                            <TextBlock Text="Admin Console" FontSize="12" Foreground="#6B7280"/>
+                            <TextBlock Text="CBT Exam" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Admin Console" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </StackPanel>
                         <Button Grid.Column="2" Command="{Binding ToggleSidebarCommand}" Style="{StaticResource NavBtn}"
                                 Padding="6" ToolTip="Collapse sidebar">
@@ -81,56 +97,137 @@
                     </Grid>
                 </Border>
 
+                <Border DockPanel.Dock="Bottom" Margin="12,0,12,6" Padding="12" CornerRadius="10"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="#F0FDF4"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ServerRunning}" Value="False">
+                                    <Setter Property="Background" Value="#FEF2F2"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,7,0"
+                                     Fill="{Binding ServerRunning, Converter={StaticResource BoolToColor}}"/>
+                            <TextBlock Text="{Binding ServerStatusText}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"
+                                       Foreground="{Binding ServerRunning, Converter={StaticResource BoolToColor}}"/>
+                        </StackPanel>
+                        <Grid Margin="0,0,0,8"
+                              Visibility="{Binding ServerRunning, Converter={StaticResource BoolToVis}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Background="{DynamicResource InputBgBrush}" CornerRadius="6" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="8,5">
+                                <TextBlock Text="{Binding ServerUrl}" FontSize="11" Foreground="{DynamicResource AccentBrush}"
+                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                            </Border>
+                            <Button Grid.Column="1" Command="{Binding CopyServerUrlCommand}" Style="{StaticResource NavBtn}"
+                                    Padding="7" Margin="6,0,0,0" ToolTip="Copy URL">
+                                <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                            </Button>
+                        </Grid>
+                        <Button Command="{Binding ToggleServerCommand}" HorizontalAlignment="Stretch"
+                                Padding="0,8" FontSize="12" FontWeight="SemiBold">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource PrimaryBtn}">
+                                    <Setter Property="Background" Value="#DC2626"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ServerRunning}" Value="False">
+                                            <Setter Property="Background" Value="#059669"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="12" Margin="0,0,7,0" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="&#xE71A;"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ServerRunning}" Value="False">
+                                                    <Setter Property="Text" Value="&#xE768;"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Stop Server"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ServerRunning}" Value="False">
+                                                    <Setter Property="Text" Value="Start Server"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
                 <Border DockPanel.Dock="Bottom" Margin="12" Padding="12" CornerRadius="10"
-                        Background="#FFFFFF" BorderBrush="#E5E7EB" BorderThickness="1">
+                        Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Border Width="34" Height="34" CornerRadius="17" Background="#059669">
+                        <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource AccentBrush}">
                             <TextBlock Text="A" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                            <TextBlock Text="Admin User" FontSize="12" FontWeight="Bold" Foreground="#111827"/>
-                            <TextBlock Text="Super Administrator" FontSize="11" Foreground="#6B7280"/>
+                            <TextBlock Text="Admin User" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Super Administrator" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </StackPanel>
-                        <TextBlock Grid.Column="2" Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" Foreground="#6B7280" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                     </Grid>
                 </Border>
 
                 <StackPanel Margin="8,18,8,0">
                     <Button Command="{Binding NavigateCommand}" CommandParameter="Dashboard" HorizontalAlignment="Stretch" ToolTip="Dashboard">
-                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Dashboard"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Dashboard"><Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/><Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE80F;" Style="{StaticResource SideIcon}"/><TextBlock Text="Dashboard" Style="{StaticResource SideLabel}"/></StackPanel>
                     </Button>
                     <Button Command="{Binding NavigateCommand}" CommandParameter="Exams" HorizontalAlignment="Stretch" ToolTip="Exams">
-                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Exams"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Exams"><Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/><Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE8A5;" Style="{StaticResource SideIcon}"/><TextBlock Text="Exams" Style="{StaticResource SideLabel}"/></StackPanel>
                     </Button>
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Questions" HorizontalAlignment="Stretch" ToolTip="Questions">
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Questions"><Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/><Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE8F1;" Style="{StaticResource SideIcon}"/><TextBlock Text="Questions" Style="{StaticResource SideLabel}"/></StackPanel>
+                    </Button>
                     <Button Command="{Binding NavigateCommand}" CommandParameter="Students" HorizontalAlignment="Stretch" ToolTip="Students">
-                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Students"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Students"><Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/><Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE716;" Style="{StaticResource SideIcon}"/><TextBlock Text="Students" Style="{StaticResource SideLabel}"/></StackPanel>
                     </Button>
                     <Button Command="{Binding NavigateCommand}" CommandParameter="Sessions" HorizontalAlignment="Stretch" ToolTip="Sessions">
-                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Sessions"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Sessions"><Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/><Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE787;" Style="{StaticResource SideIcon}"/><TextBlock Text="Sessions" Style="{StaticResource SideLabel}"/></StackPanel>
                     </Button>
                     <Button Command="{Binding NavigateCommand}" CommandParameter="Results" HorizontalAlignment="Stretch" ToolTip="Results">
-                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Results"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Results"><Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/><Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE9D2;" Style="{StaticResource SideIcon}"/><TextBlock Text="Results" Style="{StaticResource SideLabel}"/></StackPanel>
                     </Button>
                     <Button Command="{Binding NavigateCommand}" CommandParameter="Reports" HorizontalAlignment="Stretch" ToolTip="Reports">
-                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Reports"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Reports"><Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/><Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE9D9;" Style="{StaticResource SideIcon}"/><TextBlock Text="Reports" Style="{StaticResource SideLabel}"/></StackPanel>
                     </Button>
                     <Button Command="{Binding NavigateCommand}" CommandParameter="Notifications" HorizontalAlignment="Stretch" ToolTip="Notifications">
-                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Notifications"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Notifications"><Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/><Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE7ED;" Style="{StaticResource SideIcon}"/><TextBlock Text="Notifications" Style="{StaticResource SideLabel}"/></StackPanel>
                     </Button>
                     <Button Command="{Binding NavigateCommand}" CommandParameter="Settings" HorizontalAlignment="Stretch" ToolTip="Settings">
-                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="#111827"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Settings"><Setter Property="Background" Value="#ECFDF5"/><Setter Property="Foreground" Value="#047857"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                        <Button.Style><Style TargetType="Button" BasedOn="{StaticResource NavBtn}"><Setter Property="Padding" Value="14,13"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Style.Triggers><DataTrigger Binding="{Binding CurrentPageKey}" Value="Settings"><Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/><Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/></DataTrigger></Style.Triggers></Style></Button.Style>
                         <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE713;" Style="{StaticResource SideIcon}"/><TextBlock Text="Settings" Style="{StaticResource SideLabel}"/></StackPanel>
                     </Button>
                 </StackPanel>
@@ -139,16 +236,24 @@
 
         <Border Grid.Column="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0"
                 Style="{StaticResource RailOnlyWhenClosed}">
-            <DockPanel>
-                <DockPanel DockPanel.Dock="Top" Margin="0,14,0,10" LastChildFill="False">
-                    <Image DockPanel.Dock="Top" Source="pack://application:,,,/res/jamb.png" Width="38" Height="38"
-                           RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                    <Button DockPanel.Dock="Top" Command="{Binding ToggleSidebarCommand}" Content="&#xE76C;"
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <!-- Logo + expand toggle -->
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,14,0,6">
+                    <Image Source="pack://application:,,,/res/jamb.png" Width="36" Height="36"
+                           RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                    <Button Command="{Binding ToggleSidebarCommand}" Content="&#xE76C;"
                             ToolTip="Expand sidebar" Style="{StaticResource RailBtn}" HorizontalAlignment="Center"/>
-                </DockPanel>
-                <StackPanel Margin="10,8,10,0">
+                </StackPanel>
+                <!-- Nav icons — no margin, truly centred in 64px column -->
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,4,0,0">
                     <Button Content="&#xE80F;" ToolTip="Dashboard" Command="{Binding NavigateCommand}" CommandParameter="Dashboard" Style="{StaticResource RailBtn}"/>
                     <Button Content="&#xE8A5;" ToolTip="Exams" Command="{Binding NavigateCommand}" CommandParameter="Exams" Style="{StaticResource RailBtn}"/>
+                    <Button Content="&#xE8F1;" ToolTip="Questions" Command="{Binding NavigateCommand}" CommandParameter="Questions" Style="{StaticResource RailBtn}"/>
                     <Button Content="&#xE716;" ToolTip="Students" Command="{Binding NavigateCommand}" CommandParameter="Students" Style="{StaticResource RailBtn}"/>
                     <Button Content="&#xE787;" ToolTip="Sessions" Command="{Binding NavigateCommand}" CommandParameter="Sessions" Style="{StaticResource RailBtn}"/>
                     <Button Content="&#xE9D2;" ToolTip="Results" Command="{Binding NavigateCommand}" CommandParameter="Results" Style="{StaticResource RailBtn}"/>
@@ -156,7 +261,12 @@
                     <Button Content="&#xE7ED;" ToolTip="Notifications" Command="{Binding NavigateCommand}" CommandParameter="Notifications" Style="{StaticResource RailBtn}"/>
                     <Button Content="&#xE713;" ToolTip="Settings" Command="{Binding NavigateCommand}" CommandParameter="Settings" Style="{StaticResource RailBtn}"/>
                 </StackPanel>
-            </DockPanel>
+                <!-- Server dot at bottom -->
+                <Button Grid.Row="2" Command="{Binding ToggleServerCommand}" ToolTip="Start/Stop Server"
+                        Style="{StaticResource RailBtn}" HorizontalAlignment="Center" Margin="0,0,0,12">
+                    <Ellipse Width="10" Height="10" Fill="{Binding ServerRunning, Converter={StaticResource BoolToColor}}"/>
+                </Button>
+            </Grid>
         </Border>
 
         <Grid Grid.Column="1">
@@ -173,17 +283,16 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Grid Grid.Column="1" VerticalAlignment="Center" Height="42">
-                        <TextBox Text="{Binding GlobalSearch, UpdateSourceTrigger=PropertyChanged}" Padding="40,8,12,8"/>
-                        <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#6B7280"
-                                   VerticalAlignment="Center" HorizontalAlignment="Left" Margin="14,0,0,0"/>
-                        <TextBlock Text="Search anything..." Foreground="#6B7280" FontSize="13"
+                        <TextBox x:Name="SearchBox" Text="{Binding GlobalSearch, UpdateSourceTrigger=PropertyChanged}" 
+                                 Padding="40,8,12,8" GotFocus="SearchBox_GotFocus" LostFocus="SearchBox_LostFocus"
+                                 Style="{StaticResource ModernTextBox}"/>
+                        <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center" HorizontalAlignment="Left" Margin="14,0,0,0" IsHitTestVisible="False"/>
+                        <TextBlock x:Name="SearchPlaceholder" Text="Search anything..." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13"
                                    VerticalAlignment="Center" HorizontalAlignment="Left" Margin="40,0,0,0"
                                    IsHitTestVisible="False"/>
                     </Grid>
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
-                        <Button Style="{StaticResource NavBtn}" Padding="10" ToolTip="Search" Command="{Binding SearchCommand}">
-                            <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
-                        </Button>
                         <Button Style="{StaticResource NavBtn}" Padding="10" ToolTip="Theme" Command="{Binding ToggleThemeCommand}">
                             <TextBlock Text="&#xE706;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
@@ -197,15 +306,15 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </Grid>
-                        <Border Width="36" Height="36" CornerRadius="18" Background="#059669" Margin="8,0,10,0">
+                        <Border Width="36" Height="36" CornerRadius="18" Background="{DynamicResource AccentBrush}" Margin="8,0,10,0">
                             <TextBlock Text="A" Foreground="White" FontWeight="Bold" FontSize="16"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Admin User" FontSize="12" FontWeight="Bold" Foreground="#111827"/>
-                            <TextBlock Text="Super Administrator" FontSize="11" Foreground="#6B7280"/>
+                            <TextBlock Text="Admin User" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Super Administrator" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </StackPanel>
-                        <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" Foreground="#111827" Margin="10,0,0,0"
+                        <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource TextSecondaryBrush}" Margin="10,0,0,0"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
@@ -216,6 +325,9 @@
                     <DataTemplate DataType="{x:Type vm:DashboardViewModel}"><views:DashboardView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:CreateExamViewModel}"><views:CreateExamView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:ExamsViewModel}"><views:ExamsView/></DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:QuestionsViewModel}"><views:QuestionsView/></DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:SearchResultsViewModel}"><views:SearchResultsView/></DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:ErrorGuideViewModel}"><views:ErrorGuideView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:SessionViewModel}"><views:SessionView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:MonitorViewModel}"><views:MonitorView/></DataTemplate>
                     <DataTemplate DataType="{x:Type vm:StudentsViewModel}"><views:StudentsView/></DataTemplate>

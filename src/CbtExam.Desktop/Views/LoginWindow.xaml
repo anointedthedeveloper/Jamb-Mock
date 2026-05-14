@@ -1,0 +1,346 @@
+<Window x:Class="CbtExam.Desktop.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:CbtExam.Desktop.ViewModels"
+        Title="CBT Exam System - Admin Login" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        FontFamily="Segoe UI">
+
+    <Window.DataContext>
+        <vm:LoginViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!-- Boolean to Visibility Converter -->
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        
+        <!-- Premium Woven Gradient Background -->
+        <LinearGradientBrush x:Key="WovenBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0F172A" Offset="0"/>
+            <GradientStop Color="#1E293B" Offset="0.2"/>
+            <GradientStop Color="#0D9488" Offset="0.5"/>
+            <GradientStop Color="#059669" Offset="0.8"/>
+            <GradientStop Color="#0891B2" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Premium Glassmorphism Card -->
+        <Style x:Key="GlassCard" TargetType="Border">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="White" Opacity="0.08"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <Setter.Value>
+                    <SolidColorBrush Color="White" Opacity="0.15"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="24"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <BlurEffect Radius="20"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Floating Label TextBox -->
+        <Style x:Key="FloatingTextBox" TargetType="Grid">
+            <Setter Property="Margin" Value="0,8"/>
+        </Style>
+
+        <!-- Modern Button with Gradient -->
+        <Style x:Key="ModernPrimaryBtn" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#0D9488" Offset="0"/>
+                        <GradientStop Color="#059669" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="24,16"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                CornerRadius="12" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#0F766E" Offset="0"/>
+                                            <GradientStop Color="#047857" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Premium Animated Background -->
+    <Grid Background="{StaticResource WovenBackground}">
+        <!-- Organic Woven Shapes Animation -->
+        <Canvas Opacity="0.08">
+            <!-- Woven Blob 1 -->
+            <Path Fill="White" Opacity="0.3" Canvas.Left="120" Canvas.Top="80">
+                <Path.Data>
+                    <EllipseGeometry Center="0,0" RadiusX="60" RadiusY="40"/>
+                </Path.Data>
+                <Path.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever">
+                                <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)" 
+                                               From="120" To="680" Duration="0:0:25" AutoReverse="True"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)" 
+                                               From="80" To="320" Duration="0:0:18" AutoReverse="True"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Path.Triggers>
+            </Path>
+            
+            <!-- Woven Blob 2 -->
+            <Path Fill="White" Opacity="0.2" Canvas.Left="650" Canvas.Top="200">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure StartPoint="-40,0">
+                            <QuadraticBezierSegment Point1="20,40" Point2="20,0"/>
+                            <QuadraticBezierSegment Point1="40,-20" Point2="20,-40"/>
+                            <QuadraticBezierSegment Point1="-20,-40" Point2="-60,0"/>
+                            <QuadraticBezierSegment Point1="-20,0" Point2="-40,0"/>
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+                <Path.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever" BeginTime="0:0:5">
+                                <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)" 
+                                               From="650" To="180" Duration="0:0:30" AutoReverse="True"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)" 
+                                               From="200" To="420" Duration="0:0:22" AutoReverse="True"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Path.Triggers>
+            </Path>
+            
+            <!-- Woven Blob 3 -->
+            <Path Fill="White" Opacity="0.25" Canvas.Left="400" Canvas.Top="350">
+                <Path.Data>
+                    <EllipseGeometry Center="0,0" RadiusX="45" RadiusY="30"/>
+                </Path.Data>
+                <Path.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever" BeginTime="0:0:10">
+                                <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)" 
+                                               From="400" To="520" Duration="0:0:28" AutoReverse="True"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)" 
+                                               From="350" To="280" Duration="0:0:20" AutoReverse="True"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Path.Triggers>
+            </Path>
+        </Canvas>
+
+        <!-- Premium Login Card -->
+        <Border Style="{StaticResource GlassCard}" Margin="50" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" Opacity="0.3" Color="Black"/>
+            </Border.Effect>
+            
+            <Grid Width="420" Margin="40">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Premium Logo and Title -->
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,20,0,30">
+                    <Border Width="90" Height="90" CornerRadius="45" Background="White" Margin="0,0,0,20">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="15" Color="Black" Opacity="0.25"/>
+                        </Border.Effect>
+                        <Image Source="{Binding SchoolLogoPath}" 
+                               Stretch="UniformToFill"
+                               Margin="22">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SchoolLogoPath}" Value="{x:Null}">
+                                            <Setter Property="Source" Value="pack://application:,,,/CbtExam.Desktop;component/res/jamb.png"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </Border>
+                    
+                    <!-- Professional Typography -->
+                    <TextBlock Text="CBT Exam System" FontSize="26" FontWeight="Light" 
+                               Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" FontFamily="Segoe UI"/>
+                    <TextBlock Text="Administrator Portal" FontSize="15" FontWeight="SemiBold"
+                               Foreground="White" Opacity="0.95" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                    <TextBlock Text="Secure Admin Access" FontSize="12" 
+                               Foreground="White" Opacity="0.8" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    
+                    <!-- Database Connection Status -->
+                    <Border Background="#1F2937" CornerRadius="20" Padding="12,8" Margin="0,16,0,0" Opacity="0.9">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" Fill="#10B981" Margin="0,0,8,0"/>
+                            <TextBlock Text="Local Database: Active" FontSize="11" Foreground="White" FontWeight="Medium"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Error Message -->
+                <Border Grid.Row="1" Background="#FEF2F2" CornerRadius="8" Padding="12"
+                        Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}"
+                        Margin="0,0,0,16">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                   Foreground="#EF4444" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding ErrorMessage}" FontSize="13"
+                                   Foreground="#991B1B" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Login Form -->
+                <StackPanel Grid.Row="2">
+                    <!-- Username Field -->
+                    <Grid Style="{StaticResource FloatingTextBox}">
+                        <Border x:Name="UsernameBorder" Background="White" CornerRadius="8" 
+                                BorderBrush="White" BorderThickness="0,0,0,2" Padding="16,12">
+                            <StackPanel>
+                                <TextBlock x:Name="UsernameLabel" Text="Administrator" FontSize="12" 
+                                           Foreground="#64748B" Margin="0,0,0,4"/>
+                                <TextBox x:Name="UsernameTextBox" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
+                                         Background="Transparent" BorderThickness="0" FontSize="14"
+                                         Foreground="#1F2937" Padding="0"
+                                         GotFocus="UsernameTextBox_GotFocus" LostFocus="UsernameTextBox_LostFocus"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Access Code Field -->
+                    <Grid Style="{StaticResource FloatingTextBox}">
+                        <Border x:Name="CodeBorder" Background="White" CornerRadius="8" 
+                                BorderBrush="White" BorderThickness="0,0,0,2" Padding="16,12">
+                            <StackPanel>
+                                <TextBlock x:Name="CodeLabel" Text="Access Code" FontSize="12" 
+                                           Foreground="#64748B" Margin="0,0,0,4"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="CodeBox" Text="{Binding AccessCode, UpdateSourceTrigger=PropertyChanged}"
+                                                Background="Transparent" BorderThickness="0" FontSize="14"
+                                                Foreground="#1F2937" Padding="0"
+                                                MaxLength="20"
+                                                CharacterCasing="Upper"
+                                                GotFocus="CodeBox_GotFocus" LostFocus="CodeBox_LostFocus"/>
+                                    <Button Grid.Column="1" Content="&#xE890;" FontFamily="Segoe MDL2 Assets" 
+                                            Background="Transparent" BorderThickness="0" Foreground="#64748B"
+                                            Padding="8,0" Click="ToggleCodeVisibility"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Remember Me & Forgot Password -->
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <CheckBox Grid.Column="0" Content="Remember me" IsChecked="{Binding RememberMe}"
+                                  Foreground="White" FontSize="13" Padding="8,0,0,0"/>
+                        
+                        <Button Grid.Column="2" Content="Reset access code?" 
+                                Background="Transparent" BorderThickness="0" Foreground="White"
+                                FontSize="13" Padding="8" Cursor="Hand"
+                                MouseEnter="ForgotPassword_MouseEnter" MouseLeave="ForgotPassword_MouseLeave"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Premium Login Button with Loading Animation -->
+                <Button x:Name="LoginButton" Grid.Row="3" Content="Access Admin" 
+                        Style="{StaticResource ModernPrimaryBtn}"
+                        Command="{Binding LoginCommand}"
+                        Margin="0,32,0,20">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="12" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                                                <DataTrigger Binding="{Binding IsLoggingIn}" Value="True">
+                                    <Setter TargetName="ButtonBorder" Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                <GradientStop Color="#0F172A" Offset="0"/>
+                                                <GradientStop Color="#1E293B" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="Transparent"/>
+                                    <Setter TargetName="ButtonBorder" Property="Cursor" Value="Wait"/>
+                                </DataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <!-- Footer -->
+                <StackPanel Grid.Row="4" HorizontalAlignment="Center">
+                    <TextBlock Text="© 2024 AnoByte CBT Systems" FontSize="11" 
+                               Foreground="White" Opacity="0.7" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Secure • Offline • Reliable" FontSize="10" 
+                               Foreground="White" Opacity="0.5" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Close Button -->
+        <Button Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" 
+                Background="Transparent" BorderThickness="0" Foreground="White"
+                FontSize="20" Width="40" Height="40" 
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20"
+                Click="CloseButton_Click" Cursor="Hand"/>
+    </Grid>
+</Window>

@@ -1,7 +1,6 @@
 using CbtExam.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
@@ -59,6 +58,8 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
             b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
             b.Property<string>("FullName").IsRequired().HasColumnType("TEXT");
             b.Property<string>("StudentId").IsRequired().HasColumnType("TEXT");
+            b.Property<string>("Password").IsRequired().HasDefaultValue("1234").HasColumnType("TEXT");
+            b.Property<bool>("IsActive").HasDefaultValue(true).HasColumnType("INTEGER");
             b.HasKey("Id");
             b.ToTable("Students");
         });
@@ -90,6 +91,20 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
             b.HasIndex("QuestionId");
             b.HasIndex("StudentExamId");
             b.ToTable("Answers");
+        });
+
+        mb.Entity("CbtExam.Shared.Models.QuestionBank", b =>
+        {
+            b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
+            b.Property<string>("Subject").IsRequired().HasColumnType("TEXT");
+            b.Property<int>("Year").HasColumnType("INTEGER");
+            b.Property<int>("QuestionNumber").HasColumnType("INTEGER");
+            b.Property<string>("Text").IsRequired().HasColumnType("TEXT");
+            b.Property<string>("OptionsJson").IsRequired().HasColumnType("TEXT");
+            b.Property<string>("CorrectAnswer").IsRequired().HasColumnType("TEXT");
+            b.HasKey("Id");
+            b.HasIndex("Subject", "Year");
+            b.ToTable("QuestionBank");
         });
 
         mb.Entity("CbtExam.Shared.Models.Question", b =>

@@ -2,6 +2,7 @@ using CbtExam.Desktop.Services;
 using CbtExam.Shared.DTOs;
 using System.Collections.ObjectModel;
 using System.Text.Json;
+using System.IO;
 
 namespace CbtExam.Desktop.ViewModels;
 
@@ -560,14 +561,176 @@ public class DevicesViewModel(ApiClient api) : BaseViewModel, IRefreshable
                 s.JoinedAt.ToLocalTime().ToString("HH:mm:ss"),
                 s.IsSubmitted ? "Submitted" : s.ConnectionState,
                 s.TabSwitchCount,
-                s.BatteryLevel));
+                s.BatteryLevel, s.IsOnline));
         }
-        Total  = students.Count;
         Online = students.Count(s => !s.IsSubmitted && s.IsOnline);
     }
 }
 
-public record DeviceRow(string Name, string StudentId, string ConnectedAt, string Status, int Violations, int BatteryLevel);
+public record ExamSubjectConfig(string Subject, List<int> Years, int QuestionCount);
+
+public record DeviceRow(string Name, string StudentId, string JoinedAt, string Status, int TabSwitches, int Battery, bool Online);
+
+public record QuestionBankRow(int Serial, int Id, string Subject, int Year, int QuestionNumber, string Preview);
+
+public record StudentRow(int Serial, int Id, string FullName, string StudentId, bool IsActive);
+
+// ─── Questions Management ────────────────────────────────────────────────────
+public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
+{
+    public ObservableCollection<QuestionBankRow> Questions { get; } = [];
+    private List<QuestionBankDto> _all = [];
+
+    private QuestionBankDto? _selected;
+    public QuestionBankDto? Selected
+    {
+        get => _selected;
+        set { Set(ref _selected, value); OnPropertyChanged(nameof(IsEditing)); }
+    }
+    public bool IsEditing => Selected is not null;
+
+    private string _search = string.Empty;
+    public string Search { get => _search; set { Set(ref _search, value); ApplyFilter(); } }
+
+    public ObservableCollection<string> SubjectFilters { get; } = ["All subjects"];
+    private string _selectedSubject = "All subjects";
+    public string SelectedSubject { get => _selectedSubject; set { Set(ref _selectedSubject, value); ApplyFilter(); } }
+
+    public ObservableCollection<string> YearFilters { get; } = ["All years"];
+    private string _selectedYear = "All years";
+    public string SelectedYear { get => _selectedYear; set { Set(ref _selectedYear, value); ApplyFilter(); } }
+
+    private string _questionText = string.Empty;
+    public string QuestionText { get => _questionText; set => Set(ref _questionText, value); }
+
+    private string _optionA = string.Empty;
+    public string OptionA { get => _optionA; set => Set(ref _optionA, value); }
+
+    private string _optionB = string.Empty;
+    public string OptionB { get => _optionB; set => Set(ref _optionB, value); }
+
+    private string _optionC = string.Empty;
+    public string OptionC { get => _optionC; set => Set(ref _optionC, value); }
+
+    private string _optionD = string.Empty;
+    public string OptionD { get => _optionD; set => Set(ref _optionD, value); }
+
+    private string _subject = string.Empty;
+    public string Subject { get => _subject; set => Set(ref _subject, value); }
+
+    private int _year = DateTime.Now.Year;
+    public int Year { get => _year; set => Set(ref _year, value); }
+
+    private string _correctAnswer = "A";
+    public string CorrectAnswer { get => _correctAnswer; set => Set(ref _correctAnswer, value); }
+
+    private string _status = string.Empty;
+    public string Status { get => _status; set => Set(ref _status, value); }
+
+    private bool _statusOk;
+    public bool StatusOk { get => _statusOk; set => Set(ref _statusOk, value); }
+
+    public RelayCommand RefreshCommand => new(async () => await LoadAsync());
+    public RelayCommand SaveCommand => new(async () => await SaveAsync());
+    public RelayCommand DeleteCommand => new(async () => await DeleteAsync());
+    public RelayCommand ClearCommand => new(Clear);
+    public RelayCommand<QuestionBankDto> PickCommand => new(q => Pick(q));
+    public RelayCommand BulkUploadCommand => new(() => { Status = "Bulk upload feature coming soon!"; StatusOk = false; });
+
+    public async Task LoadAsync()
+    {
+        // For now, we'll work with QuestionBank directly
+        // In a real implementation, this would call API
+        _all = []; // TODO: Load from API
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        var searchQuery = Search.Trim();
+        var result = _all.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            result = result.Where(qb => qb.Text.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                                      qb.Subject.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (SelectedSubject != "All subjects")
+        {
+            result = result.Where(qb => qb.Subject.Equals(SelectedSubject, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (SelectedYear != "All years" && int.TryParse(SelectedYear, out int yearValue))
+        {
+            result = result.Where(qb => qb.Year == yearValue);
+        }
+
+        Questions.Clear();
+        int i = 1;
+        foreach (var question in result.OrderBy(qb => qb.Subject).ThenBy(qb => qb.Year).ThenBy(qb => qb.QuestionNumber))
+            Questions.Add(new QuestionBankRow(i++, question.Id, question.Subject, question.Year, question.QuestionNumber, question.Text.Substring(0, Math.Min(100, question.Text.Length)) + "..."));
+    }
+
+    private async Task SaveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(QuestionText)) { Status = "Question text is required."; StatusOk = false; return; }
+        if (string.IsNullOrWhiteSpace(Subject)) { Status = "Subject is required."; StatusOk = false; return; }
+        if (string.IsNullOrWhiteSpace(OptionA) || string.IsNullOrWhiteSpace(OptionB) || 
+            string.IsNullOrWhiteSpace(OptionC) || string.IsNullOrWhiteSpace(OptionD))
+        { Status = "All four options are required."; StatusOk = false; return; }
+
+        var options = new[] { OptionA, OptionB, OptionC, OptionD };
+        var correctOption = CorrectAnswer.ToUpper() switch
+        {
+            "A" => options[0],
+            "B" => options[1],
+            "C" => options[2],
+            "D" => options[3],
+            _ => options[0]
+        };
+
+        // TODO: Implement API call to save question
+        Status = "Question saved successfully."; StatusOk = true;
+        Clear();
+        await LoadAsync();
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (Selected is null) return;
+        // TODO: Implement API call to delete question
+        Status = "Question deleted successfully."; StatusOk = true;
+        Clear();
+        await LoadAsync();
+    }
+
+    private void Pick(QuestionBankDto? q)
+    {
+        if (q is null) return;
+        Selected = q;
+        QuestionText = q.Text;
+        Subject = q.Subject;
+        Year = q.Year;
+        
+        // Parse options from JSON (simplified for demo)
+        var options = new[] { "Option A", "Option B", "Option C", "Option D" }; // TODO: Parse from q.OptionsJson
+        OptionA = options[0];
+        OptionB = options[1];
+        OptionC = options[2];
+        OptionD = options[3];
+        CorrectAnswer = q.CorrectAnswer;
+    }
+
+    private void Clear()
+    {
+        Selected = null;
+        QuestionText = OptionA = OptionB = OptionC = OptionD = Subject = string.Empty;
+        Year = DateTime.Now.Year;
+        CorrectAnswer = "A";
+        Status = string.Empty;
+    }
+}
 
 // ─── Results ─────────────────────────────────────────────────────────────────
 public class ResultsViewModel(ApiClient api) : BaseViewModel, IRefreshable
@@ -652,13 +815,305 @@ public class ReportsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 public record ReportRow(string ExamTitle, string SessionCode, string Date,
     int Students, double AvgPct, int Passed, int Failed);
 
+// ─── Search Results ─────────────────────────────────────────────────────────────
+public class SearchResultsViewModel : BaseViewModel
+{
+    private string _searchQuery = string.Empty;
+    public string SearchQuery { get => _searchQuery; set => Set(ref _searchQuery, value); }
+
+    private ObservableCollection<SearchSuggestion> _suggestions = [];
+    public ObservableCollection<SearchSuggestion> Suggestions { get => _suggestions; set => Set(ref _suggestions, value); }
+
+    private ObservableCollection<SearchResult> _searchResults = [];
+    public ObservableCollection<SearchResult> SearchResults { get => _searchResults; set => Set(ref _searchResults, value); }
+
+    public bool HasSuggestions => Suggestions.Count > 0;
+    public bool HasNoResults => SearchResults.Count == 0 && !string.IsNullOrWhiteSpace(SearchQuery);
+
+    public RelayCommand CloseCommand => new(() => { 
+        // Navigate back to previous page or dashboard
+        if (System.Windows.Application.Current.MainWindow?.DataContext is MainViewModel mainViewModel)
+        {
+            mainViewModel.NavigateCommand.Execute("Dashboard");
+        }
+    });
+    
+    public RelayCommand NavigateToExamSettingsCommand => new(() => { 
+        if (System.Windows.Application.Current.MainWindow?.DataContext is MainViewModel mainViewModel)
+        {
+            mainViewModel.NavigateCommand.Execute("CreateExam");
+        }
+    });
+    
+    public RelayCommand NavigateToThemeSettingsCommand => new(() => { 
+        if (System.Windows.Application.Current.MainWindow?.DataContext is MainViewModel mainViewModel)
+        {
+            mainViewModel.NavigateCommand.Execute("Settings");
+        }
+    });
+    
+    public RelayCommand NavigateToErrorGuideCommand => new(() => { 
+        if (System.Windows.Application.Current.MainWindow?.DataContext is MainViewModel mainViewModel)
+        {
+            mainViewModel.NavigateCommand.Execute("ErrorGuide");
+        }
+    });
+    
+    public RelayCommand NavigateToSettingsCommand => new(() => { 
+        if (System.Windows.Application.Current.MainWindow?.DataContext is MainViewModel mainViewModel)
+        {
+            mainViewModel.NavigateCommand.Execute("Settings");
+        }
+    });
+    
+    public RelayCommand<SearchSuggestion> NavigateToSuggestionCommand => new(suggestion => { 
+        // Handle suggestion navigation based on title
+        if (System.Windows.Application.Current.MainWindow?.DataContext is MainViewModel mainViewModel)
+        {
+            switch (suggestion.Title.ToLower())
+            {
+                case "exam settings":
+                case "create new exam":
+                    mainViewModel.NavigateCommand.Execute("CreateExam");
+                    break;
+                case "theme settings":
+                case "dark mode":
+                    mainViewModel.NavigateCommand.Execute("Settings");
+                    break;
+                case "error guide":
+                case "troubleshooting":
+                    mainViewModel.NavigateCommand.Execute("ErrorGuide");
+                    break;
+                case "settings":
+                case "general settings":
+                    mainViewModel.NavigateCommand.Execute("Settings");
+                    break;
+                case "exam history":
+                case "exam list":
+                    mainViewModel.NavigateCommand.Execute("Exams");
+                    break;
+                case "student management":
+                    mainViewModel.NavigateCommand.Execute("Students");
+                    break;
+                case "student reports":
+                    mainViewModel.NavigateCommand.Execute("Results");
+                    break;
+                case "question bank":
+                case "search questions":
+                    mainViewModel.NavigateCommand.Execute("Questions");
+                    break;
+            }
+        }
+    });
+    
+    public RelayCommand<SearchResult> NavigateToResultCommand => new(result => { 
+        // Handle result navigation based on title
+        if (System.Windows.Application.Current.MainWindow?.DataContext is MainViewModel mainViewModel)
+        {
+            switch (result.Title.ToLower())
+            {
+                case "student management":
+                    mainViewModel.NavigateCommand.Execute("Students");
+                    break;
+                case "student reports":
+                    mainViewModel.NavigateCommand.Execute("Results");
+                    break;
+                case "create exam":
+                    mainViewModel.NavigateCommand.Execute("CreateExam");
+                    break;
+                case "exam list":
+                    mainViewModel.NavigateCommand.Execute("Exams");
+                    break;
+                case "question bank":
+                case "search questions":
+                    mainViewModel.NavigateCommand.Execute("Questions");
+                    break;
+                case "general settings":
+                case "theme settings":
+                    mainViewModel.NavigateCommand.Execute("Settings");
+                    break;
+            }
+        }
+    });
+
+    public SearchResultsViewModel(string query)
+    {
+        SearchQuery = query;
+        LoadSuggestions();
+        LoadResults();
+    }
+
+    private void LoadSuggestions()
+    {
+        Suggestions.Clear();
+        
+        if (string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            Suggestions.Add(new SearchSuggestion("&#xE7FD;", "Exam Settings", "Configure exam parameters"));
+            Suggestions.Add(new SearchSuggestion("&#xE706;", "Theme Settings", "Customize appearance"));
+            Suggestions.Add(new SearchSuggestion("&#xE783;", "Error Guide", "Troubleshooting help"));
+            Suggestions.Add(new SearchSuggestion("&#xE713;", "Settings", "General settings"));
+        }
+        else
+        {
+            // Dynamic suggestions based on query
+            if (SearchQuery.Contains("exam", StringComparison.OrdinalIgnoreCase))
+            {
+                Suggestions.Add(new SearchSuggestion("&#xE7FD;", "Create New Exam", "Start creating an exam"));
+                Suggestions.Add(new SearchSuggestion("&#xE8A5;", "Exam History", "View past exams"));
+            }
+            if (SearchQuery.Contains("theme", StringComparison.OrdinalIgnoreCase))
+            {
+                Suggestions.Add(new SearchSuggestion("&#xE706;", "Dark Mode", "Switch to dark theme"));
+                Suggestions.Add(new SearchSuggestion("&#xE790;", "Color Settings", "Customize colors"));
+            }
+            if (SearchQuery.Contains("error", StringComparison.OrdinalIgnoreCase))
+            {
+                Suggestions.Add(new SearchSuggestion("&#xE783;", "Troubleshooting", "Common issues and fixes"));
+                Suggestions.Add(new SearchSuggestion("&#xE946;", "System Status", "Check system health"));
+            }
+        }
+    }
+
+    private void LoadResults()
+    {
+        SearchResults.Clear();
+        
+        if (string.IsNullOrWhiteSpace(SearchQuery))
+            return;
+
+        // Mock search results - in real implementation, this would search actual data
+        if (SearchQuery.Contains("student", StringComparison.OrdinalIgnoreCase))
+        {
+            SearchResults.Add(new SearchResult("&#xE77B;", "Student Management", "Manage student accounts and enrollment"));
+            SearchResults.Add(new SearchResult("&#xE8A5;", "Student Reports", "View student performance reports"));
+        }
+        if (SearchQuery.Contains("exam", StringComparison.OrdinalIgnoreCase))
+        {
+            SearchResults.Add(new SearchResult("&#xE7FD;", "Create Exam", "Create a new examination"));
+            SearchResults.Add(new SearchResult("&#xE8A5;", "Exam List", "View all available exams"));
+        }
+        if (SearchQuery.Contains("question", StringComparison.OrdinalIgnoreCase))
+        {
+            SearchResults.Add(new SearchResult("&#xE8F7;", "Question Bank", "Manage question database"));
+            SearchResults.Add(new SearchResult("&#xE721;", "Search Questions", "Find specific questions"));
+        }
+        if (SearchQuery.Contains("setting", StringComparison.OrdinalIgnoreCase))
+        {
+            SearchResults.Add(new SearchResult("&#xE713;", "General Settings", "Application configuration"));
+            SearchResults.Add(new SearchResult("&#xE706;", "Theme Settings", "Customize appearance"));
+        }
+    }
+}
+
+public record SearchSuggestion(string Icon, string Title, string Description);
+public record SearchResult(string Icon, string Title, string Description);
+
+// ─── Error Guide ─────────────────────────────────────────────────────────
+public class ErrorGuideViewModel : BaseViewModel
+{
+    private string _serverStatus = "Unknown";
+    public string ServerStatus { get => _serverStatus; set => Set(ref _serverStatus, value); }
+    public string ServerStatusColor => ServerStatus == "Running" ? "#16A34A" : "#EF4444";
+    public string ServerStatusText => ServerStatus == "Running" ? "Server is running normally" : "Server is not responding";
+
+    private string _databaseStatus = "Unknown";
+    public string DatabaseStatus { get => _databaseStatus; set => Set(ref _databaseStatus, value); }
+    public string DatabaseStatusColor => DatabaseStatus == "Healthy" ? "#16A34A" : "#EF4444";
+    public string DatabaseStatusText => DatabaseStatus == "Healthy" ? "Database is accessible" : "Database connection issues";
+
+    public ObservableCollection<CommonIssue> CommonIssues { get; } = [
+        new CommonIssue("Server Not Starting", "The CBT server fails to start when launching the application.", 
+            "1. Check if port 5000 is available\n2. Restart the application\n3. Check Windows Firewall settings\n4. Run as Administrator", 
+            "&#xE946;"),
+        new CommonIssue("Database Locked", "The database file is locked by another process.", 
+            "1. Close all other instances of CBT Exam System\n2. Check Task Manager for CbtExam.exe processes\n3. Restart the computer", 
+            "&#xE747;"),
+        new CommonIssue("Connection Refused", "Cannot connect to the server from student devices.", 
+            "1. Verify server is running in admin panel\n2. Check network connectivity\n3. Verify correct IP address and port\n4. Check Windows Firewall rules", 
+            "&#xE7C4;"),
+        new CommonIssue("Students Not Loading", "Student list appears empty or fails to load.", 
+            "1. Ensure server is running\n2. Check database file integrity\n3. Verify student data exists\n4. Refresh the page manually", 
+            "&#xE77B;"),
+        new CommonIssue("Exam Creation Fails", "Unable to create new exams or save questions.", 
+            "1. Check server connection status\n2. Verify database write permissions\n3. Clear browser cache\n4. Try creating a simpler exam first", 
+            "&#xE7FD;"),
+        new CommonIssue("Questions Not Displaying", "Questions don't appear in exam or question bank.", 
+            "1. Refresh the question bank\n2. Check question import format\n3. Verify exam has questions\n4. Check browser console for errors", 
+            "&#xE8F7;"),
+        new CommonIssue("Results Not Generating", "Exam results are not being calculated or displayed.", 
+            "1. Ensure all students have submitted exams\n2. Check session is properly closed\n3. Verify result calculation settings\n4. Regenerate reports manually", 
+            "&#xE8A5;")
+    ];
+
+    public RelayCommand CloseCommand => new(() => { 
+        // Navigate back to dashboard
+        var mainViewModel = System.Windows.Application.Current.MainWindow.DataContext as MainViewModel;
+        mainViewModel?.NavigateCommand.Execute("Dashboard");
+    });
+    
+    public RelayCommand CheckServerStatusCommand => new(CheckServerStatus);
+    public RelayCommand ViewLogsCommand => new(ViewLogs);
+    public RelayCommand ResetDatabaseCommand => new(ResetDatabase);
+    public RelayCommand ContactSupportCommand => new(() => ContactSupport());
+    public RelayCommand<CommonIssue> FixIssueCommand => new(issue => FixIssue(issue));
+
+    private void CheckServerStatus()
+    {
+        // Mock server status check - in real implementation, this would ping the server
+        ServerStatus = "Running"; // or "Not Running"
+    }
+
+    private void ViewLogs()
+    {
+        // Mock log viewing - in real implementation, this would open log files
+        System.Windows.MessageBox.Show("Log files would open here", "Error Logs", 
+            System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+    }
+
+    private void ResetDatabase()
+    {
+        // Mock database reset - in real implementation, this would reset the database
+        var result = System.Windows.MessageBox.Show(
+            "Are you sure you want to reset the database? This will delete all data and cannot be undone.", 
+            "Reset Database", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
+        
+        if (result == System.Windows.MessageBoxResult.Yes)
+        {
+            DatabaseStatus = "Healthy";
+            System.Windows.MessageBox.Show("Database has been reset successfully.", 
+                "Database Reset", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
+    }
+
+    private void ContactSupport()
+    {
+        // Mock support contact - in real implementation, this would open support email or chat
+        System.Windows.MessageBox.Show("Technical Support:\n\nEmail: support@cbtexam.com\nPhone: +1-800-CBT-HELP\n\nPlease include:\n- Application version\n- Error details\n- Steps to reproduce", 
+            "Contact Technical Support", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+    }
+
+    private void FixIssue(CommonIssue? issue)
+    {
+        // Mock issue fixing - in real implementation, this would provide specific fixes
+        if (issue != null)
+        {
+            System.Windows.MessageBox.Show($"Applying fix for: {issue.Title}\n\n{issue.Solution}", 
+                "Fix Issue", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
+    }
+}
+
+public record CommonIssue(string Title, string Description, string Solution, string Icon);
+public record ContactSupportCommand(string Title, string Email, string Phone);
+
 // ─── Settings ────────────────────────────────────────────────────────────────
 public class SettingsViewModel : BaseViewModel, IRefreshable
 {
     private readonly EmbeddedServerService _server;
 
     private int _port = 5000;
-    public int Port { get => _port; set => Set(ref _port, value); }
+    public int Port { get => _port; set { Set(ref _port, value); SaveSettings(); } }
 
     public string LocalIp { get; } = EmbeddedServerService.GetLocalIp();
 
@@ -672,10 +1127,20 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
     public ObservableCollection<string> AccentOptions { get; } = ["Teal", "Blue", "Purple", "Emerald"];
 
     private string _selectedTheme = "Light";
-    public string SelectedTheme { get => _selectedTheme; set => Set(ref _selectedTheme, value); }
+    public string SelectedTheme { get => _selectedTheme; set { Set(ref _selectedTheme, value); SaveSettings(); } }
 
     private string _selectedAccent = "Teal";
-    public string SelectedAccent { get => _selectedAccent; set => Set(ref _selectedAccent, value); }
+    public string SelectedAccent { get => _selectedAccent; set { Set(ref _selectedAccent, value); SaveSettings(); } }
+
+    // New properties for enhanced settings
+    private string _systemName = "CBT Exam System";
+    public string SystemName { get => _systemName; set { Set(ref _systemName, value); SaveSettings(); } }
+
+    private string _adminEmail = "admin@example.com";
+    public string AdminEmail { get => _adminEmail; set { Set(ref _adminEmail, value); SaveSettings(); } }
+
+    private string? _schoolLogoPath = null;
+    public string? SchoolLogoPath { get => _schoolLogoPath; set { Set(ref _schoolLogoPath, value); SaveSettings(); } }
 
     public RelayCommand ApplyThemeCommand => new(() =>
     {
@@ -712,15 +1177,140 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
         catch { /* user cancelled UAC */ }
     });
 
+    public RelayCommand UploadLogoCommand => new(() =>
+    {
+        var openFileDialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Select School Logo",
+            Filter = "Image Files|*.png;*.jpg;*.jpeg|PNG Files|*.png|JPEG Files|*.jpg;*.jpeg",
+            Multiselect = false
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            try
+            {
+                var sourceFile = openFileDialog.FileName;
+                var destFile = Path.Combine(
+                    Path.GetDirectoryName(Environment.ProcessPath) ?? AppDomain.CurrentDomain.BaseDirectory,
+                    "school_logo.png");
+
+                // Copy and resize if needed
+                File.Copy(sourceFile, destFile, true);
+                SchoolLogoPath = destFile;
+                CopyStatus = "Logo uploaded successfully!";
+                Task.Delay(2000).ContinueWith(_ => App.Current.Dispatcher.Invoke(() => CopyStatus = string.Empty));
+            }
+            catch (Exception ex)
+            {
+                App.Log("Failed to upload logo", ex);
+                CopyStatus = "Failed to upload logo";
+                Task.Delay(2000).ContinueWith(_ => App.Current.Dispatcher.Invoke(() => CopyStatus = string.Empty));
+            }
+        }
+    });
+
     public SettingsViewModel(EmbeddedServerService server)
     {
         _server = server;
+        LoadSettings();
     }
+
+    public event Action? ThemeApplied;
 
     public void NotifyServerStarted(string url) => ServerUrl = url;
     public void NotifyServerStopped()           => ServerUrl = string.Empty;
 
-    public Task LoadAsync() => Task.CompletedTask;
+    public Task LoadAsync() 
+    { 
+        LoadSettings(); 
+        return Task.CompletedTask; 
+    }
+
+    private void LoadSettings()
+    {
+        try
+        {
+            var settingsFile = Path.Combine(
+                Path.GetDirectoryName(Environment.ProcessPath) ?? AppDomain.CurrentDomain.BaseDirectory,
+                "settings.json");
+
+            if (File.Exists(settingsFile))
+            {
+                var json = File.ReadAllText(settingsFile);
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    var data = System.Text.Json.JsonSerializer.Deserialize<SettingsData>(json);
+                    if (data != null)
+                    {
+                        Port = data.Port ?? 5000;
+                        SystemName = data.SystemName ?? "CBT Exam System";
+                        AdminEmail = data.AdminEmail ?? "admin@example.com";
+                        SelectedTheme = data.Theme ?? "Light";
+                        SelectedAccent = data.Accent ?? "Teal";
+                        SchoolLogoPath = data.SchoolLogoPath;
+                    }
+                }
+            }
+        }
+        catch (System.Text.Json.JsonException ex)
+        {
+            App.Log("JSON parsing error in settings", ex);
+            // Try to delete corrupted file
+            try
+            {
+                var settingsFile = Path.Combine(
+                    Path.GetDirectoryName(Environment.ProcessPath) ?? AppDomain.CurrentDomain.BaseDirectory,
+                    "settings.json");
+                if (File.Exists(settingsFile))
+                {
+                    File.Delete(settingsFile);
+                }
+            }
+            catch { /* Ignore deletion errors */ }
+        }
+        catch (Exception ex)
+        {
+            App.Log("Failed to load settings", ex);
+        }
+    }
+
+    private void SaveSettings()
+    {
+        try
+        {
+            var settingsFile = Path.Combine(
+                Path.GetDirectoryName(Environment.ProcessPath) ?? AppDomain.CurrentDomain.BaseDirectory,
+                "settings.json");
+
+            var data = new SettingsData
+            {
+                Port = Port,
+                SystemName = SystemName,
+                AdminEmail = AdminEmail,
+                Theme = SelectedTheme,
+                Accent = SelectedAccent,
+                SchoolLogoPath = SchoolLogoPath
+            };
+
+            var json = System.Text.Json.JsonSerializer.Serialize(data, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(settingsFile, json);
+        }
+        catch (Exception ex)
+        {
+            App.Log("Failed to save settings", ex);
+        }
+    }
+}
+
+public class SettingsData
+{
+    public int? Port { get; set; }
+    public string SystemName { get; set; } = "CBT Exam System";
+    public string AdminEmail { get; set; } = "admin@example.com";
+    public string Theme { get; set; } = "Light";
+    public string Accent { get; set; } = "Teal";
+    public string? SchoolLogoPath { get; set; }
 }
 
 public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable

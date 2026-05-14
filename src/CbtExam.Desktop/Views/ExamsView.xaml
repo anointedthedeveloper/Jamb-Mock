@@ -1,146 +1,181 @@
 <UserControl x:Class="CbtExam.Desktop.Views.ExamsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <ScrollViewer Background="{StaticResource BgBrush}">
-        <StackPanel Margin="26">
-            <Grid Margin="0,0,0,22">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <TextBlock Text="Exams" FontSize="28" FontWeight="Bold" Foreground="#111827"/>
-                    <TextBlock Text="Create, search, and manage all exam records."
-                               FontSize="14" Foreground="#64748B" Margin="0,8,0,0"/>
-                </StackPanel>
-                <Button Grid.Column="1" Command="{Binding RefreshCommand}" Style="{StaticResource PrimaryBtn}"
-                        Background="#059669" Padding="18,11" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" Margin="0,0,8,0"/>
-                        <TextBlock Text="Refresh"/>
-                    </StackPanel>
-                </Button>
-            </Grid>
+    <Grid Background="{DynamicResource BgBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="380" x:Name="DetailCol"/>
+        </Grid.ColumnDefinitions>
 
-            <Border Background="White" CornerRadius="14" BorderBrush="#E5E7EB" BorderThickness="1" Padding="18">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.06" Color="#111827"/>
-                </Border.Effect>
-                <StackPanel>
-                    <Grid Margin="0,0,0,18">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="190"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid Height="44" Margin="0,0,12,0">
-                            <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Padding="40,8,12,8"/>
-                            <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#64748B"
-                                       VerticalAlignment="Center" HorizontalAlignment="Left" Margin="14,0,0,0"/>
-                            <TextBlock Text="Search exams..." FontSize="13" Foreground="#64748B"
-                                       VerticalAlignment="Center" HorizontalAlignment="Left" Margin="40,0,0,0"
-                                       IsHitTestVisible="False"
-                                       Visibility="{Binding Search, Mode=OneWay, Converter={StaticResource EmptyStringToVis}}"/>
-                        </Grid>
-                        <ComboBox Grid.Column="1" Margin="0,0,12,0">
-                            <ComboBoxItem Content="All subjects" IsSelected="True"/>
-                        </ComboBox>
-                        <Button Grid.Column="2" Command="{Binding ToggleCreateCommand}" Style="{StaticResource PrimaryBtn}"
-                                Background="#F8FAFC" Foreground="#111827" Padding="15,10">
+        <!-- Left: exam list -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="26">
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Exams" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Create and manage exam papers with questions." FontSize="13" Foreground="#64748B" Margin="0,6,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Command="{Binding RefreshCommand}" Style="{StaticResource PrimaryBtn}"
+                                Background="#F1F5F9" Foreground="#111827" Padding="13,9" Margin="0,0,8,0">
+                            <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets"/>
+                        </Button>
+                        <Button Command="{Binding ToggleCreateCommand}" Style="{StaticResource PrimaryBtn}"
+                                Background="#047857" Padding="16,9">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="+" FontSize="16" Margin="0,0,8,0"/>
-                                <TextBlock Text="Create Exam"/>
+                                <TextBlock Text="+" FontSize="16" Margin="0,0,7,0"/>
+                                <TextBlock Text="New Exam"/>
                             </StackPanel>
                         </Button>
-                    </Grid>
+                    </StackPanel>
+                </Grid>
 
-                    <Border Visibility="{Binding ShowCreateForm, Converter={StaticResource BoolToVis}}"
-                            Background="#F8FAFC" CornerRadius="12" BorderBrush="#E5E7EB" BorderThickness="1"
-                            Padding="16" Margin="0,0,0,16">
-                        <StackPanel>
-                            <TextBlock Text="New Exam" FontSize="14" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,12"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="120"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
-                                <TextBox Grid.Column="1" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
-                                <TextBox Grid.Column="2" Text="{Binding Duration, UpdateSourceTrigger=PropertyChanged}"/>
-                            </Grid>
-                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                <CheckBox Content="Shuffle Questions" IsChecked="{Binding ShuffleQuestions}" Margin="0,0,20,0"/>
-                                <CheckBox Content="Shuffle Options" IsChecked="{Binding ShuffleOptions}"/>
-                                <Button Content="Save Exam" Command="{Binding CreateExamCommand}" Style="{StaticResource PrimaryBtn}"
-                                        Background="#0F6FEA" Padding="16,8" Margin="24,0,8,0"/>
-                                <Button Content="Cancel" Command="{Binding ToggleCreateCommand}" Style="{StaticResource PrimaryBtn}"
-                                        Background="#E5E7EB" Foreground="#111827" Padding="16,8"/>
-                                <TextBlock Text="{Binding CreateStatus, Mode=OneWay}" Foreground="{StaticResource DangerBrush}"
-                                           VerticalAlignment="Center" Margin="12,0,0,0"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
+                <!-- Search -->
+                <Grid Height="44" Margin="0,0,0,16">
+                    <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Padding="40,8,12,8"/>
+                    <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8"
+                               VerticalAlignment="Center" HorizontalAlignment="Left" Margin="14,0,0,0" IsHitTestVisible="False"/>
+                    <TextBlock Text="Search exams..." FontSize="13" Foreground="#94A3B8"
+                               VerticalAlignment="Center" HorizontalAlignment="Left" Margin="40,0,0,0"
+                               IsHitTestVisible="False"
+                               Visibility="{Binding Search, Converter={StaticResource EmptyStringToVis}}"/>
+                </Grid>
 
-                    <Border Background="#F8FAFC" CornerRadius="10,10,0,0" Height="42">
-                        <Grid>
+                <!-- Create form -->
+                <Border Visibility="{Binding ShowCreateForm, Converter={StaticResource BoolToVis}}"
+                        Background="{DynamicResource CardBrush}" CornerRadius="12" BorderBrush="#E5E7EB"
+                        BorderThickness="1" Padding="18" Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.07" Color="#111827"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="New Exam" FontSize="15" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,14"/>
+                        <Grid Margin="0,0,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="1.2*"/>
-                                <ColumnDefinition Width=".8*"/>
-                                <ColumnDefinition Width=".8*"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width=".8*"/>
+                                <ColumnDefinition Width="1.5*"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="100"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Exam Title" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
-                            <TextBlock Grid.Column="1" Text="Subject" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
-                            <TextBlock Grid.Column="2" Text="Duration" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
-                            <TextBlock Grid.Column="3" Text="Questions" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
-                            <TextBlock Grid.Column="4" Text="Status" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
-                            <TextBlock Grid.Column="5" Text="Actions" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock Text="Exam Name *" FontSize="11" Foreground="#64748B" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                                <TextBlock Text="Subject" FontSize="11" Foreground="#64748B" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                                <TextBlock Text="Year" FontSize="11" Foreground="#64748B" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Year, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3">
+                                <TextBlock Text="Duration (min)" FontSize="11" Foreground="#64748B" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Duration, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
                         </Grid>
-                    </Border>
-
-                    <Border BorderBrush="#E5E7EB" BorderThickness="0,1,0,0"
-                            Visibility="{Binding Filtered.Count, Mode=OneWay, Converter={StaticResource ZeroToVis}}">
-                        <StackPanel HorizontalAlignment="Center" Margin="0,44">
-                            <Border Width="58" Height="58" CornerRadius="29" Background="#ECFDF5" Margin="0,0,0,12">
-                                <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="24"
-                                           Foreground="#059669" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="No exams found" FontSize="15" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Create an exam here or adjust your search."
-                                       FontSize="13" Foreground="#64748B" Margin="0,6,0,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <CheckBox Content="Shuffle Questions" IsChecked="{Binding ShuffleQuestions}" Margin="0,0,20,0" FontSize="13"/>
+                            <CheckBox Content="Shuffle Options" IsChecked="{Binding ShuffleOptions}" FontSize="13"/>
                         </StackPanel>
-                    </Border>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Save Exam" Command="{Binding CreateExamCommand}"
+                                    Style="{StaticResource PrimaryBtn}" Background="#047857" Padding="16,8" Margin="0,0,8,0"/>
+                            <Button Content="Cancel" Command="{Binding ToggleCreateCommand}"
+                                    Style="{StaticResource PrimaryBtn}" Background="#F1F5F9" Foreground="#111827" Padding="16,8"/>
+                            <TextBlock Text="{Binding CreateStatus}" Foreground="{StaticResource DangerBrush}"
+                                       VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
 
-                    <ItemsControl ItemsSource="{Binding Filtered, Mode=OneWay}"
-                                  Visibility="{Binding Filtered.Count, Mode=OneWay, Converter={StaticResource IntToVis}}">
+                <!-- Table header -->
+                <Border Background="#F8FAFC" CornerRadius="8,8,0,0" Padding="16,0" Height="40">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Exam Name" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                        <TextBlock Grid.Column="1" Text="Subject" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                        <TextBlock Grid.Column="2" Text="Year" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                        <TextBlock Grid.Column="3" Text="Duration" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                        <TextBlock Grid.Column="4" Text="Questions" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                        <TextBlock Grid.Column="5" Text="Shuffle" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                        <TextBlock Grid.Column="6" Text="Actions" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                    </Grid>
+                </Border>
+
+                <!-- Empty state -->
+                <Border BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" CornerRadius="0,0,8,8"
+                        Visibility="{Binding Filtered.Count, Converter={StaticResource ZeroToVis}}">
+                    <StackPanel HorizontalAlignment="Center" Margin="0,40">
+                        <Border Width="56" Height="56" CornerRadius="28" Background="#ECFDF5" HorizontalAlignment="Center" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       Foreground="#059669" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="No exams yet" FontSize="15" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Click New Exam to create your first exam paper."
+                                   FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Exam rows -->
+                <Border BorderBrush="#E5E7EB" BorderThickness="1,0,1,1" CornerRadius="0,0,8,8"
+                        Visibility="{Binding Filtered.Count, Converter={StaticResource IntToVis}}">
+                    <ItemsControl ItemsSource="{Binding Filtered}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Grid Height="48">
+                                <Grid Height="50">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="2*"/>
                                         <ColumnDefinition Width="1.2*"/>
-                                        <ColumnDefinition Width=".8*"/>
-                                        <ColumnDefinition Width=".8*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width=".8*"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="80"/>
                                     </Grid.ColumnDefinitions>
-                                    <Border Grid.ColumnSpan="6" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1"/>
-                                    <TextBlock Text="{Binding Title, Mode=OneWay}" Margin="16,0,0,0" VerticalAlignment="Center"
-                                               FontSize="13" FontWeight="SemiBold" Foreground="#111827"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Subject, Mode=OneWay}" VerticalAlignment="Center" Foreground="#334155"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding DurationMinutes, Mode=OneWay, StringFormat='{}{0} min'}" VerticalAlignment="Center" Foreground="#334155"/>
-                                    <TextBlock Grid.Column="3" Text="{Binding QuestionCount, Mode=OneWay}" VerticalAlignment="Center" Foreground="#334155"/>
-                                    <Border Grid.Column="4" CornerRadius="6" Background="#ECFDF5" BorderBrush="#BBF7D0" BorderThickness="1"
-                                            Padding="9,4" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                        <TextBlock Text="Ready" FontSize="12" FontWeight="Bold" Foreground="#047857"/>
-                                    </Border>
+                                    <Border Grid.ColumnSpan="7" BorderBrush="#F1F5F9" BorderThickness="0,0,0,1"/>
+                                    <TextBlock Text="{Binding Title}" Margin="16,0,0,0" VerticalAlignment="Center"
+                                               FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SubjectDisplay}" VerticalAlignment="Center"
+                                               FontSize="13" Foreground="#64748B"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Year}" VerticalAlignment="Center"
+                                               FontSize="13" Foreground="#64748B"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding DurationMinutes, StringFormat='{}{0}m'}"
+                                               VerticalAlignment="Center" FontSize="13" Foreground="#64748B"/>
+                                    <TextBlock Grid.Column="4" Text="{Binding QuestionCount}" VerticalAlignment="Center"
+                                               FontSize="13" Foreground="#64748B"/>
                                     <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Border CornerRadius="4" Padding="6,3" Margin="0,0,4,0"
+                                                Visibility="{Binding ShuffleQuestions, Converter={StaticResource BoolToVis}}">
+                                            <Border.Background><SolidColorBrush Color="#DCFCE7"/></Border.Background>
+                                            <TextBlock Text="Q" FontSize="10" FontWeight="Bold" Foreground="#047857"/>
+                                        </Border>
+                                        <Border CornerRadius="4" Padding="6,3"
+                                                Visibility="{Binding ShuffleOptions, Converter={StaticResource BoolToVis}}">
+                                            <Border.Background><SolidColorBrush Color="#EFF6FF"/></Border.Background>
+                                            <TextBlock Text="O" FontSize="10" FontWeight="Bold" Foreground="#2563EB"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
                                         <Button Style="{StaticResource PrimaryBtn}" Background="#EFF6FF" Foreground="#2563EB"
-                                                Padding="8,5" Margin="0,0,5,0" ToolTip="Edit">
-                                            <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets"/>
+                                                Padding="8,5" Margin="0,0,5,0" ToolTip="Add Questions"
+                                                Command="{Binding DataContext.SelectExamCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}">
+                                            <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets"/>
                                         </Button>
                                         <Button Style="{StaticResource PrimaryBtn}" Background="#FEF2F2" Foreground="#DC2626"
                                                 Padding="8,5" ToolTip="Delete"
@@ -153,8 +188,149 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </StackPanel>
-            </Border>
-        </StackPanel>
-    </ScrollViewer>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Right: question panel for selected exam -->
+        <Border Grid.Column="1" Background="{DynamicResource CardBrush}" BorderBrush="#E5E7EB" BorderThickness="1,0,0,0"
+                Visibility="{Binding SelectedExamStr, Converter={StaticResource NonEmptyToVis}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Panel header -->
+                <Border Grid.Row="0" Padding="18,14" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{Binding SelectedExam.Title}" FontSize="15" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock FontSize="11" Foreground="#64748B" Margin="0,2,0,0">
+                                <Run Text="{Binding SelectedExam.SubjectDisplay}"/>
+                                <Run Text=" · "/>
+                                <Run Text="{Binding SelectedExam.QuestionCount}"/>
+                                <Run Text=" questions"/>
+                            </TextBlock>
+                        </StackPanel>
+                        <Button Grid.Column="1" Command="{Binding CloseDetailCommand}"
+                                Style="{StaticResource PrimaryBtn}" Background="Transparent"
+                                Foreground="#64748B" Padding="6">
+                            <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Add question form -->
+                <Border Grid.Row="1" Padding="16" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1"
+                        Background="#F8FAFC">
+                    <StackPanel>
+                        <TextBlock Text="Add Question" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="#64748B" Margin="0,0,0,10"/>
+                        <TextBox Text="{Binding QText, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True" Height="52" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding Opt1, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,4,0"/>
+                            <TextBox Grid.Column="1" Text="{Binding Opt2, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="4,0,0,0"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding Opt3, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,4,0"/>
+                            <TextBox Grid.Column="1" Text="{Binding Opt4, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="4,0,0,0"/>
+                        </Grid>
+                        <TextBox Text="{Binding Correct, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,0,10"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Content="+ Add" Command="{Binding AddQuestionCommand}"
+                                    Style="{StaticResource PrimaryBtn}" Background="#047857" Padding="14,7"/>
+                            <Button Grid.Column="1" Content="⬆ Bulk JSON" Command="{Binding ShowBulkCommand}"
+                                    Style="{StaticResource PrimaryBtn}" Background="#F1F5F9"
+                                    Foreground="#111827" Padding="12,7" Margin="8,0,0,0"/>
+                        </Grid>
+                        <!-- Bulk JSON area -->
+                        <Border Visibility="{Binding ShowBulk, Converter={StaticResource BoolToVis}}"
+                                Margin="0,10,0,0">
+                            <StackPanel>
+                                <TextBox Text="{Binding JsonImport, UpdateSourceTrigger=PropertyChanged}"
+                                         AcceptsReturn="True" Height="70" TextWrapping="Wrap"
+                                         FontFamily="Consolas" FontSize="11" Margin="0,0,0,8"/>
+                                <Button Content="Import JSON" Command="{Binding ImportJsonCommand}"
+                                        Style="{StaticResource PrimaryBtn}" Background="#2563EB" Padding="14,7"/>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Text="{Binding QStatus}" FontSize="11" Margin="0,8,0,0"
+                                   Foreground="{Binding QSuccess, Converter={StaticResource BoolToColor}}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Question list -->
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,0,16">
+                        <Border Padding="16,10" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1"
+                                Visibility="{Binding ExamQuestions.Count, Converter={StaticResource ZeroToVis}}">
+                            <TextBlock Text="No questions yet. Add one above." FontSize="12"
+                                       Foreground="#94A3B8" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding ExamQuestions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="14,10" BorderBrush="#F1F5F9" BorderThickness="0,0,0,1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="26" Height="26" CornerRadius="13" Background="#EFF6FF"
+                                                    Margin="0,0,10,0" VerticalAlignment="Top">
+                                                <TextBlock Text="{Binding QuestionNumber}" FontSize="11" FontWeight="Bold"
+                                                           Foreground="#2563EB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Text}" FontSize="12" TextWrapping="Wrap"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,4"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="✓ " Foreground="#16A34A" FontSize="11"/>
+                                                    <TextBlock Text="{Binding CorrectAnswer}" Foreground="#16A34A"
+                                                               FontSize="11" FontWeight="SemiBold"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <Button Grid.Column="2" Style="{StaticResource PrimaryBtn}"
+                                                    Background="Transparent" Foreground="#DC2626" Padding="6,4"
+                                                    ToolTip="Delete question"
+                                                    Command="{Binding DataContext.DeleteQuestionCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

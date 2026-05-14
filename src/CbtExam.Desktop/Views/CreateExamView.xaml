@@ -12,9 +12,13 @@
                     <TextBlock Text="Set up a new exam and add questions." FontSize="13"
                                Foreground="{StaticResource TextSecondaryBrush}" Margin="0,3,0,0"/>
                 </StackPanel>
-                <Button Grid.Column="1" Content="↺  Start Over" Command="{Binding ResetCommand}"
-                        Style="{StaticResource PrimaryBtn}" Background="#F1F5F9"
-                        Foreground="{StaticResource TextPrimaryBrush}" Padding="14,8" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="↺  Start Over" Command="{Binding ResetCommand}"
+                            Style="{StaticResource PrimaryBtn}" Background="#F1F5F9"
+                            Foreground="{StaticResource TextPrimaryBrush}" Padding="14,8" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <CheckBox Content="Advanced Mode" IsChecked="{Binding AdvancedMode}" FontSize="13"
+                              Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
             </Grid>
 
             <!-- Status banner -->
@@ -95,9 +99,121 @@
                                   FontSize="13"/>
                     </StackPanel>
 
-                    <Button Content="💾  Save Exam" Command="{Binding SaveExamCommand}"
-                            Style="{StaticResource PrimaryBtn}" Padding="20,9" HorizontalAlignment="Left"
-                            IsEnabled="{Binding ExamCreated, Converter={StaticResource InvBool}}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Button Content="Save Exam" Command="{Binding SaveExamCommand}"
+                                Style="{StaticResource PrimaryBtn}" Background="#047857" Padding="16,8" Margin="0,0,8,0"/>
+                        <Button Content="Cancel" Command="{Binding ResetCommand}"
+                                Style="{StaticResource PrimaryBtn}" Background="#F1F5F9" Foreground="{StaticResource TextPrimaryBrush}" Padding="16,8"/>
+                        <TextBlock Text="{Binding Status}" Foreground="{StaticResource DangerBrush}"
+                                   VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Advanced Mode: 4 Subjects Configuration -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,20" Padding="20"
+                    Visibility="{Binding AdvancedMode, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Border Width="26" Height="26" CornerRadius="13" Background="{StaticResource AccentBrush}" Margin="0,0,10,0">
+                            <TextBlock Text="2" Foreground="White" FontWeight="Bold" FontSize="13"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Advanced Mode: 4 Subjects" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Subject 1 -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Subject 1" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedSubject1, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Years (e.g., 2010-2022)" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding YearRange1, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Questions" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding QuestionCount1, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Subject 2 -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Subject 2" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedSubject2, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Years (e.g., 2010-2022)" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding YearRange2, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Questions" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding QuestionCount2, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Subject 3 -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Subject 3" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedSubject3, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Years (e.g., 2010-2022)" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding YearRange3, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Questions" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding QuestionCount3, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Subject 4 -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Subject 4" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedSubject4, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Years (e.g., 2010-2022)" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding YearRange4, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Questions" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding QuestionCount4, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Button Content="Generate Advanced Exam" Command="{Binding GenerateExamCommand}"
+                                Style="{StaticResource PrimaryBtn}" Background="#047857" Padding="16,8" Margin="0,0,8,0"/>
+                        <Button Content="Cancel" Command="{Binding ResetCommand}"
+                                Style="{StaticResource PrimaryBtn}" Background="#F1F5F9" Foreground="{StaticResource TextPrimaryBrush}" Padding="16,8"/>
+                        <TextBlock Text="{Binding Status}" Foreground="{Binding StatusOk, Converter={StaticResource BoolToColor}}"
+                                   VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
