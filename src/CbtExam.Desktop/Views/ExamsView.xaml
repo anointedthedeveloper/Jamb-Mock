@@ -195,14 +195,14 @@
         <!-- Right: Detail panel for selected exam (Read-only questions list) -->
         <Border Grid.Column="1" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0"
                 Visibility="{Binding SelectedExamStr, Converter={StaticResource NonEmptyToVis}}">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Opacity="0.05" Color="#000000"/>
+            </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="12" ShadowDepth="0" Opacity="0.05" Color="#000000"/>
-                </Border.Effect>
 
                 <!-- Panel header -->
                 <Border Grid.Row="0" Padding="20,24" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
