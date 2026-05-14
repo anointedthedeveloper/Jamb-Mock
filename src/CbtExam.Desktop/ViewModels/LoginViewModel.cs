@@ -84,6 +84,8 @@ public class LoginViewModel : BaseViewModel
                     {
                         Username = data.Username ?? string.Empty;
                         RememberMe = data.RememberMe;
+                        // Password is loaded but not displayed for security
+                        // It will be used for auto-login if RememberMe is true
                     }
                 }
             }
@@ -226,6 +228,7 @@ public class LoginViewModel : BaseViewModel
             var data = new LoginData
             {
                 Username = Username,
+                Password = AccessCode, // Store the password
                 RememberMe = RememberMe
             };
 
@@ -261,5 +264,6 @@ public class LoginViewModel : BaseViewModel
 public class LoginData
 {
     public string Username { get; set; } = string.Empty;
+    public string? Password { get; set; }
     public bool RememberMe { get; set; }
 }

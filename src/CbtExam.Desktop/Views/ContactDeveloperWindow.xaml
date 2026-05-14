@@ -1,0 +1,198 @@
+<Window x:Class="CbtExam.Desktop.Views.ContactDeveloperWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Contact Developer" Height="450" Width="500"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="TextMain" Color="#18181B"/>
+        <SolidColorBrush x:Key="TextSub" Color="#71717A"/>
+        <SolidColorBrush x:Key="FieldBg" Color="White"/>
+        <SolidColorBrush x:Key="FieldBorder" Color="#E4E4E7"/>
+    </Window.Resources>
+
+    <Border Background="White" CornerRadius="16" BorderThickness="1" BorderBrush="#E4E4E7">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" Color="Black" Opacity="0.15" ShadowDepth="10"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#064E3B" CornerRadius="16,16,0,0" Padding="24,20">
+                <Grid>
+                    <TextBlock Text="Contact Developer" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                    <Button Width="30" Height="30" Background="Transparent" BorderThickness="0" 
+                            HorizontalAlignment="Right" VerticalAlignment="Top" Click="CloseButton_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="Transparent" CornerRadius="15">
+                                    <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="14" 
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#EF4444"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="32,32,32,32">
+                    <TextBlock Text="Need help? Get in touch with the developer" 
+                               FontSize="14" Foreground="{DynamicResource TextSub}" 
+                               Margin="0,0,0,24" TextWrapping="Wrap"/>
+
+                <!-- WhatsApp 1 -->
+                <Border Background="#F0FDF4" CornerRadius="12" Padding="20" Margin="0,0,0,16" 
+                        BorderThickness="1" BorderBrush="#10B981" Cursor="Hand">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#DCFCE7"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="48" Height="48" CornerRadius="12" Background="#10B981" 
+                                Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE8B1;" FontFamily="Segoe MDL2 Assets" FontSize="20" 
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="WhatsApp" FontSize="14" FontWeight="SemiBold" 
+                                       Foreground="#064E3B" Margin="0,0,0,4"/>
+                            <TextBlock Text="+234 810 120 9470" FontSize="13" 
+                                       Foreground="{DynamicResource TextSub}"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Background="Transparent" BorderThickness="0" 
+                                HorizontalAlignment="Right" VerticalAlignment="Center" Click="WhatsApp1_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#10B981" CornerRadius="8" Padding="12,8">
+                                        <TextBlock Text="Chat" FontSize="12" FontWeight="SemiBold" 
+                                                   Foreground="White"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- WhatsApp 2 -->
+                <Border Background="#F0FDF4" CornerRadius="12" Padding="20" Margin="0,0,0,16" 
+                        BorderThickness="1" BorderBrush="#10B981" Cursor="Hand">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#DCFCE7"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="48" Height="48" CornerRadius="12" Background="#10B981" 
+                                Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE8B1;" FontFamily="Segoe MDL2 Assets" FontSize="20" 
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="WhatsApp" FontSize="14" FontWeight="SemiBold" 
+                                       Foreground="#064E3B" Margin="0,0,0,4"/>
+                            <TextBlock Text="+234 901 647 1351" FontSize="13" 
+                                       Foreground="{DynamicResource TextSub}"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Background="Transparent" BorderThickness="0" 
+                                HorizontalAlignment="Right" VerticalAlignment="Center" Click="WhatsApp2_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#10B981" CornerRadius="8" Padding="12,8">
+                                        <TextBlock Text="Chat" FontSize="12" FontWeight="SemiBold" 
+                                                   Foreground="White"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Email -->
+                <Border Background="#EFF6FF" CornerRadius="12" Padding="20" Margin="0,0,0,16" 
+                        BorderThickness="1" BorderBrush="#3B82F6" Cursor="Hand">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#DBEAFE"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="48" Height="48" CornerRadius="12" Background="#3B82F6" 
+                                Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="20" 
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Email" FontSize="14" FontWeight="SemiBold" 
+                                       Foreground="#1E40AF" Margin="0,0,0,4"/>
+                            <TextBlock Text="anointedthedeveloper@gmail.com" FontSize="13" 
+                                       Foreground="{DynamicResource TextSub}"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Background="Transparent" BorderThickness="0" 
+                                HorizontalAlignment="Right" VerticalAlignment="Center" Click="Email_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#3B82F6" CornerRadius="8" Padding="12,8">
+                                        <TextBlock Text="Send" FontSize="12" FontWeight="SemiBold" 
+                                                   Foreground="White"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Branding -->
+                <TextBlock Text="Powered by Anobyte Technologies" 
+                           FontSize="12" FontWeight="SemiBold" 
+                           Foreground="{DynamicResource TextSub}" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,16,0,0" Opacity="0.7"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</Window>

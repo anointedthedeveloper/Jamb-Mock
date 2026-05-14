@@ -45,6 +45,16 @@ public partial class LoginWindow : Window
         }
     }
 
+    private void CodeBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+        _isUserTypingPassword = true;
+    }
+
+    private void CodeBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        // Don't reset _isUserTypingPassword here - we want to remember if user has typed
+    }
+
     private void VisibleCodeBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (DataContext is LoginViewModel vm && _isPasswordVisible)
@@ -55,7 +65,8 @@ public partial class LoginWindow : Window
 
     private void TogglePasswordBtn_Click(object sender, RoutedEventArgs e)
     {
-        if (!_isUserTypingPassword && CodeBox.Password.Length > 0)
+        // Check if password was saved (loaded from credentials) and user hasn't typed anything new
+        if (!_isUserTypingPassword && !string.IsNullOrEmpty(CodeBox.Password))
         {
             MessageBox.Show("For security reasons, saved credentials cannot be revealed. Please clear the field to enter a new password.", "Security", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
@@ -67,14 +78,14 @@ public partial class LoginWindow : Window
             VisibleCodeBox.Text = CodeBox.Password;
             CodeBox.Visibility = Visibility.Collapsed;
             VisibleCodeBox.Visibility = Visibility.Visible;
-            TogglePasswordIcon.Text = "\uE8D4"; // Hide icon
+            TogglePasswordIcon.Text = "\uE8D4"; // Hide icon (crossed eye)
         }
         else
         {
             CodeBox.Password = VisibleCodeBox.Text;
             VisibleCodeBox.Visibility = Visibility.Collapsed;
             CodeBox.Visibility = Visibility.Visible;
-            TogglePasswordIcon.Text = "\uE18B"; // Reveal icon
+            TogglePasswordIcon.Text = "\uE18B"; // Reveal icon (View)
         }
     }
 
@@ -118,14 +129,8 @@ public partial class LoginWindow : Window
 
     private void ContactDeveloper_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://wa.me/2348101209470",
-                UseShellExecute = true
-            });
-        }
-        catch { }
+        var contactWindow = new ContactDeveloperWindow();
+        contactWindow.Owner = this;
+        contactWindow.ShowDialog();
     }
 }

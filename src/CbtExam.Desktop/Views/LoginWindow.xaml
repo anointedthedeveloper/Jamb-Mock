@@ -153,11 +153,12 @@
 
         <Style x:Key="LoginButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontSize" Value="18"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="0,18"/>
+            <Setter Property="Padding" Value="0,24"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="MinHeight" Value="60"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -168,12 +169,12 @@
                                     <TranslateTransform x:Name="btnTranslate" Y="0"/>
                                 </TransformGroup>
                             </Grid.RenderTransform>
-                            <Border x:Name="bdShadow" Background="Transparent" CornerRadius="8">
+                            <Border x:Name="bdShadow" Background="Transparent" CornerRadius="4">
                                 <Border.Effect>
                                     <DropShadowEffect x:Name="btnShadow" BlurRadius="10" ShadowDepth="4" Direction="270" Color="#059669" Opacity="0.3"/>
                                 </Border.Effect>
                             </Border>
-                            <Border x:Name="bdBase" CornerRadius="8">
+                            <Border x:Name="bdBase" CornerRadius="4">
                                 <Border.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                         <GradientStop Color="#10B981" Offset="0"/>
@@ -181,7 +182,7 @@
                                     </LinearGradientBrush>
                                 </Border.Background>
                             </Border>
-                            <Border x:Name="bdHover" CornerRadius="8" Opacity="0">
+                            <Border x:Name="bdHover" CornerRadius="4" Opacity="0">
                                 <Border.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                         <GradientStop Color="#10B981" Offset="0"/>
@@ -273,20 +274,44 @@
             <Setter Property="Foreground" Value="#A1A1AA"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="12">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" x:Name="BtnBorder">
+                            <Border.Effect>
+                                <DropShadowEffect x:Name="BtnShadow" BlurRadius="0" ShadowDepth="0" Color="#10B981" Opacity="0"/>
+                            </Border.Effect>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="BtnBorder" Storyboard.TargetProperty="Background.Color" To="#10B981" Duration="0:0:0.2"/>
+                                            <ColorAnimation Storyboard.TargetProperty="Foreground.Color" To="White" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="BtnShadow" Storyboard.TargetProperty="BlurRadius" To="8" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="BtnShadow" Storyboard.TargetProperty="Opacity" To="0.3" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="BtnBorder" Storyboard.TargetProperty="Background.Color" To="Transparent" Duration="0:0:0.2"/>
+                                            <ColorAnimation Storyboard.TargetProperty="Foreground.Color" To="#A1A1AA" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="BtnShadow" Storyboard.TargetProperty="BlurRadius" To="0" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="BtnShadow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#10B981"/>
-                </Trigger>
-            </Style.Triggers>
         </Style>
 
         <Style x:Key="CloseButtonStyle" TargetType="Button">
@@ -325,9 +350,48 @@
 
             <!-- Left Pane (Dark Green) -->
             <Grid Grid.Column="0">
-                <Canvas Opacity="0.3">
+                <Canvas Opacity="0.3" ClipToBounds="True">
                     <Path Data="M-100,300 C200,400 300,100 600,200" Stroke="#10B981" StrokeThickness="2" Opacity="0.5"/>
                     <Path Data="M-100,350 C250,450 350,150 650,250" Stroke="#059669" StrokeThickness="1" Opacity="0.3"/>
+                    
+                    <Ellipse Width="100" Height="100" Fill="#10B981" Opacity="0.1" Canvas.Left="50" Canvas.Top="50">
+                        <Ellipse.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)" From="50" To="400" Duration="0:0:20" AutoReverse="True"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)" From="50" To="300" Duration="0:0:25" AutoReverse="True"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+                    
+                    <Ellipse Width="150" Height="150" Fill="#059669" Opacity="0.1" Canvas.Left="400" Canvas.Top="450">
+                        <Ellipse.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)" From="450" To="100" Duration="0:0:22" AutoReverse="True"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)" From="400" To="100" Duration="0:0:18" AutoReverse="True"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+                    
+                    <Ellipse Width="80" Height="80" Fill="#34D399" Opacity="0.15" Canvas.Left="250" Canvas.Top="200">
+                        <Ellipse.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)" From="200" To="500" Duration="0:0:15" AutoReverse="True"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.15" To="0.05" Duration="0:0:5" AutoReverse="True"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
                 </Canvas>
                 
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="40,0">
@@ -340,7 +404,7 @@
                     
                     <TextBlock Text="CBT Mock Exam System" FontSize="32" FontWeight="Bold" 
                                Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                    <TextBlock Text="Secure Administrator Portal" FontSize="16" FontWeight="SemiBold"
+                    <TextBlock Text="" FontSize="16" FontWeight="SemiBold"
                                Foreground="#10B981" HorizontalAlignment="Center" Margin="0,0,0,40"/>
                                
                     <Border Width="40" Height="2" Background="#10B981" HorizontalAlignment="Center" Margin="0,0,0,40"/>
@@ -386,22 +450,109 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
+
+                        <Border x:Name="CarouselItem3" Background="#022C22" CornerRadius="12" Padding="20" BorderThickness="1" BorderBrush="#065F46" Opacity="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="32" Height="32" CornerRadius="8" Background="#064E3B" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="15,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Real-time Sync" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Data syncs automatically when" FontSize="12" Foreground="#A1A1AA"/>
+                                    <TextBlock Text="connection is restored." FontSize="12" Foreground="#A1A1AA"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border x:Name="CarouselItem4" Background="#022C22" CornerRadius="12" Padding="20" BorderThickness="1" BorderBrush="#065F46" Opacity="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="32" Height="32" CornerRadius="8" Background="#064E3B" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="15,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Encrypted Storage" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4"/>
+                                    <TextBlock Text="All data is encrypted using" FontSize="12" Foreground="#A1A1AA"/>
+                                    <TextBlock Text="military-grade encryption." FontSize="12" Foreground="#A1A1AA"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border x:Name="CarouselItem5" Background="#022C22" CornerRadius="12" Padding="20" BorderThickness="1" BorderBrush="#065F46" Opacity="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="32" Height="32" CornerRadius="8" Background="#064E3B" Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE897;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="15,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Multi-device Support" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Access from any device with" FontSize="12" Foreground="#A1A1AA"/>
+                                    <TextBlock Text="your credentials." FontSize="12" Foreground="#A1A1AA"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
                         <Grid.Triggers>
                             <EventTrigger RoutedEvent="Loaded">
                                 <BeginStoryboard>
                                     <Storyboard RepeatBehavior="Forever">
+                                        <!-- Item 1 to 2 -->
                                         <DoubleAnimation Storyboard.TargetName="CarouselItem1" Storyboard.TargetProperty="Opacity" From="1" To="0" BeginTime="0:0:4" Duration="0:0:0.5"/>
                                         <DoubleAnimation Storyboard.TargetName="CarouselItem2" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:4" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot1" Storyboard.TargetProperty="Opacity" From="1" To="0.3" BeginTime="0:0:4" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot2" Storyboard.TargetProperty="Opacity" From="0.3" To="1" BeginTime="0:0:4" Duration="0:0:0.5"/>
                                         
-                                        <DoubleAnimation Storyboard.TargetName="CarouselItem2" Storyboard.TargetProperty="Opacity" From="1" To="0" BeginTime="0:0:9" Duration="0:0:0.5"/>
-                                        <DoubleAnimation Storyboard.TargetName="CarouselItem1" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:9" Duration="0:0:0.5"/>
+                                        <!-- Item 2 to 3 -->
+                                        <DoubleAnimation Storyboard.TargetName="CarouselItem2" Storyboard.TargetProperty="Opacity" From="1" To="0" BeginTime="0:0:8" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="CarouselItem3" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:8" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot2" Storyboard.TargetProperty="Opacity" From="1" To="0.3" BeginTime="0:0:8" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot3" Storyboard.TargetProperty="Opacity" From="0.3" To="1" BeginTime="0:0:8" Duration="0:0:0.5"/>
                                         
-                                        <DoubleAnimation Storyboard.TargetName="CarouselItem1" Storyboard.TargetProperty="Opacity" To="1" BeginTime="0:0:10" Duration="0:0:0"/>
+                                        <!-- Item 3 to 4 -->
+                                        <DoubleAnimation Storyboard.TargetName="CarouselItem3" Storyboard.TargetProperty="Opacity" From="1" To="0" BeginTime="0:0:12" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="CarouselItem4" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:12" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot3" Storyboard.TargetProperty="Opacity" From="1" To="0.3" BeginTime="0:0:12" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot4" Storyboard.TargetProperty="Opacity" From="0.3" To="1" BeginTime="0:0:12" Duration="0:0:0.5"/>
+                                        
+                                        <!-- Item 4 to 5 -->
+                                        <DoubleAnimation Storyboard.TargetName="CarouselItem4" Storyboard.TargetProperty="Opacity" From="1" To="0" BeginTime="0:0:16" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="CarouselItem5" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:16" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot4" Storyboard.TargetProperty="Opacity" From="1" To="0.3" BeginTime="0:0:16" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot5" Storyboard.TargetProperty="Opacity" From="0.3" To="1" BeginTime="0:0:16" Duration="0:0:0.5"/>
+                                        
+                                        <!-- Item 5 to 1 -->
+                                        <DoubleAnimation Storyboard.TargetName="CarouselItem5" Storyboard.TargetProperty="Opacity" From="1" To="0" BeginTime="0:0:20" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="CarouselItem1" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:20" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot5" Storyboard.TargetProperty="Opacity" From="1" To="0.3" BeginTime="0:0:20" Duration="0:0:0.5"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot1" Storyboard.TargetProperty="Opacity" From="0.3" To="1" BeginTime="0:0:20" Duration="0:0:0.5"/>
+                                        
+                                        <!-- Maintain state at end of loop -->
+                                        <DoubleAnimation Storyboard.TargetName="CarouselItem1" Storyboard.TargetProperty="Opacity" To="1" BeginTime="0:0:21" Duration="0:0:0"/>
+                                        <DoubleAnimation Storyboard.TargetName="Dot1" Storyboard.TargetProperty="Opacity" To="1" BeginTime="0:0:21" Duration="0:0:0"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </EventTrigger>
                         </Grid.Triggers>
                     </Grid>
+
+                    <!-- Carousel Ticker -->
+                    <StackPanel x:Name="CarouselTicker" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                        <Ellipse x:Name="Dot1" Width="8" Height="8" Fill="#10B981" Margin="4,0" Opacity="1"/>
+                        <Ellipse x:Name="Dot2" Width="8" Height="8" Fill="#10B981" Margin="4,0" Opacity="0.3"/>
+                        <Ellipse x:Name="Dot3" Width="8" Height="8" Fill="#10B981" Margin="4,0" Opacity="0.3"/>
+                        <Ellipse x:Name="Dot4" Width="8" Height="8" Fill="#10B981" Margin="4,0" Opacity="0.3"/>
+                        <Ellipse x:Name="Dot5" Width="8" Height="8" Fill="#10B981" Margin="4,0" Opacity="0.3"/>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
 
@@ -454,7 +605,7 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Margin="0,0,0,45">
-                            <TextBlock Text="Admin Sign In" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextMain}" Margin="0,0,0,8"/>
+                            <TextBlock Text="Sign In" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextMain}" Margin="0,0,0,8"/>
                             <TextBlock Text="Use your credentials to access the system" FontSize="14" Foreground="{DynamicResource TextSub}"/>
                         </StackPanel>
 
@@ -480,12 +631,41 @@
 
                         <Grid Margin="0,0,0,8">
                             <TextBlock Text="Access Code" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextMain}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <Button Background="Transparent" BorderThickness="0" Foreground="#10B981" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="13" Cursor="Hand">
+                            <Button x:Name="ForgotCodeBtn" Background="Transparent" BorderThickness="0" Foreground="#10B981" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="13" Cursor="Hand" Click="ContactDeveloper_Click">
                                 <TextBlock Text="Forgot access code?"/>
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <TextBlock Text="Forgot access code?" Foreground="#10B981" x:Name="ForgotText">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
+                                                            <Setter Property="TextDecorations" Value="Underline"/>
+                                                            <DataTrigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation Storyboard.TargetProperty="Foreground.Color" To="#059669" Duration="0:0:0.2"/>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </DataTrigger.EnterActions>
+                                                            <DataTrigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation Storyboard.TargetProperty="Foreground.Color" To="#10B981" Duration="0:0:0.2"/>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </DataTrigger.ExitActions>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </ControlTemplate>
+                                </Button.Template>
                             </Button>
                         </Grid>
                         <Grid Margin="0,0,0,20">
-                            <PasswordBox x:Name="CodeBox" PasswordChanged="PasswordBox_PasswordChanged"
+                            <PasswordBox x:Name="CodeBox" PasswordChanged="PasswordBox_PasswordChanged" GotFocus="CodeBox_GotFocus" LostFocus="CodeBox_LostFocus"
                                          Style="{StaticResource PasswordFieldStyle}"/>
                             <TextBox x:Name="VisibleCodeBox" Text="{Binding AccessCode, UpdateSourceTrigger=PropertyChanged}" 
                                      Style="{StaticResource InputFieldStyle}" Visibility="Collapsed" TextChanged="VisibleCodeBox_TextChanged"/>
@@ -493,7 +673,7 @@
                                        HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12,0,0,0" IsHitTestVisible="False"/>
                             <Button x:Name="TogglePasswordBtn" Style="{StaticResource RevealButtonStyle}" 
                                     HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" Click="TogglePasswordBtn_Click">
-                                <TextBlock x:Name="TogglePasswordIcon" Text="&#xE18B;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                <TextBlock x:Name="TogglePasswordIcon" Text="&#xE18B;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                             </Button>
                         </Grid>
 
@@ -529,7 +709,7 @@
                                                 <RotateTransform Angle="0"/>
                                             </TextBlock.RenderTransform>
                                         </TextBlock>
-                                        <TextBlock x:Name="ArrowIcon" Text="&#xE72A;" FontFamily="Segoe MDL2 Assets" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <TextBlock x:Name="ArrowIcon" Text="&#xE8A0;" FontFamily="Segoe MDL2 Assets" Margin="0,0,12,0" VerticalAlignment="Center">
                                             <TextBlock.RenderTransform>
                                                 <TranslateTransform X="0" Y="0"/>
                                             </TextBlock.RenderTransform>
