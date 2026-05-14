@@ -84,8 +84,10 @@ public class LoginViewModel : BaseViewModel
                     {
                         Username = data.Username ?? string.Empty;
                         RememberMe = data.RememberMe;
-                        // Password is loaded but not displayed for security
-                        // It will be used for auto-login if RememberMe is true
+                        if (RememberMe && !string.IsNullOrEmpty(data.Password))
+                        {
+                            AccessCode = data.Password;
+                        }
                     }
                 }
             }
@@ -196,6 +198,7 @@ public class LoginViewModel : BaseViewModel
         else
         {
             ErrorMessage = "Invalid admin access code. Please check your credentials.";
+            App.Log($"Failed login attempt for username '{Username}': Incorrect access code.", null);
         }
 
         // Hide loading state

@@ -12,7 +12,7 @@ public partial class LoginWindow : Window
     private LoginViewModel ViewModel => (LoginViewModel)DataContext;
     private bool _isPasswordVisible = false;
     private bool _isDarkTheme = false;
-    private bool _isUserTypingPassword = false;
+    private bool _hasSavedPassword = false;
 
     public LoginWindow()
     {
@@ -25,6 +25,12 @@ public partial class LoginWindow : Window
         var app = App.Current as App;
         app?.ApplyTitleBarToWindow(this);
         UsernameTextBox?.Focus();
+
+        if (DataContext is LoginViewModel vm && !string.IsNullOrEmpty(vm.AccessCode))
+        {
+            CodeBox.Password = vm.AccessCode;
+            _hasSavedPassword = true;
+        }
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -34,9 +40,13 @@ public partial class LoginWindow : Window
 
     private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
     {
-        if (CodeBox.IsFocused) 
+        if (CodeBox.IsFocused && _hasSavedPassword) 
         {
-            _isUserTypingPassword = true;
+            // If they clear the field, it's no longer a saved password
+            if (CodeBox.Password.Length == 0)
+            {
+                _hasSavedPassword = false;
+            }
         }
 
         if (DataContext is LoginViewModel vm && !_isPasswordVisible)
@@ -47,12 +57,10 @@ public partial class LoginWindow : Window
 
     private void CodeBox_GotFocus(object sender, RoutedEventArgs e)
     {
-        _isUserTypingPassword = true;
     }
 
     private void CodeBox_LostFocus(object sender, RoutedEventArgs e)
     {
-        // Don't reset _isUserTypingPassword here - we want to remember if user has typed
     }
 
     private void VisibleCodeBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -65,8 +73,8 @@ public partial class LoginWindow : Window
 
     private void TogglePasswordBtn_Click(object sender, RoutedEventArgs e)
     {
-        // Check if password was saved (loaded from credentials) and user hasn't typed anything new
-        if (!_isUserTypingPassword && !string.IsNullOrEmpty(CodeBox.Password))
+        // Check if password was saved (loaded from credentials)
+        if (_hasSavedPassword)
         {
             MessageBox.Show("For security reasons, saved credentials cannot be revealed. Please clear the field to enter a new password.", "Security", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
@@ -78,14 +86,14 @@ public partial class LoginWindow : Window
             VisibleCodeBox.Text = CodeBox.Password;
             CodeBox.Visibility = Visibility.Collapsed;
             VisibleCodeBox.Visibility = Visibility.Visible;
-            TogglePasswordIcon.Text = "\uE8D4"; // Hide icon (crossed eye)
+            TogglePasswordIcon.Text = "\uE18B"; // Normal Eye (View)
         }
         else
         {
             CodeBox.Password = VisibleCodeBox.Text;
             VisibleCodeBox.Visibility = Visibility.Collapsed;
             CodeBox.Visibility = Visibility.Visible;
-            TogglePasswordIcon.Text = "\uE18B"; // Reveal icon (View)
+            TogglePasswordIcon.Text = "\uED1A"; // Eye Crossed (Hide)
         }
     }
 
