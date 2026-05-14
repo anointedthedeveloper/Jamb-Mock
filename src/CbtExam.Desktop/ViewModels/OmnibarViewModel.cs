@@ -9,9 +9,9 @@ namespace CbtExam.Desktop.ViewModels;
 public class OmnibarViewModel : BaseViewModel
 {
     private readonly SearchCatalogService _catalogService;
-    private readonly ICommand _closeCommand;
-    private readonly ICommand _navigateCommand;
-    private readonly ICommand _executeActionCommand;
+    private ICommand? _closeCommand;
+    private ICommand? _navigateCommand;
+    private ICommand? _executeActionCommand;
     private string _query = string.Empty;
     private ObservableCollection<SearchItemRecord> _results = new();
     private bool _isOpen = false;
@@ -84,10 +84,10 @@ public class OmnibarViewModel : BaseViewModel
         Results = new ObservableCollection<SearchItemRecord>(filtered);
     }
 
-    private void NavigateToPage(string pageKey)
+    private void NavigateToPage(string? pageKey)
     {
         // Find the main view model from MainWindow
-        if (System.Windows.Application.Current.MainWindow is MainWindow mainWindow &&
+        if (pageKey != null && System.Windows.Application.Current.MainWindow is MainWindow mainWindow &&
             mainWindow.DataContext is MainViewModel mainViewModel)
         {
             mainViewModel.NavigateCommand.Execute(pageKey);
@@ -95,8 +95,9 @@ public class OmnibarViewModel : BaseViewModel
         IsOpen = false;
     }
 
-    private void ExecuteAction(SearchItemRecord action)
+    private void ExecuteAction(SearchItemRecord? action)
     {
+        if (action == null) return;
         if (action.Action == "Theme")
         {
             if (System.Windows.Application.Current.MainWindow?.DataContext is MainViewModel mainViewModel)
