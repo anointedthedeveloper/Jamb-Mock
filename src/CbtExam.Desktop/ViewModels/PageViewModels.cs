@@ -3,6 +3,7 @@ using CbtExam.Shared.DTOs;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.IO;
+using System.Windows;
 
 namespace CbtExam.Desktop.ViewModels;
 
@@ -630,19 +631,60 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     private bool _statusOk;
     public bool StatusOk { get => _statusOk; set => Set(ref _statusOk, value); }
 
+    private string _jsonImport = string.Empty;
+    public string JsonImport { get => _jsonImport; set => Set(ref _jsonImport, value); }
+
+    public string BulkJsonTemplate => @"[
+  {
+    ""subject"": ""Mathematics"",
+    ""year"": 2024,
+    ""questionNumber"": 1,
+    ""text"": ""Solve for x: 2x + 5 = 15"",
+    ""options"": [""5"", ""10"", ""7"", ""15""],
+    ""correctAnswer"": ""5""
+  }
+]";
+
+    public ObservableCollection<string> Subjects { get; } = [];
+
     public RelayCommand RefreshCommand => new(async () => await LoadAsync());
     public RelayCommand SaveCommand => new(async () => await SaveAsync());
     public RelayCommand DeleteCommand => new(async () => await DeleteAsync());
     public RelayCommand ClearCommand => new(Clear);
-    public RelayCommand<QuestionBankDto> PickCommand => new(q => Pick(q));
-    public RelayCommand BulkUploadCommand => new(() => { Status = "Bulk upload feature coming soon!"; StatusOk = false; });
+    public RelayCommand<QuestionBankRow> PickCommand => new(q => Pick(_all.FirstOrDefault(x => x.Id == q.Id)));
+    public RelayCommand ImportJsonCommand => new(async () => await ImportJsonAsync());
+    public RelayCommand CopyTemplateCommand => new(() => { Clipboard.SetText(BulkJsonTemplate); Status = "Template copied to clipboard!"; StatusOk = true; });
 
     public async Task LoadAsync()
     {
-        // For now, we'll work with QuestionBank directly
-        // In a real implementation, this would call API
-        _all = []; // TODO: Load from API
+        var list = await api.GetQuestionBankAsync();
+        _all = list ?? [];
+        
+        var subjects = await api.GetQuestionBankSubjectsAsync();
+        Subjects.Clear();
+        subjects?.ForEach(Subjects.Add);
+
+        RebuildFilters();
         ApplyFilter();
+    }
+
+    private void RebuildFilters()
+    {
+        var prevSub = SelectedSubject;
+        var prevYear = SelectedYear;
+
+        SubjectFilters.Clear();
+        SubjectFilters.Add("All subjects");
+        foreach (var s in _all.Select(x => x.Subject).Distinct().OrderBy(x => x))
+            SubjectFilters.Add(s);
+
+        YearFilters.Clear();
+        YearFilters.Add("All years");
+        foreach (var y in _all.Select(x => x.Year).Distinct().OrderByDescending(x => x))
+            YearFilters.Add(y.ToString());
+
+        SelectedSubject = SubjectFilters.Contains(prevSub) ? prevSub : "All subjects";
+        SelectedYear = YearFilters.Contains(prevYear) ? prevYear : "All years";
     }
 
     private void ApplyFilter()
@@ -680,29 +722,41 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             string.IsNullOrWhiteSpace(OptionC) || string.IsNullOrWhiteSpace(OptionD))
         { Status = "All four options are required."; StatusOk = false; return; }
 
-        var options = new[] { OptionA, OptionB, OptionC, OptionD };
-        var correctOption = CorrectAnswer.ToUpper() switch
-        {
-            "A" => options[0],
-            "B" => options[1],
-            "C" => options[2],
-            "D" => options[3],
-            _ => options[0]
-        };
+        var options = new List<string> { OptionA, OptionB, OptionC, OptionD };
+        var dto = new QuestionBankCreateDto(Subject, Year, 0, QuestionText, options, CorrectAnswer);
 
-        // TODO: Implement API call to save question
-        Status = "Question saved successfully."; StatusOk = true;
-        Clear();
-        await LoadAsync();
+        HttpResponseMessage resp;
+        if (Selected is not null)
+            resp = await api.UpdateQuestionBankAsync(Selected.Id, dto);
+        else
+            resp = await api.AddQuestionBankAsync(dto);
+
+        if (resp.IsSuccessStatusCode)
+        {
+            Status = "Question saved successfully."; StatusOk = true;
+            Clear();
+            await LoadAsync();
+        }
+        else
+        {
+            Status = "Failed to save question."; StatusOk = false;
+        }
     }
 
     private async Task DeleteAsync()
     {
         if (Selected is null) return;
-        // TODO: Implement API call to delete question
-        Status = "Question deleted successfully."; StatusOk = true;
-        Clear();
-        await LoadAsync();
+        var resp = await api.DeleteQuestionBankAsync(Selected.Id);
+        if (resp.IsSuccessStatusCode)
+        {
+            Status = "Question deleted successfully."; StatusOk = true;
+            Clear();
+            await LoadAsync();
+        }
+        else
+        {
+            Status = "Failed to delete question."; StatusOk = false;
+        }
     }
 
     private void Pick(QuestionBankDto? q)
@@ -713,13 +767,51 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         Subject = q.Subject;
         Year = q.Year;
         
-        // Parse options from JSON (simplified for demo)
-        var options = new[] { "Option A", "Option B", "Option C", "Option D" }; // TODO: Parse from q.OptionsJson
-        OptionA = options[0];
-        OptionB = options[1];
-        OptionC = options[2];
-        OptionD = options[3];
+        try
+        {
+            var options = JsonSerializer.Deserialize<List<string>>(q.OptionsJson);
+            if (options != null && options.Count >= 4)
+            {
+                OptionA = options[0];
+                OptionB = options[1];
+                OptionC = options[2];
+                OptionD = options[3];
+            }
+        }
+        catch { /* Fallback */ }
+        
         CorrectAnswer = q.CorrectAnswer;
+    }
+
+    private async Task ImportJsonAsync()
+    {
+        if (string.IsNullOrWhiteSpace(JsonImport)) return;
+        try
+        {
+            var list = JsonSerializer.Deserialize<List<QuestionBankCreateDto>>(JsonImport, 
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+            if (list == null || list.Count == 0)
+            {
+                Status = "No questions found in JSON."; StatusOk = false; return;
+            }
+
+            var resp = await api.ImportQuestionBankAsync(list);
+            if (resp.IsSuccessStatusCode)
+            {
+                Status = $"{list.Count} questions imported successfully."; StatusOk = true;
+                JsonImport = string.Empty;
+                await LoadAsync();
+            }
+            else
+            {
+                Status = "Failed to import questions."; StatusOk = false;
+            }
+        }
+        catch
+        {
+            Status = "Invalid JSON format."; StatusOk = false;
+        }
     }
 
     private void Clear()
