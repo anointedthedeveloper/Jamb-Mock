@@ -68,27 +68,32 @@ public class DashboardViewModel(ApiClient api) : BaseViewModel, IRefreshable
 
     public async Task LoadAsync()
     {
-        var sessions = await api.GetSessionsAsync();
-        ActiveSession = sessions?.FirstOrDefault(s => s.IsActive);
-
-        if (ActiveSession is not null)
+        IsBusy = true;
+        try
         {
-            var students = await api.GetStudentsAsync(ActiveSession.Id);
-            TotalStudents  = students?.Count ?? 0;
-            SubmittedCount = students?.Count(s => s.IsSubmitted) ?? 0;
-            ActiveCount    = students?.Count(s => !s.IsSubmitted) ?? 0;
-            PausedCount    = 0;
-        }
-        else
-        {
-            TotalStudents = ActiveCount = SubmittedCount = PausedCount = 0;
-        }
+            var sessions = await api.GetSessionsAsync();
+            ActiveSession = sessions?.FirstOrDefault(s => s.IsActive);
 
-        var exams = await api.GetExamsAsync();
-        Exams.Clear();
-        exams?.ForEach(Exams.Add);
-        RebuildSubjectFilters();
-        FilterDashboardExams();
+            if (ActiveSession is not null)
+            {
+                var students = await api.GetStudentsAsync(ActiveSession.Id);
+                TotalStudents  = students?.Count ?? 0;
+                SubmittedCount = students?.Count(s => s.IsSubmitted) ?? 0;
+                ActiveCount    = students?.Count(s => !s.IsSubmitted) ?? 0;
+                PausedCount    = 0;
+            }
+            else
+            {
+                TotalStudents = ActiveCount = SubmittedCount = PausedCount = 0;
+            }
+
+            var exams = await api.GetExamsAsync();
+            Exams.Clear();
+            exams?.ForEach(Exams.Add);
+            RebuildSubjectFilters();
+            FilterDashboardExams();
+        }
+        finally { IsBusy = false; }
     }
 
     private async Task CreateExamAsync()
@@ -335,38 +340,58 @@ public class ExamsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     private string _createStatus = string.Empty;
     public string CreateStatus { get => _createStatus; set => Set(ref _createStatus, value); }
 
+    private bool _isEditing;
+    public bool IsEditing { get => _isEditing; set { Set(ref _isEditing, value); OnPropertyChanged(nameof(FormTitle)); OnPropertyChanged(nameof(SubmitButtonText)); } }
+
+    private ExamDto? _selectedExam;
+    public ExamDto? SelectedExam { get => _selectedExam; set => Set(ref _selectedExam, value); }
+
+    public string FormTitle => IsEditing ? "Edit Exam Settings" : "New Exam";
+    public string SubmitButtonText => IsEditing ? "Update Exam" : "Save Exam";
+
     public RelayCommand RefreshCommand => new(async () => await LoadAsync());
     public RelayCommand<ExamDto> DeleteCommand => new(async e => await DeleteAsync(e));
-    public RelayCommand ToggleCreateCommand => new(() => { ShowCreateForm = !ShowCreateForm; CreateStatus = string.Empty; });
-    public RelayCommand CreateExamCommand => new(async () => await CreateExamAsync());
+    public RelayCommand ToggleCreateCommand => new(() => { IsEditing = false; ShowCreateForm = !ShowCreateForm; CreateStatus = string.Empty; ClearForm(); });
+    public RelayCommand CreateExamCommand => new(async () => await SaveExamAsync());
+    public RelayCommand<ExamDto> EditCommand => new(e => StartEdit(e));
 
     public async Task LoadAsync()
     {
-        var list = await api.GetExamsAsync();
-        _all = list ?? [];
-        Exams.Clear();
-        _all.ForEach(Exams.Add);
-        FilterExams();
+        IsBusy = true;
+        try
+        {
+            var list = await api.GetExamsAsync();
+            _all = list ?? [];
+            Exams.Clear();
+            _all.ForEach(Exams.Add);
+            FilterExams();
+        }
+        finally { IsBusy = false; }
     }
 
-    private void FilterExams()
+    private void StartEdit(ExamDto? e)
     {
-        var q = Search.Trim().ToLower();
-        var result = string.IsNullOrEmpty(q)
-            ? _all
-            : _all.Where(e => e.Title.ToLower().Contains(q) || e.Subject.ToLower().Contains(q)).ToList();
-        Filtered.Clear();
-        result.ForEach(Filtered.Add);
+        if (e is null) return;
+        SelectedExam = e;
+        Title = e.Title;
+        Subject = e.Subject;
+        Duration = e.DurationMinutes;
+        ShuffleQuestions = e.ShuffleQuestions;
+        ShuffleOptions = e.ShuffleOptions;
+        IsEditing = true;
+        ShowCreateForm = true;
     }
 
-    private async Task DeleteAsync(ExamDto? exam)
+    private void ClearForm()
     {
-        if (exam is null) return;
-        await api.DeleteExamAsync(exam.Id);
-        await LoadAsync();
+        Title = Subject = string.Empty;
+        Duration = 60;
+        ShuffleQuestions = true;
+        ShuffleOptions = true;
+        SelectedExam = null;
     }
 
-    private async Task CreateExamAsync()
+    private async Task SaveExamAsync()
     {
         if (string.IsNullOrWhiteSpace(Title))
         {
@@ -374,18 +399,50 @@ public class ExamsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             return;
         }
 
-        var resp = await api.CreateExamAsync(new ExamCreateDto(Title, Subject, Duration, ShuffleQuestions, ShuffleOptions));
-        if (!resp.IsSuccessStatusCode)
+        IsBusy = true;
+        try
         {
-            CreateStatus = "Could not create exam. Ensure server is running.";
-            return;
-        }
+            HttpResponseMessage resp;
+            var dto = new ExamCreateDto(Title, Subject, Duration, ShuffleQuestions, ShuffleOptions);
+            
+            if (IsEditing && SelectedExam != null)
+                resp = await api.UpdateExamAsync(SelectedExam.Id, dto);
+            else
+                resp = await api.CreateExamAsync(dto);
 
-        Title = Subject = string.Empty;
-        Duration = 60;
-        ShowCreateForm = false;
-        CreateStatus = string.Empty;
-        await LoadAsync();
+            if (!resp.IsSuccessStatusCode)
+            {
+                CreateStatus = IsEditing ? "Could not update exam." : "Could not create exam.";
+                return;
+            }
+
+            ClearForm();
+            ShowCreateForm = false;
+            CreateStatus = string.Empty;
+            IsEditing = false;
+            await LoadAsync();
+        }
+        finally { IsBusy = false; }
+    }
+    private void FilterExams()
+    {
+        var q = Search.Trim();
+        var list = string.IsNullOrWhiteSpace(q)
+            ? _all
+            : _all.Where(e => e.Title.Contains(q, StringComparison.OrdinalIgnoreCase) || e.Subject.Contains(q, StringComparison.OrdinalIgnoreCase)).ToList();
+        Filtered.Clear();
+        foreach (var e in list) Filtered.Add(e);
+    }
+
+    private async Task DeleteAsync(ExamDto? exam)
+    {
+        if (exam is null) return;
+        var res = MessageBox.Show($"Are you sure you want to delete '{exam.Title}'?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (res == MessageBoxResult.Yes)
+        {
+            await api.DeleteExamAsync(exam.Id);
+            await LoadAsync();
+        }
     }
 }
 
@@ -658,15 +715,20 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 
     public async Task LoadAsync()
     {
-        var list = await api.GetQuestionBankAsync();
-        _all = list ?? [];
-        
-        var subjects = await api.GetQuestionBankSubjectsAsync();
-        Subjects.Clear();
-        subjects?.ForEach(Subjects.Add);
+        IsBusy = true;
+        try
+        {
+            var list = await api.GetQuestionBankAsync();
+            _all = list ?? [];
+            
+            var subjects = await api.GetQuestionBankSubjectsAsync();
+            Subjects.Clear();
+            subjects?.ForEach(Subjects.Add);
 
-        RebuildFilters();
-        ApplyFilter();
+            RebuildFilters();
+            ApplyFilter();
+        }
+        finally { IsBusy = false; }
     }
 
     private void RebuildFilters()
@@ -723,25 +785,30 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             string.IsNullOrWhiteSpace(OptionC) || string.IsNullOrWhiteSpace(OptionD))
         { Status = "All four options are required."; StatusOk = false; return; }
 
-        var options = new List<string> { OptionA, OptionB, OptionC, OptionD };
-        var dto = new QuestionBankCreateDto(Subject, Year, 0, QuestionText, options, CorrectAnswer);
-
-        HttpResponseMessage resp;
-        if (Selected is not null)
-            resp = await api.UpdateQuestionBankAsync(Selected.Id, dto);
-        else
-            resp = await api.AddQuestionBankAsync(dto);
-
-        if (resp.IsSuccessStatusCode)
+        IsBusy = true;
+        try
         {
-            Status = "Question saved successfully."; StatusOk = true;
-            Clear();
-            await LoadAsync();
+            var options = new List<string> { OptionA, OptionB, OptionC, OptionD };
+            var dto = new QuestionBankCreateDto(Subject, Year, 0, QuestionText, options, CorrectAnswer);
+
+            HttpResponseMessage resp;
+            if (Selected is not null)
+                resp = await api.UpdateQuestionBankAsync(Selected.Id, dto);
+            else
+                resp = await api.AddQuestionBankAsync(dto);
+
+            if (resp.IsSuccessStatusCode)
+            {
+                Status = "Question saved successfully."; StatusOk = true;
+                Clear();
+                await LoadAsync();
+            }
+            else
+            {
+                Status = "Failed to save question."; StatusOk = false;
+            }
         }
-        else
-        {
-            Status = "Failed to save question."; StatusOk = false;
-        }
+        finally { IsBusy = false; }
     }
 
     private async Task DeleteAsync()
@@ -1203,6 +1270,7 @@ public record ContactSupportCommand(string Title, string Email, string Phone);
 // ─── Settings ────────────────────────────────────────────────────────────────
 public class SettingsViewModel : BaseViewModel, IRefreshable
 {
+    private readonly ApiClient api;
     private readonly EmbeddedServerService _server;
 
     private int _port = 5000;
@@ -1215,6 +1283,9 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
 
     private string _copyStatus = string.Empty;
     public string CopyStatus { get => _copyStatus; set => Set(ref _copyStatus, value); }
+
+    private string _repoUrl = string.Empty;
+    public string RepoUrl { get => _repoUrl; set { Set(ref _repoUrl, value); SaveSettings(); } }
 
     public ObservableCollection<string> ThemeOptions { get; } = ["Light", "Dark"];
     public ObservableCollection<string> AccentOptions { get; } = ["Teal", "Blue", "Purple", "Emerald"];
@@ -1305,6 +1376,52 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
         }
     });
 
+    public RelayCommand DownloadRepoCommand => new(async () => await DownloadQuestionsAsync());
+
+    private async Task DownloadQuestionsAsync()
+    {
+        if (string.IsNullOrWhiteSpace(RepoUrl))
+        {
+            CopyStatus = "Please enter a valid URL.";
+            return;
+        }
+
+        IsBusy = true;
+        BusyMessage = "Downloading questions from repository...";
+        try
+        {
+            using var client = new HttpClient();
+            var json = await client.GetStringAsync(RepoUrl);
+            var questions = JsonSerializer.Deserialize<List<QuestionBankCreateDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+            if (questions == null || questions.Count == 0)
+            {
+                CopyStatus = "No questions found in repository.";
+                return;
+            }
+
+            var resp = await api.ImportQuestionBankAsync(questions);
+            if (resp.IsSuccessStatusCode)
+            {
+                CopyStatus = $"Successfully imported {questions.Count} questions!";
+            }
+            else
+            {
+                CopyStatus = "Failed to import questions to server.";
+            }
+        }
+        catch (Exception ex)
+        {
+            App.Log("Failed to download questions", ex);
+            CopyStatus = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            Task.Delay(5000).ContinueWith(_ => App.Current.Dispatcher.Invoke(() => CopyStatus = string.Empty));
+        }
+    }
+
     public RelayCommand OpenFirewallCommand => new(() =>
     {
         try
@@ -1358,8 +1475,9 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
         }
     });
 
-    public SettingsViewModel(EmbeddedServerService server)
+    public SettingsViewModel(ApiClient api, EmbeddedServerService server)
     {
+        this.api = api;
         _server = server;
         LoadSettings();
     }
@@ -1397,6 +1515,7 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
                         SelectedTheme = data.Theme ?? "Light";
                         SelectedAccent = data.Accent ?? "Teal";
                         SchoolLogoPath = data.SchoolLogoPath;
+                        RepoUrl = data.RepoUrl ?? string.Empty;
                     }
                 }
             }
@@ -1438,7 +1557,8 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
                 AdminEmail = AdminEmail,
                 Theme = SelectedTheme,
                 Accent = SelectedAccent,
-                SchoolLogoPath = SchoolLogoPath
+                SchoolLogoPath = SchoolLogoPath,
+                RepoUrl = RepoUrl
             };
 
             var json = System.Text.Json.JsonSerializer.Serialize(data, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
@@ -1459,6 +1579,7 @@ public class SettingsData
     public string Theme { get; set; } = "Light";
     public string Accent { get; set; } = "Teal";
     public string? SchoolLogoPath { get; set; }
+    public string? RepoUrl { get; set; }
 }
 
 public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
@@ -1500,8 +1621,13 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 
     public async Task LoadAsync()
     {
-        _all = await api.GetStudentRosterAsync() ?? [];
-        Filter();
+        IsBusy = true;
+        try
+        {
+            _all = await api.GetStudentRosterAsync() ?? [];
+            Filter();
+        }
+        finally { IsBusy = false; }
     }
 
     private void Filter()

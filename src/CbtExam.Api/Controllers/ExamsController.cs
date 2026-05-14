@@ -39,6 +39,20 @@ public class ExamsController(AppDbContext db) : ControllerBase
         return Ok(exam.Id);
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, ExamCreateDto dto)
+    {
+        var exam = await db.Exams.FindAsync(id);
+        if (exam is null) return NotFound();
+        exam.Title = dto.Title;
+        exam.Subject = dto.Subject;
+        exam.DurationMinutes = dto.DurationMinutes;
+        exam.ShuffleQuestions = dto.ShuffleQuestions;
+        exam.ShuffleOptions = dto.ShuffleOptions;
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

@@ -327,5 +327,13 @@
                 </ScrollViewer>
             </Grid>
         </Border>
+
+        <!-- Loading Overlay -->
+        <Border Grid.ColumnSpan="2" Background="#40FFFFFF" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="120" Height="3" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource AccentBrush}"/>
+                <TextBlock Text="{Binding BusyMessage}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,10,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

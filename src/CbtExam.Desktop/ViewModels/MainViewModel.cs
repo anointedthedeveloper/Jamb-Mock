@@ -103,7 +103,7 @@ public class MainViewModel : BaseViewModel
         Results    = new ResultsViewModel(Api);
         Reports    = new ReportsViewModel(Api);
         Notifications = new NotificationsViewModel();
-        Settings   = new SettingsViewModel(_server);
+        Settings   = new SettingsViewModel(Api, _server);
 
         _currentPage = Dashboard;
 
@@ -193,12 +193,21 @@ public class MainViewModel : BaseViewModel
     // Called from MainWindow.Loaded — auto-start on launch
     public async Task InitAsync()
     {
-        await StartServerAsync();
-        // Only load dashboard data if server actually started
-        if (ServerRunning)
+        IsBusy = true;
+        BusyMessage = "Initializing system and starting server...";
+        try
         {
-            await Dashboard.LoadAsync();
-            await Students.LoadAsync();
+            await StartServerAsync();
+            // Only load dashboard data if server actually started
+            if (ServerRunning)
+            {
+                await Dashboard.LoadAsync();
+                await Students.LoadAsync();
+            }
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 

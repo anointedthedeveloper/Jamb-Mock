@@ -26,6 +26,7 @@ public class ApiClient
     // Exams
     public Task<List<ExamDto>?> GetExamsAsync() => IsReady ? _http.GetFromJsonAsync<List<ExamDto>>("api/exams") : Task.FromResult<List<ExamDto>?>([]);
     public Task<HttpResponseMessage> CreateExamAsync(ExamCreateDto dto) => IsReady ? _http.PostAsJsonAsync("api/exams", dto) : OfflineResponse();
+    public Task<HttpResponseMessage> UpdateExamAsync(int id, ExamCreateDto dto) => IsReady ? _http.PutAsJsonAsync($"api/exams/{id}", dto) : OfflineResponse();
     public Task<HttpResponseMessage> DeleteExamAsync(int id) => IsReady ? _http.DeleteAsync($"api/exams/{id}") : OfflineResponse();
     public Task<HttpResponseMessage> AddQuestionAsync(int examId, QuestionCreateDto dto) => IsReady ? _http.PostAsJsonAsync($"api/exams/{examId}/questions", dto) : OfflineResponse();
     public Task<HttpResponseMessage> ImportQuestionsAsync(int examId, List<QuestionCreateDto> dto) => IsReady ? _http.PostAsJsonAsync($"api/exams/{examId}/questions/import", dto) : OfflineResponse();

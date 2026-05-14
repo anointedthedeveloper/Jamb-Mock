@@ -520,5 +520,31 @@
                 </ContentControl.Style>
             </ContentControl>
         </Grid>
+        
+        <!-- Global Loading Overlay -->
+        <Border Grid.ColumnSpan="2" Background="#F8FAFC" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid Width="100" Height="100" Margin="0,0,0,24">
+                    <Ellipse Stroke="{DynamicResource AccentBrush}" StrokeThickness="4" StrokeDashArray="6,2" Opacity="0.3"/>
+                    <Ellipse Stroke="{DynamicResource AccentBrush}" StrokeThickness="4" StrokeDashArray="2,10">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform x:Name="Rotator" Angle="0" CenterX="50" CenterY="50"/>
+                        </Ellipse.RenderTransform>
+                        <Ellipse.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Rotator" Storyboard.TargetProperty="Angle" From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+                    <Image Source="pack://application:,,,/Resources/jamb.png" Width="50" Height="50" RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Grid>
+                <TextBlock Text="{Binding BusyMessage}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="Please wait while we prepare your workspace..." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

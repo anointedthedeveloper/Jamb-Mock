@@ -17,6 +17,12 @@ public abstract class BaseViewModel : INotifyPropertyChanged
         OnPropertyChanged(name);
         return true;
     }
+
+    private bool _isBusy;
+    public bool IsBusy { get => _isBusy; set => Set(ref _isBusy, value); }
+
+    private string _busyMessage = "Loading...";
+    public string BusyMessage { get => _busyMessage; set => Set(ref _busyMessage, value); }
 }
 
 public class RelayCommand(Action execute, Func<bool>? canExecute = null) : ICommand
