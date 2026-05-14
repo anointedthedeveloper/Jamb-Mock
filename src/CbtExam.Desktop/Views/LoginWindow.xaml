@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:CbtExam.Desktop.ViewModels"
-        Title="CBT Exam System - Admin Login" Height="650" Width="1000"
+        Title="CBT Mock Exam System - Admin Login" Height="650" Width="1000"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -16,35 +16,62 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         
-        <!-- Premium Animated Background Gradient -->
-        <LinearGradientBrush x:Key="AppBackground" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#09090B" Offset="0.0"/>
-            <GradientStop Color="#18181B" Offset="0.4"/>
-            <GradientStop Color="#064E3B" Offset="0.8"/>
-            <GradientStop Color="#022C22" Offset="1.0"/>
-        </LinearGradientBrush>
-
+        <SolidColorBrush x:Key="PaneBg" Color="White"/>
+        <SolidColorBrush x:Key="TextMain" Color="#18181B"/>
+        <SolidColorBrush x:Key="TextSub" Color="#71717A"/>
+        <SolidColorBrush x:Key="FieldBg" Color="White"/>
+        <SolidColorBrush x:Key="FieldBorder" Color="#E4E4E7"/>
+        <SolidColorBrush x:Key="FieldFg" Color="#18181B"/>
+        
         <Style x:Key="InputFieldStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="#1AFFFFFF"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
-            <Setter Property="BorderBrush" Value="#33FFFFFF"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="15,12"/>
+            <Setter Property="Background" Value="{DynamicResource FieldBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource FieldFg}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource FieldFg}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="35,12,12,12"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{DynamicResource FieldBorder}"
+                                    BorderThickness="1" CornerRadius="8"/>
+                            <Border x:Name="ActiveBorder" BorderBrush="#10B981" BorderThickness="1" CornerRadius="8" Opacity="0"/>
                             <ScrollViewer x:Name="PART_ContentHost" Margin="0" />
-                        </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#10B981"/>
-                                <Setter Property="Background" Value="#2AFFFFFF"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -53,26 +80,54 @@
         </Style>
 
         <Style x:Key="PasswordFieldStyle" TargetType="PasswordBox">
-            <Setter Property="Background" Value="#1AFFFFFF"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
-            <Setter Property="BorderBrush" Value="#33FFFFFF"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="15,12"/>
+            <Setter Property="Background" Value="{DynamicResource FieldBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource FieldFg}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource FieldFg}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="35,12,35,12"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="PasswordBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{DynamicResource FieldBorder}"
+                                    BorderThickness="1" CornerRadius="8"/>
+                            <Border x:Name="ActiveBorder" BorderBrush="#10B981" BorderThickness="1" CornerRadius="8" Opacity="0"/>
                             <ScrollViewer x:Name="PART_ContentHost" Margin="0" />
-                        </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#10B981"/>
-                                <Setter Property="Background" Value="#2AFFFFFF"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -81,142 +136,260 @@
         </Style>
 
         <Style x:Key="LoginButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#10B981"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="0,14"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0,12"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
+                        <Grid RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <ScaleTransform x:Name="btnScale" ScaleX="1" ScaleY="1"/>
+                            </Grid.RenderTransform>
+                            <Border x:Name="bdBase" Background="#10B981" CornerRadius="8"/>
+                            <Border x:Name="bdHover" Background="#059669" CornerRadius="8" Opacity="0"/>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#059669"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="bdHover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="bdHover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="bd" Property="RenderTransform">
-                                    <Setter.Value>
-                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
-                                    </Setter.Value>
-                                </Setter>
-                                <Setter TargetName="bd" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleX" To="0.97" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleY" To="0.97" Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                             <DataTrigger Binding="{Binding IsLoggingIn}" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#3F3F46"/>
+                                <Setter TargetName="bdBase" Property="Background" Value="#A1A1AA"/>
                                 <Setter Property="Cursor" Value="Wait"/>
+                                <Setter Property="IsEnabled" Value="False"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-
     </Window.Resources>
 
-    <Grid Background="{StaticResource AppBackground}">
-        <Canvas Opacity="0.4">
-            <!-- Glowing orbs -->
-            <Ellipse Fill="#059669" Width="300" Height="300" Canvas.Left="-100" Canvas.Top="-50">
-                <Ellipse.Effect>
-                    <BlurEffect Radius="150"/>
-                </Ellipse.Effect>
-            </Ellipse>
-            <Ellipse Fill="#0284C7" Width="400" Height="400" Canvas.Right="-150" Canvas.Bottom="-100">
-                <Ellipse.Effect>
-                    <BlurEffect Radius="200"/>
-                </Ellipse.Effect>
-            </Ellipse>
-        </Canvas>
+    <!-- Main Container -->
+    <Border Background="#064E3B" CornerRadius="16" BorderThickness="0" Margin="20">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="40" Color="Black" Opacity="0.2" ShadowDepth="10"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="420"/>
+            </Grid.ColumnDefinitions>
 
-        <!-- Glassmorphism Card -->
-        <Border Width="460" VerticalAlignment="Center" HorizontalAlignment="Center"
-                Background="#1AFFFFFF" CornerRadius="20" BorderThickness="1" BorderBrush="#2AFFFFFF">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="30" Color="Black" Opacity="0.4" ShadowDepth="10"/>
-            </Border.Effect>
-
-            <Grid Margin="45,55">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <!-- Logo and Title -->
-                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,35">
-                    <Border Width="90" Height="90" CornerRadius="45" Background="White" Margin="0,0,0,20">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="20" Color="#10B981" Opacity="0.3"/>
-                        </Border.Effect>
-                        <!-- FallbackValue properly sets the logo to jamb.png! -->
-                        <Image Stretch="UniformToFill" Margin="22" 
-                               Source="{Binding SchoolLogoPath, TargetNullValue='pack://application:,,,/res/jamb.png', FallbackValue='pack://application:,,,/res/jamb.png'}">
-                        </Image>
-                    </Border>
-                    
-                    <TextBlock Text="CBT Exam System" FontSize="28" FontWeight="SemiBold" 
-                               Foreground="White" HorizontalAlignment="Center" FontFamily="Segoe UI"/>
-                    <TextBlock Text="Secure Administrator Portal" FontSize="14"
-                               Foreground="#A1A1AA" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                </StackPanel>
-
-                <!-- Error Message -->
-                <Border Grid.Row="1" Background="#3E1C1C" CornerRadius="8" Padding="12"
-                        Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}"
-                        BorderBrush="#EF4444" BorderThickness="1" Margin="0,0,0,20">
+            <!-- Theme Toggle Top Right (Absolute Positioning relative to the container) -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,20,0" Grid.Column="1" Panel.ZIndex="10">
+                <Border Background="#1E293B" CornerRadius="12" Padding="2" BorderThickness="1" BorderBrush="#334155">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="16"
-                                   Foreground="#FCA5A5" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBlock Text="{Binding ErrorMessage}" FontSize="13" TextWrapping="Wrap"
-                                   Foreground="#FECACA" VerticalAlignment="Center" Width="300"/>
+                        <Button x:Name="LightModeBtn" Background="#334155" BorderThickness="0" Foreground="White" Width="24" Height="24" Cursor="Hand" Click="ToggleTheme_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="10">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="&#xE706;" FontFamily="Segoe MDL2 Assets" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button>
+                        <Button x:Name="DarkModeBtn" Background="Transparent" BorderThickness="0" Foreground="White" Width="24" Height="24" Cursor="Hand" Click="ToggleTheme_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="10">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="&#xE708;" FontFamily="Segoe MDL2 Assets" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button>
                     </StackPanel>
                 </Border>
+                <!-- Close Button -->
+                <Button Background="Transparent" BorderThickness="0" Foreground="#A1A1AA" Width="30" Height="30" Margin="10,0,0,0" Click="CloseButton_Click" Cursor="Hand">
+                    <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Button>
+            </StackPanel>
 
-                <!-- Fields -->
-                <StackPanel Grid.Row="2" Visibility="Visible">
-                    <!-- Username Field -->
-                    <TextBlock Text="Username" Foreground="#E4E4E7" FontSize="13" FontWeight="Medium" Margin="0,0,0,8"/>
-                    <TextBox x:Name="UsernameTextBox" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
-                             Style="{StaticResource InputFieldStyle}" Margin="0,0,0,20"/>
-
-                    <!-- Password/Access Code Field -->
-                    <TextBlock Text="Access Code" Foreground="#E4E4E7" FontSize="13" FontWeight="Medium" Margin="0,0,0,8"/>
-                    <PasswordBox x:Name="CodeBox" PasswordChanged="PasswordBox_PasswordChanged"
-                                 Style="{StaticResource PasswordFieldStyle}" Margin="0,0,0,20"/>
-
-                    <CheckBox Content="Remember my credentials" IsChecked="{Binding RememberMe}"
-                              Foreground="#A1A1AA" FontSize="13" Margin="0,0,0,10"/>
+            <!-- Left Pane (Dark Green) -->
+            <Grid Grid.Column="0">
+                <Canvas Opacity="0.3">
+                    <Path Data="M-100,300 C200,400 300,100 600,200" Stroke="#10B981" StrokeThickness="2" Opacity="0.5"/>
+                    <Path Data="M-100,350 C250,450 350,150 650,250" Stroke="#059669" StrokeThickness="1" Opacity="0.3"/>
+                </Canvas>
+                
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="40,0">
+                    <Border Width="120" Height="120" CornerRadius="60" Background="White" Margin="0,0,0,30" HorizontalAlignment="Center">
+                        <Image Stretch="Uniform" Margin="20" 
+                               Source="{Binding SchoolLogoPath, TargetNullValue='pack://application:,,,/res/jamb.png', FallbackValue='pack://application:,,,/res/jamb.png'}"/>
+                    </Border>
+                    
+                    <TextBlock Text="CBT Mock Exam System" FontSize="32" FontWeight="Bold" 
+                               Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                    <TextBlock Text="Secure Administrator Portal" FontSize="16" FontWeight="SemiBold"
+                               Foreground="#10B981" HorizontalAlignment="Center" Margin="0,0,0,40"/>
+                               
+                    <Border Width="40" Height="2" Background="#10B981" HorizontalAlignment="Center" Margin="0,0,0,40"/>
+                    
+                    <TextBlock Text="Welcome back!" FontSize="20" FontWeight="SemiBold"
+                               Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                    <TextBlock Text="Please sign in to continue" FontSize="14"
+                               Foreground="#D1D5DB" HorizontalAlignment="Center"/>
+                    <TextBlock Text="accessing the admin dashboard." FontSize="14"
+                               Foreground="#D1D5DB" HorizontalAlignment="Center" Margin="0,0,0,60"/>
+                               
+                    <Border Background="#022C22" CornerRadius="12" Padding="20" BorderThickness="1" BorderBrush="#065F46" HorizontalAlignment="Center" Width="300">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Width="32" Height="32" CornerRadius="8" Background="#064E3B" Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" Margin="15,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Secure Access" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4"/>
+                                <TextBlock Text="All access is monitored and logged" FontSize="12" Foreground="#A1A1AA"/>
+                                <TextBlock Text="for your security." FontSize="12" Foreground="#A1A1AA"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </StackPanel>
-
-                <!-- Login Button -->
-                <Button Grid.Row="3" Content="Access Admin" 
-                        Style="{StaticResource LoginButtonStyle}"
-                        Command="{Binding LoginCommand}"
-                        Margin="0,25,0,0"/>
             </Grid>
-        </Border>
 
-        <!-- Close Button -->
-        <Button Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" 
-                Background="Transparent" BorderThickness="0" Foreground="#A1A1AA"
-                FontSize="16" Width="40" Height="40" 
-                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="15"
-                Click="CloseButton_Click" Cursor="Hand">
-            <Button.Style>
-                <Style TargetType="Button">
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Foreground" Value="White"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </Button.Style>
-        </Button>
-    </Grid>
+            <!-- Right Pane (Dynamic Theme) -->
+            <Border Grid.Column="1" Background="{DynamicResource PaneBg}" CornerRadius="16" Margin="0,20,20,20">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" Color="Black" Opacity="0.1" ShadowDepth="0"/>
+                </Border.Effect>
+                
+                <Grid Margin="40,50">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="0,0,0,30">
+                        <TextBlock Text="Admin Sign In" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextMain}" Margin="0,0,0,8"/>
+                        <TextBlock Text="Use your credentials to access the system" FontSize="14" Foreground="{DynamicResource TextSub}"/>
+                    </StackPanel>
+
+                    <Border Grid.Row="1" Background="#FEF2F2" CornerRadius="8" Padding="12"
+                            Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}"
+                            BorderBrush="#FECACA" BorderThickness="1" Margin="0,0,0,20">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                       Foreground="#EF4444" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding ErrorMessage}" FontSize="13" TextWrapping="Wrap"
+                                       Foreground="#991B1B" VerticalAlignment="Center" Width="260"/>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Grid.Row="2" Margin="0,0,0,25">
+                        <TextBlock Text="Username" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextMain}" Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,20">
+                            <TextBox x:Name="UsernameTextBox" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource InputFieldStyle}"/>
+                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#A1A1AA" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                        </Grid>
+
+                        <TextBlock Text="Access Code" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextMain}" Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,10">
+                            <PasswordBox x:Name="CodeBox" PasswordChanged="PasswordBox_PasswordChanged"
+                                         Style="{StaticResource PasswordFieldStyle}"/>
+                            <TextBox x:Name="VisibleCodeBox" Text="{Binding AccessCode, UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource InputFieldStyle}" Visibility="Collapsed" TextChanged="VisibleCodeBox_TextChanged"/>
+                            <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#A1A1AA" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                            <Button x:Name="TogglePasswordBtn" Background="Transparent" BorderThickness="0" Foreground="#A1A1AA" 
+                                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" Cursor="Hand" Click="TogglePasswordBtn_Click">
+                                <TextBlock x:Name="TogglePasswordIcon" Text="&#xE7B3;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                            </Button>
+                        </Grid>
+                        
+                        <Button Background="Transparent" BorderThickness="0" Foreground="#10B981" 
+                                HorizontalAlignment="Left" FontSize="13" Cursor="Hand" Margin="0,0,0,20">
+                            <TextBlock Text="Forgot access code?"/>
+                        </Button>
+
+                        <CheckBox Content="Remember this device" IsChecked="{Binding RememberMe}"
+                                  Foreground="{DynamicResource TextSub}" FontSize="13">
+                            <CheckBox.Template>
+                                <ControlTemplate TargetType="CheckBox">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="18" Height="18" BorderBrush="{DynamicResource FieldBorder}" BorderThickness="1" CornerRadius="4" Background="{DynamicResource FieldBg}" Margin="0,0,10,0">
+                                            <Path Data="M 4,9 L 8,13 L 14,4" Stretch="None" Stroke="#10B981" StrokeThickness="2" 
+                                                  Visibility="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVis}}" 
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel>
+                                            <TextBlock Text="{TemplateBinding Content}" Foreground="{DynamicResource TextMain}" FontSize="13" FontWeight="Medium"/>
+                                            <TextBlock Text="We'll remember your device, not your credentials." Foreground="{DynamicResource TextSub}" FontSize="11" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ControlTemplate>
+                            </CheckBox.Template>
+                        </CheckBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3">
+                        <Button Content="&#xE72A;  Access Admin Portal" FontFamily="Segoe MDL2 Assets"
+                                Style="{StaticResource LoginButtonStyle}"
+                                Command="{Binding LoginCommand}" Margin="0,0,0,20">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE72A;" FontFamily="Segoe MDL2 Assets" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Access Admin Portal" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                        <TextBlock Text="Need help? " FontSize="12" Foreground="{DynamicResource TextSub}"/>
+                        <Button Background="Transparent" BorderThickness="0" Foreground="#10B981" FontSize="12" Cursor="Hand">
+                            <TextBlock Text="Contact system administrator"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
 </Window>

@@ -10,15 +10,17 @@ namespace CbtExam.Desktop.Services;
 /// </summary>
 public class ApiClient
 {
-    private readonly HttpClient _http = new();
+    private HttpClient _http = new();
     public string BaseUrl => _http.BaseAddress?.ToString().TrimEnd('/') ?? string.Empty;
     private bool IsReady => _http.BaseAddress is not null;
 
     public void SetBaseUrl(string url)
     {
+        var oldHttp = _http;
+        _http = new HttpClient();
         _http.BaseAddress = new Uri(url + "/");
-        _http.DefaultRequestHeaders.Remove("X-Admin-Key");
         _http.DefaultRequestHeaders.Add("X-Admin-Key", Environment.GetEnvironmentVariable("CBT_ADMIN_KEY") ?? "admin123");
+        oldHttp?.Dispose();
     }
 
     // Exams

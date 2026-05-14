@@ -37,7 +37,8 @@ public static class ApiBootstrap
         builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
             p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddApplicationPart(typeof(ApiBootstrap).Assembly);
         builder.Services.AddSignalR();
         builder.Services.AddScoped<SnapshotExportService>();
 
