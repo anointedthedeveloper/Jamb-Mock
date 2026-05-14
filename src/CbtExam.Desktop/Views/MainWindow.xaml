@@ -292,7 +292,7 @@
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{Binding CurrentPath}" FontWeight="Bold" FontSize="26" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,24,0"/>
                         
-                        <ToggleButton x:Name="QuickActionsToggle" Background="{DynamicResource FieldBg}" Foreground="{DynamicResource TextPrimaryBrush}" BorderBrush="{DynamicResource FieldBorder}" BorderThickness="1" Padding="16,8" VerticalAlignment="Center" Cursor="Hand">
+                        <ToggleButton x:Name="QuickActionsToggle" IsChecked="{Binding IsQuickActionsOpen, Mode=TwoWay}" Background="{DynamicResource FieldBg}" Foreground="{DynamicResource TextPrimaryBrush}" BorderBrush="{DynamicResource FieldBorder}" BorderThickness="1" Padding="16,8" VerticalAlignment="Center" Cursor="Hand">
                             <ToggleButton.Template>
                                 <ControlTemplate TargetType="ToggleButton">
                                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
@@ -311,91 +311,124 @@
                             </ToggleButton.Template>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Quick Actions" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="10" VerticalAlignment="Center" FontWeight="Bold"/>
+                                <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="10" VerticalAlignment="Center" FontWeight="Bold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                            <Setter Property="RenderTransform">
+                                                <Setter.Value>
+                                                    <RotateTransform Angle="0"/>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsQuickActionsOpen}" Value="True">
+                                                    <DataTrigger.EnterActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" To="180" Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </DataTrigger.EnterActions>
+                                                    <DataTrigger.ExitActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" To="0" Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </DataTrigger.ExitActions>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </StackPanel>
                         </ToggleButton>
                         
-                        <Popup IsOpen="{Binding IsChecked, ElementName=QuickActionsToggle}" StaysOpen="False" PlacementTarget="{Binding ElementName=QuickActionsToggle}" Placement="Bottom" VerticalOffset="8">
-                            <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="4" Width="200">
+                        <Popup IsOpen="{Binding IsQuickActionsOpen}" StaysOpen="False" PlacementTarget="{Binding ElementName=QuickActionsToggle}" Placement="Bottom" VerticalOffset="8" PopupAnimation="Slide">
+                            <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="6" Width="220">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="15" ShadowDepth="4" Opacity="0.15" Direction="270" Color="Black"/>
+                                    <DropShadowEffect BlurRadius="25" ShadowDepth="8" Opacity="0.15" Direction="270" Color="Black"/>
                                 </Border.Effect>
                                 <StackPanel>
-                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Students" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="12,10" Cursor="Hand" Foreground="{DynamicResource TextPrimaryBrush}">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Students" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="14,12" Cursor="Hand" Foreground="{DynamicResource TextPrimaryBrush}">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                                                     <ContentPresenter/>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource FieldBg}"/>
+                                                        <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource NavActiveBrush}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Button.Template>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,10,0" Foreground="#10B981"/>
-                                            <TextBlock Text="Register Student" FontSize="13" FontWeight="Medium"/>
+                                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,12,0" Foreground="#10B981"/>
+                                            <TextBlock Text="Register Student" FontSize="14" FontWeight="Medium"/>
                                         </StackPanel>
                                     </Button>
                                     
-                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Questions" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="12,10" Cursor="Hand" Foreground="{DynamicResource TextPrimaryBrush}">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Questions" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="14,12" Cursor="Hand" Foreground="{DynamicResource TextPrimaryBrush}">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                                                     <ContentPresenter/>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource FieldBg}"/>
+                                                        <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource NavActiveBrush}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Button.Template>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="&#xE8D3;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,10,0" Foreground="#3B82F6"/>
-                                            <TextBlock Text="Import Questions" FontSize="13" FontWeight="Medium"/>
+                                            <TextBlock Text="&#xE8D3;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,12,0" Foreground="#3B82F6"/>
+                                            <TextBlock Text="Import Questions" FontSize="14" FontWeight="Medium"/>
                                         </StackPanel>
                                     </Button>
 
-                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Sessions" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="12,10" Cursor="Hand" Foreground="{DynamicResource TextPrimaryBrush}">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Sessions" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="14,12" Cursor="Hand" Foreground="{DynamicResource TextPrimaryBrush}">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                                                     <ContentPresenter/>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource FieldBg}"/>
+                                                        <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource NavActiveBrush}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Button.Template>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,10,0" Foreground="#F59E0B"/>
-                                            <TextBlock Text="Manage Sessions" FontSize="13" FontWeight="Medium"/>
+                                            <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,12,0" Foreground="#F59E0B"/>
+                                            <TextBlock Text="Manage Sessions" FontSize="14" FontWeight="Medium"/>
                                         </StackPanel>
                                     </Button>
                                     
-                                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="4,4"/>
+                                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="6,6"/>
                                     
-                                    <Button Command="{Binding ToggleServerCommand}" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="12,10" Cursor="Hand" Foreground="{DynamicResource TextPrimaryBrush}">
+                                    <Button Command="{Binding ToggleServerCommand}" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="14,12" Cursor="Hand" Foreground="{DynamicResource TextPrimaryBrush}">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                                                     <ContentPresenter/>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource FieldBg}"/>
+                                                        <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource NavActiveBrush}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource NavActiveFgBrush}"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Button.Template>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,10,0" Foreground="#EF4444"/>
-                                            <TextBlock Text="Toggle Server" FontSize="13" FontWeight="Medium"/>
+                                            <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,12,0" Foreground="#EF4444"/>
+                                            <TextBlock Text="Toggle Server" FontSize="14" FontWeight="Medium"/>
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
@@ -404,10 +437,10 @@
                     </StackPanel>
 
                     <!-- Live Metric Ticker -->
-                    <Border Grid.Column="1" Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16,8" Margin="40,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border Grid.Column="1" Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16,8" Margin="40,0" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="260" MaxWidth="500">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#10B981" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <TextBlock Text="{Binding LiveMetricText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" FontWeight="Medium" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding LiveMetricIcon}" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#10B981" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding LiveMetricText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" FontWeight="Medium" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
                     </Border>
 
