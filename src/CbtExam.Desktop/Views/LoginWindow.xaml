@@ -36,7 +36,11 @@
                         <Grid>
                             <Border Background="{TemplateBinding Background}"
                                     BorderBrush="{DynamicResource FieldBorder}"
-                                    BorderThickness="1" CornerRadius="8"/>
+                                    BorderThickness="1" CornerRadius="8">
+                                <Border.Effect>
+                                    <DropShadowEffect x:Name="FieldShadow" BlurRadius="0" ShadowDepth="0" Color="#10B981" Opacity="0"/>
+                                </Border.Effect>
+                            </Border>
                             <Border x:Name="ActiveBorder" BorderBrush="#10B981" BorderThickness="1" CornerRadius="8" Opacity="0"/>
                             <ScrollViewer x:Name="PART_ContentHost" Margin="0" />
                         </Grid>
@@ -62,6 +66,8 @@
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="FieldShadow" Storyboard.TargetProperty="BlurRadius" To="8" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="FieldShadow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.2"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
@@ -69,6 +75,8 @@
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="FieldShadow" Storyboard.TargetProperty="BlurRadius" To="0" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="FieldShadow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
@@ -92,7 +100,11 @@
                         <Grid>
                             <Border Background="{TemplateBinding Background}"
                                     BorderBrush="{DynamicResource FieldBorder}"
-                                    BorderThickness="1" CornerRadius="8"/>
+                                    BorderThickness="1" CornerRadius="8">
+                                <Border.Effect>
+                                    <DropShadowEffect x:Name="FieldShadow" BlurRadius="0" ShadowDepth="0" Color="#10B981" Opacity="0"/>
+                                </Border.Effect>
+                            </Border>
                             <Border x:Name="ActiveBorder" BorderBrush="#10B981" BorderThickness="1" CornerRadius="8" Opacity="0"/>
                             <ScrollViewer x:Name="PART_ContentHost" Margin="0" />
                         </Grid>
@@ -118,6 +130,8 @@
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="FieldShadow" Storyboard.TargetProperty="BlurRadius" To="8" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="FieldShadow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.2"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
@@ -125,6 +139,8 @@
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="ActiveBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="FieldShadow" Storyboard.TargetProperty="BlurRadius" To="0" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="FieldShadow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
@@ -146,10 +162,32 @@
                     <ControlTemplate TargetType="Button">
                         <Grid RenderTransformOrigin="0.5,0.5">
                             <Grid.RenderTransform>
-                                <ScaleTransform x:Name="btnScale" ScaleX="1" ScaleY="1"/>
+                                <TransformGroup>
+                                    <ScaleTransform x:Name="btnScale" ScaleX="1" ScaleY="1"/>
+                                    <TranslateTransform x:Name="btnTranslate" Y="0"/>
+                                </TransformGroup>
                             </Grid.RenderTransform>
-                            <Border x:Name="bdBase" Background="#10B981" CornerRadius="8"/>
-                            <Border x:Name="bdHover" Background="#059669" CornerRadius="8" Opacity="0"/>
+                            <Border x:Name="bdShadow" Background="Transparent" CornerRadius="8">
+                                <Border.Effect>
+                                    <DropShadowEffect x:Name="btnShadow" BlurRadius="10" ShadowDepth="4" Direction="270" Color="#059669" Opacity="0.3"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="bdBase" CornerRadius="8">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#10B981" Offset="0"/>
+                                        <GradientStop Color="#059669" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+                            <Border x:Name="bdHover" CornerRadius="8" Opacity="0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#34D399" Offset="0"/>
+                                        <GradientStop Color="#10B981" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -157,14 +195,38 @@
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="bdHover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="bdHover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.3" >
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetName="btnTranslate" Storyboard.TargetProperty="Y" To="-2" Duration="0:0:0.3">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="BlurRadius" To="15" Duration="0:0:0.3"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="ShadowDepth" To="6" Duration="0:0:0.3"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.3"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
                                 <Trigger.ExitActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="bdHover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="bdHover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetName="btnTranslate" Storyboard.TargetProperty="Y" To="0" Duration="0:0:0.3">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="BlurRadius" To="10" Duration="0:0:0.3"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="ShadowDepth" To="4" Duration="0:0:0.3"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="Opacity" To="0.3" Duration="0:0:0.3"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
@@ -173,16 +235,22 @@
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleX" To="0.97" Duration="0:0:0.1"/>
-                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleY" To="0.97" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleX" To="0.95" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleY" To="0.95" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnTranslate" Storyboard.TargetProperty="Y" To="1" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="BlurRadius" To="5" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="ShadowDepth" To="2" Duration="0:0:0.1"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
                                 <Trigger.ExitActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.1"/>
-                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnTranslate" Storyboard.TargetProperty="Y" To="-2" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="BlurRadius" To="15" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="btnShadow" Storyboard.TargetProperty="ShadowDepth" To="6" Duration="0:0:0.2"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
@@ -191,6 +259,7 @@
                                 <Setter TargetName="bdBase" Property="Background" Value="#A1A1AA"/>
                                 <Setter Property="Cursor" Value="Wait"/>
                                 <Setter Property="IsEnabled" Value="False"/>
+                                <Setter TargetName="bdShadow" Property="Opacity" Value="0"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -250,10 +319,12 @@
                 </Canvas>
                 
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="40,0">
-                    <Border Width="160" Height="160" Background="Transparent" Margin="0,0,0,30" HorizontalAlignment="Center">
-                        <Image Stretch="Uniform" Margin="0" 
-                               Source="{Binding SchoolLogoPath, TargetNullValue='pack://application:,,,/res/jamb.png', FallbackValue='pack://application:,,,/res/jamb.png'}"/>
-                    </Border>
+                    <Image Width="140" Height="140" Stretch="Uniform" Margin="0,0,0,30" HorizontalAlignment="Center" 
+                           Source="{Binding SchoolLogoPath, TargetNullValue='pack://application:,,,/res/jamb.png', FallbackValue='pack://application:,,,/res/jamb.png'}">
+                        <Image.Effect>
+                            <DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.4" Color="Black"/>
+                        </Image.Effect>
+                    </Image>
                     
                     <TextBlock Text="CBT Mock Exam System" FontSize="32" FontWeight="Bold" 
                                Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
