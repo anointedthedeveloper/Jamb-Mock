@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CbtExam.Desktop.Services;
 using CbtExam.Desktop.Models;
+using CbtExam.Desktop.Views;
 
 namespace CbtExam.Desktop.ViewModels;
 
@@ -70,8 +71,8 @@ public class OmnibarViewModel : BaseViewModel
         allItems.AddRange(_catalogService.GetPages().Select(p => new SearchItemRecord
         {
             Id = p.Key,
-            Title = p.Label,
-            Description = $"{p.Label} page",
+            Title = p.Title,
+            Description = $"{p.Title} page",
             Icon = p.Icon,
             Category = "Pages"
         }));
