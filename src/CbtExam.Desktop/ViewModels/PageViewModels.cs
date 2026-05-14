@@ -1127,10 +1127,10 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
     public ObservableCollection<string> AccentOptions { get; } = ["Teal", "Blue", "Purple", "Emerald"];
 
     private string _selectedTheme = "Light";
-    public string SelectedTheme { get => _selectedTheme; set { Set(ref _selectedTheme, value); SaveSettings(); } }
+    public string SelectedTheme { get => _selectedTheme; set { if (Set(ref _selectedTheme, value)) { SaveSettings(); ApplyTheme(); ThemeApplied?.Invoke(); } } }
 
     private string _selectedAccent = "Teal";
-    public string SelectedAccent { get => _selectedAccent; set { Set(ref _selectedAccent, value); SaveSettings(); } }
+    public string SelectedAccent { get => _selectedAccent; set { if (Set(ref _selectedAccent, value)) { SaveSettings(); ApplyTheme(); ThemeApplied?.Invoke(); } } }
 
     // New properties for enhanced settings
     private string _systemName = "CBT Exam System";
@@ -1188,13 +1188,19 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
 
     public RelayCommand ApplyThemeCommand => new(() =>
     {
+        ApplyTheme();
+        CopyStatus = $"Theme applied: {SelectedTheme} / {SelectedAccent}";
+        Task.Delay(1800).ContinueWith(_ => App.Current.Dispatcher.Invoke(() => CopyStatus = string.Empty));
+        ThemeApplied?.Invoke();
+    });
+
+    private void ApplyTheme()
+    {
         if (App.Current is CbtExam.Desktop.App app)
         {
             app.ApplyTheme(SelectedTheme, SelectedAccent);
-            CopyStatus = $"Theme applied: {SelectedTheme} / {SelectedAccent}";
-            Task.Delay(1800).ContinueWith(_ => App.Current.Dispatcher.Invoke(() => CopyStatus = string.Empty));
         }
-    });
+    }
 
     public RelayCommand CopyUrlCommand => new(() =>
     {

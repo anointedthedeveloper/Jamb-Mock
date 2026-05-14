@@ -11,7 +11,6 @@ public partial class LoginWindow : Window
 {
     private LoginViewModel ViewModel => (LoginViewModel)DataContext;
     private bool _isPasswordVisible = false;
-    private bool _isDarkTheme = false;
     private bool _hasSavedPassword = false;
 
     public LoginWindow()
@@ -31,6 +30,8 @@ public partial class LoginWindow : Window
             CodeBox.Password = vm.AccessCode;
             _hasSavedPassword = true;
         }
+
+        ApplyThemeFromApp();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -99,8 +100,33 @@ public partial class LoginWindow : Window
 
     private void ToggleTheme_Click(object sender, RoutedEventArgs e)
     {
-        _isDarkTheme = !_isDarkTheme;
-        if (_isDarkTheme)
+        var app = App.Current as App;
+        var newTheme = App.CurrentTheme == "Dark" ? "Light" : "Dark";
+        app?.ApplyTheme(newTheme, App.CurrentAccent);
+        ApplyThemeFromApp();
+    }
+
+    protected override void OnMouseDown(MouseButtonEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed)
+        {
+            DragMove();
+        }
+        base.OnMouseDown(e);
+    }
+
+    private void ContactDeveloper_Click(object sender, RoutedEventArgs e)
+    {
+        var contactWindow = new ContactDeveloperWindow();
+        contactWindow.Owner = this;
+        contactWindow.ShowDialog();
+    }
+
+    public void ApplyThemeFromApp()
+    {
+        var isDark = App.CurrentTheme == "Dark";
+
+        if (isDark)
         {
             Resources["PaneBg"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#18181B"));
             Resources["TextMain"] = new SolidColorBrush(Colors.White);
@@ -126,19 +152,5 @@ public partial class LoginWindow : Window
         }
     }
 
-    protected override void OnMouseDown(MouseButtonEventArgs e)
-    {
-        if (e.LeftButton == MouseButtonState.Pressed)
-        {
-            DragMove();
-        }
-        base.OnMouseDown(e);
-    }
-
-    private void ContactDeveloper_Click(object sender, RoutedEventArgs e)
-    {
-        var contactWindow = new ContactDeveloperWindow();
-        contactWindow.Owner = this;
-        contactWindow.ShowDialog();
-    }
+    public void RefreshTheme() => ApplyThemeFromApp();
 }
