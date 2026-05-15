@@ -542,6 +542,24 @@ public class ExamsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         CurrentStep++;
     });
     public RelayCommand PrevStepCommand => new(() => { if (CurrentStep > 1) CurrentStep--; });
+    public RelayCommand<object> BatchAddSubjectsCommand => new(items =>
+    {
+        if (items is System.Collections.IList list)
+        {
+            foreach (var item in list)
+            {
+                if (item is string subject && SubjectConfigs.Count < 4)
+                {
+                    if (SubjectConfigs.Any(s => s.SelectedSubject == subject)) continue;
+                    var row = new ExamSubjectConfigVM(api, AvailableSubjects, RemoveSubjectRow, NotifySummary);
+                    row.SelectedSubject = subject;
+                    SubjectConfigs.Add(row);
+                }
+            }
+            NotifySummary();
+        }
+    });
+
     public RelayCommand AddSubjectCommand => new(() => AddSubjectRow());
     public RelayCommand<ExamDto> EditCommand => new(e => StartEdit(e));
     public RelayCommand<ExamDto> DeleteCommand => new(async e => await DeleteAsync(e));
