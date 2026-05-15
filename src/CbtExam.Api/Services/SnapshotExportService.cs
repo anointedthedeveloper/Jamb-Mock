@@ -19,40 +19,56 @@ public sealed class SnapshotExportService
 
     public async Task ExportAllAsync()
     {
-        Directory.CreateDirectory(_basePath);
-        var datedResultsDir = Path.Combine(_basePath, "results");
-        var datedLogsDir = Path.Combine(_basePath, "logs");
-        Directory.CreateDirectory(datedResultsDir);
-        Directory.CreateDirectory(datedLogsDir);
+        await _exportLock.WaitAsync();
+        try
+        {
+            Directory.CreateDirectory(_basePath);
+            var datedResultsDir = Path.Combine(_basePath, "results");
+            var datedLogsDir = Path.Combine(_basePath, "logs");
+            Directory.CreateDirectory(datedResultsDir);
+            Directory.CreateDirectory(datedLogsDir);
 
-        await WriteJsonAsync("students.json", await _db.Students.AsNoTracking().ToListAsync());
-        await WriteJsonAsync("exams.json", await _db.Exams.AsNoTracking().ToListAsync());
-        await WriteJsonAsync("exam-state.json", await _db.ExamSessions.AsNoTracking().ToListAsync());
-        await WriteJsonAsync("results.json", await _db.StudentExams.AsNoTracking().Where(x => x.IsSubmitted).ToListAsync());
+            await WriteJsonAsync("students.json", await _db.Students.AsNoTracking().ToListAsync());
+            await WriteJsonAsync("exams.json", await _db.Exams.AsNoTracking().ToListAsync());
+            await WriteJsonAsync("exam-state.json", await _db.ExamSessions.AsNoTracking().ToListAsync());
+            await WriteJsonAsync("results.json", await _db.StudentExams.AsNoTracking().Where(x => x.IsSubmitted).ToListAsync());
 
-        var stamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-        await WriteJsonAsync(Path.Combine("results", $"results_{stamp}.json"),
-            await _db.StudentExams.AsNoTracking().Include(x => x.Student).Where(x => x.IsSubmitted).ToListAsync());
-        await WriteJsonAsync(Path.Combine("logs", $"activity_{stamp}.json"),
-            await _db.StudentExams.AsNoTracking().Select(x => new
-            {
-                x.Id,
-                x.StudentId,
-                x.SessionId,
-                x.JoinedAt,
-                x.SubmittedAt,
-                x.TabSwitchCount
-            }).ToListAsync());
+            var stamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+            await WriteJsonAsync(Path.Combine("results", $"results_{stamp}.json"),
+                await _db.StudentExams.AsNoTracking().Include(x => x.Student).Where(x => x.IsSubmitted).ToListAsync());
+            await WriteJsonAsync(Path.Combine("logs", $"activity_{stamp}.json"),
+                await _db.StudentExams.AsNoTracking().Select(x => new
+                {
+                    x.Id,
+                    x.StudentId,
+                    x.SessionId,
+                    x.JoinedAt,
+                    x.SubmittedAt,
+                    x.TabSwitchCount
+                }).ToListAsync());
+        }
+        finally
+        {
+            _exportLock.Release();
+        }
     }
 
     public async Task SaveSnapshotAsync(int studentExamId, string imageBase64)
     {
-        var logsDir = Path.Combine(_basePath, "logs");
-        Directory.CreateDirectory(logsDir);
-        var payload = imageBase64.Contains(',') ? imageBase64[(imageBase64.IndexOf(',') + 1)..] : imageBase64;
-        var bytes = Convert.FromBase64String(payload);
-        var file = Path.Combine(logsDir, $"snapshot_{studentExamId}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.jpg");
-        await File.WriteAllBytesAsync(file, bytes);
+        await _exportLock.WaitAsync();
+        try
+        {
+            var logsDir = Path.Combine(_basePath, "logs");
+            Directory.CreateDirectory(logsDir);
+            var payload = imageBase64.Contains(',') ? imageBase64[(imageBase64.IndexOf(',') + 1)..] : imageBase64;
+            var bytes = Convert.FromBase64String(payload);
+            var file = Path.Combine(logsDir, $"snapshot_{studentExamId}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.jpg");
+            await File.WriteAllBytesAsync(file, bytes);
+        }
+        finally
+        {
+            _exportLock.Release();
+        }
     }
 
     private async Task WriteJsonAsync(string relativePath, object data)
