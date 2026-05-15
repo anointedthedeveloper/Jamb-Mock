@@ -544,7 +544,17 @@ public class ExamsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public RelayCommand PrevStepCommand => new(() => { if (CurrentStep > 1) CurrentStep--; });
     public RelayCommand<object> BatchAddSubjectsCommand => new(items =>
     {
-        if (items is System.Collections.IList list)
+        if (items is string single)
+        {
+            if (SubjectConfigs.Count < 4 && !SubjectConfigs.Any(s => s.SelectedSubject == single))
+            {
+                var row = new ExamSubjectConfigVM(api, AvailableSubjects, RemoveSubjectRow, NotifySummary);
+                row.SelectedSubject = single;
+                SubjectConfigs.Add(row);
+                NotifySummary();
+            }
+        }
+        else if (items is System.Collections.IList list)
         {
             foreach (var item in list)
             {
