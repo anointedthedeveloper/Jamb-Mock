@@ -9,6 +9,7 @@ public sealed class SnapshotExportService
     private readonly AppDbContext _db;
     private readonly string _basePath;
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly SemaphoreSlim _exportLock = new(1, 1);
 
     public SnapshotExportService(AppDbContext db)
     {
