@@ -197,34 +197,38 @@
                                                                             </ItemsControl.ItemsPanel>
                                                                             <ItemsControl.ItemTemplate>
                                                                                 <DataTemplate DataType="{x:Type vm:YearToggle}">
-                                                                                    <Border Margin="0,0,6,6" CornerRadius="8" Padding="12,6" Cursor="Hand" MouseLeftButtonDown="YearChip_Click">
-                                                                                        <Border.Style>
-                                                                                            <Style TargetType="Border">
-                                                                                                <Setter Property="Background" Value="White"/>
-                                                                                                <Setter Property="BorderBrush" Value="#CBD5E1"/>
-                                                                                                <Setter Property="BorderThickness" Value="1"/>
-                                                                                                <Style.Triggers>
-                                                                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                                                        <Setter Property="Background" Value="#ECFDF5"/>
-                                                                                                        <Setter Property="BorderBrush" Value="#10B981"/>
-                                                                                                    </DataTrigger>
-                                                                                                </Style.Triggers>
-                                                                                            </Style>
-                                                                                        </Border.Style>
-                                                                                        <TextBlock Text="{Binding Label}" FontSize="12">
-                                                                                            <TextBlock.Style>
-                                                                                                <Style TargetType="TextBlock">
-                                                                                                    <Setter Property="Foreground" Value="#64748B"/>
+                                                                                    <Button Command="{Binding DataContext.ToggleYearCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                                            CommandParameter="{Binding}"
+                                                                                            Background="Transparent" BorderThickness="0" Padding="0" Margin="0,0,6,6">
+                                                                                        <Border CornerRadius="8" Padding="12,6" Cursor="Hand">
+                                                                                            <Border.Style>
+                                                                                                <Style TargetType="Border">
+                                                                                                    <Setter Property="Background" Value="White"/>
+                                                                                                    <Setter Property="BorderBrush" Value="#CBD5E1"/>
+                                                                                                    <Setter Property="BorderThickness" Value="1"/>
                                                                                                     <Style.Triggers>
                                                                                                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                                                            <Setter Property="Foreground" Value="#047857"/>
-                                                                                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                                                                                            <Setter Property="Background" Value="#ECFDF5"/>
+                                                                                                            <Setter Property="BorderBrush" Value="#10B981"/>
                                                                                                         </DataTrigger>
                                                                                                     </Style.Triggers>
                                                                                                 </Style>
-                                                                                            </TextBlock.Style>
-                                                                                        </TextBlock>
-                                                                                    </Border>
+                                                                                            </Border.Style>
+                                                                                            <TextBlock Text="{Binding Label}" FontSize="12">
+                                                                                                <TextBlock.Style>
+                                                                                                    <Style TargetType="TextBlock">
+                                                                                                        <Setter Property="Foreground" Value="#64748B"/>
+                                                                                                        <Style.Triggers>
+                                                                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                                                                <Setter Property="Foreground" Value="#047857"/>
+                                                                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                                                                            </DataTrigger>
+                                                                                                        </Style.Triggers>
+                                                                                                    </Style>
+                                                                                                </TextBlock.Style>
+                                                                                            </TextBlock>
+                                                                                        </Border>
+                                                                                    </Button>
                                                                                 </DataTemplate>
                                                                             </ItemsControl.ItemTemplate>
                                                                         </ItemsControl>
