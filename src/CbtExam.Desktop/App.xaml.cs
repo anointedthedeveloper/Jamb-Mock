@@ -34,14 +34,30 @@ public partial class App : Application
         catch { }
     }
 
+    // ── Shell Integration ─────────────────────────────────────────────────
+    [DllImport("shell32.dll", SetLastError = true)]
+    private static extern int SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string AppID);
+
     // ── Startup ────────────────────────────────────────────────────────────
     protected override void OnStartup(StartupEventArgs e)
     {
+        // Fix taskbar grouping and icons
+        try { SetCurrentProcessExplicitAppUserModelID("Anobyte.CbtExam.Admin"); } catch { }
+
         base.OnStartup(e);
+        
+        // Ensure app doesn't close when switching between Login and Main windows
+        ShutdownMode = ShutdownMode.OnLastWindowClose;
+
         DispatcherUnhandledException          += OnDispatcherUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+        
         LoadTheme();
+
+        // Manually show the first window since we removed StartupUri
+        var login = new Views.LoginWindow();
+        login.Show();
     }
 
     // ── Exception handlers ─────────────────────────────────────────────────
