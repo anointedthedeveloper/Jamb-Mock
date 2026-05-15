@@ -170,11 +170,17 @@
                                                         <Border Background="#F8FAFC" CornerRadius="12" Padding="20" Margin="0,0,0,16" BorderBrush="#E2E8F0" BorderThickness="1">
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto"/> <!-- Handle -->
                                                                     <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/> <!-- Remove -->
                                                                 </Grid.ColumnDefinitions>
 
-                                                                <StackPanel>
+                                                                <!-- Drag Handle -->
+                                                                <TextBlock Text="&#xE700;" FontFamily="Segoe MDL2 Assets" Foreground="#CBD5E1" 
+                                                                           FontSize="18" VerticalAlignment="Center" Margin="0,0,16,0" Cursor="SizeAll"
+                                                                           ToolTip="Drag to reorder (Coming soon)"/>
+
+                                                                <StackPanel Grid.Column="1">
                                                                     <Grid Margin="0,0,0,16">
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="2*"/>
@@ -186,7 +192,18 @@
                                                                         </StackPanel>
                                                                         <StackPanel Grid.Column="1">
                                                                             <TextBlock Text="Questions to Pick" FontSize="11" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,6"/>
-                                                                            <TextBox Text="{Binding QuestionCount, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14" FontWeight="Bold"/>
+                                                                            <TextBox Text="{Binding QuestionCount, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14" FontWeight="Bold">
+                                                                                <TextBox.Style>
+                                                                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                                                                        <Style.Triggers>
+                                                                                            <DataTrigger Binding="{Binding HasPoolWarning}" Value="True">
+                                                                                                <Setter Property="BorderBrush" Value="#EF4444"/>
+                                                                                                <Setter Property="Background" Value="#FFF5F5"/>
+                                                                                            </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                    </Style>
+                                                                                </TextBox.Style>
+                                                                            </TextBox>
                                                                         </StackPanel>
                                                                     </Grid>
 
@@ -334,6 +351,10 @@
                                                         <TextBlock Text="Duration:" Foreground="#64748B"/>
                                                         <TextBlock Text="{Binding Duration, StringFormat='{}{0} minutes'}" FontWeight="Bold" HorizontalAlignment="Right"/>
                                                     </Grid>
+                                                    
+                                                    <Button Content="Preview Configuration" Style="{StaticResource PrimaryBtn}" 
+                                                            Background="#F1F5F9" Foreground="#475569" Margin="0,20,0,0" Padding="12,10"
+                                                            ToolTip="Show a summary of the exam structure"/>
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>
