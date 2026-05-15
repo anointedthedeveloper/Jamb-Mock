@@ -421,6 +421,7 @@ public class YearToggle : BaseViewModel
 {
     public int Year { get; }
     public int QuestionCount { get; }
+    private bool _isSelected;
     public bool IsSelected { get => _isSelected; set => Set(ref _isSelected, value); }
     public string Label => QuestionCount > 0 ? $"{Year} ({QuestionCount})" : $"{Year}";
     public YearToggle(int year, bool selected, int questionCount = 0) { Year = year; _isSelected = selected; QuestionCount = questionCount; }
