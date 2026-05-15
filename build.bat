@@ -2,41 +2,54 @@
 setlocal
 
 echo ============================================
-echo   CBT Exam System - Build Script
+echo   CBT Exam System - Professional Build
 echo ============================================
 echo.
 
 set PROJECT=src\CbtExam.Desktop\CbtExam.Desktop.csproj
 set OUTPUT=publish\CbtExam
 
-echo [1/3] Closing running instances of CbtExam.exe (if any)...
+echo [1/3] Closing running instances of CbtExam.exe...
 taskkill /F /IM CbtExam.exe /T >nul 2>&1
-echo.
+timeout /t 1 /nobreak >nul
 
-echo [2/3] Building and Publishing self-contained single EXE...
-dotnet publish %PROJECT% ^
+echo [2/3] Preparing clean output directory...
+if exist "%OUTPUT%" (
+    echo   Cleaning %OUTPUT%...
+    rd /s /q "%OUTPUT%" >nul 2>&1
+    if exist "%OUTPUT%" (
+        echo   WARNING: Manual cleaning failed. Attempting force delete of EXE...
+        del /f /q "%OUTPUT%\CbtExam.exe" >nul 2>&1
+    )
+)
+if not exist "%OUTPUT%" mkdir "%OUTPUT%"
+
+echo [3/3] Building and Publishing (Release win-x64)...
+dotnet publish "%PROJECT%" ^
   --configuration Release ^
   --runtime win-x64 ^
   --self-contained true ^
   -p:PublishSingleFile=true ^
   -p:IncludeNativeLibrariesForSelfExtract=true ^
-  --output %OUTPUT%
+  --output "%OUTPUT%"
 
 if %errorlevel% neq 0 (
     echo.
-    echo FAILED: publish
+    echo --------------------------------------------
+    echo   BUILD FAILED! 
+    echo   Please check the error messages above.
+    echo --------------------------------------------
     pause
     exit /b 1
 )
 
 echo.
-echo [3/3] Done!
-echo.
+echo ============================================
+echo   SUCCESS! New version compiled.
+echo ============================================
 echo Output: %CD%\%OUTPUT%\CbtExam.exe
-echo Size:
-for %%f in ("%OUTPUT%\CbtExam.exe") do echo   %%~zf bytes
 echo.
-echo To run: Double-click CbtExam.exe
-echo No .NET installation required on target machine.
+echo NOTE: On first run, the app will update your
+echo database schema automatically.
 echo.
 pause
