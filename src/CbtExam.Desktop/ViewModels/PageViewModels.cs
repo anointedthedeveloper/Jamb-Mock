@@ -1158,7 +1158,12 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         try
         {
             // Standardize subject name to Title Case
-            var standardizedSubject = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Subject.Trim().ToLower());
+            var rawSubject = (Subject ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(rawSubject))
+            {
+                Status = "Subject is required."; StatusOk = false; return;
+            }
+            var standardizedSubject = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(rawSubject.ToLower());
             Subject = standardizedSubject;
 
             var options = new List<string> { OptionA, OptionB, OptionC, OptionD };

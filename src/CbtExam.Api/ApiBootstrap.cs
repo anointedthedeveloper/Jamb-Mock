@@ -53,8 +53,9 @@ public static class ApiBootstrap
             try
             {
                 db.Database.EnsureCreated();
-                // Verify schema is usable by probing a known table
+                // Verify schema is usable by probing known tables
                 _ = db.Students.Count();
+                _ = db.Exams.Count();
                 created = true;
             }
             catch { }
