@@ -309,10 +309,95 @@ public class CreateExamViewModel(ApiClient api) : BaseViewModel, IRefreshable
     }
 }
 
-// ─── Exams list ───────────────────────────────────────────────────────────────
+// ─── Subject configuration row for exam template builder ──────────────────────
+public class ExamSubjectConfigVM : BaseViewModel
+{
+    private readonly ApiClient _api;
+    private readonly Action<ExamSubjectConfigVM> _onRemove;
+
+    public ExamSubjectConfigVM(ApiClient api, ObservableCollection<string> availableSubjects, Action<ExamSubjectConfigVM> onRemove)
+    {
+        _api = api;
+        _onRemove = onRemove;
+        AvailableSubjects = availableSubjects;
+    }
+
+    public ObservableCollection<string> AvailableSubjects { get; }
+    public ObservableCollection<YearToggle> AvailableYears { get; } = [];
+
+    private string _selectedSubject = string.Empty;
+    public string SelectedSubject
+    {
+        get => _selectedSubject;
+        set
+        {
+            if (Set(ref _selectedSubject, value))
+                _ = LoadYearsAsync();
+        }
+    }
+
+    private int _questionCount = 40;
+    public int QuestionCount { get => _questionCount; set => Set(ref _questionCount, value); }
+
+    private int _poolSize;
+    public int PoolSize { get => _poolSize; set => Set(ref _poolSize, value); }
+
+    public List<int> GetSelectedYears() => AvailableYears.Where(y => y.IsSelected).Select(y => y.Year).ToList();
+
+    public RelayCommand RemoveCommand => new(() => _onRemove(this));
+
+    public RelayCommand<YearToggle> ToggleYearCommand => new(y =>
+    {
+        if (y is null) return;
+        y.IsSelected = !y.IsSelected;
+        RecalcPool();
+    });
+
+    public RelayCommand SelectAllYearsCommand => new(() =>
+    {
+        foreach (var y in AvailableYears) y.IsSelected = true;
+        RecalcPool();
+    });
+
+    public RelayCommand DeselectAllYearsCommand => new(() =>
+    {
+        foreach (var y in AvailableYears) y.IsSelected = false;
+        RecalcPool();
+    });
+
+    private async Task LoadYearsAsync()
+    {
+        AvailableYears.Clear();
+        PoolSize = 0;
+        if (string.IsNullOrWhiteSpace(SelectedSubject)) return;
+        var years = await _api.GetQuestionBankYearsAsync(SelectedSubject);
+        if (years is null) return;
+        foreach (var y in years.OrderByDescending(y => y))
+            AvailableYears.Add(new YearToggle(y, true));
+        RecalcPool();
+    }
+
+    private void RecalcPool()
+    {
+        // Pool size will be computed during save — for now just show selected year count
+        PoolSize = AvailableYears.Count(y => y.IsSelected);
+        OnPropertyChanged(nameof(PoolSize));
+    }
+}
+
+public class YearToggle : BaseViewModel
+{
+    public int Year { get; }
+    private bool _isSelected;
+    public bool IsSelected { get => _isSelected; set => Set(ref _isSelected, value); }
+    public YearToggle(int year, bool selected) { Year = year; _isSelected = selected; }
+}
+
+// ─── Exams list (Template builder) ────────────────────────────────────────────
 public class ExamsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 {
     public ObservableCollection<ExamDto> Exams { get; } = [];
+    private List<ExamDto> _all = [];
 
     private string _search = string.Empty;
     public string Search
@@ -324,42 +409,74 @@ public class ExamsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     private ObservableCollection<ExamDto> _filtered = [];
     public ObservableCollection<ExamDto> Filtered { get => _filtered; set => Set(ref _filtered, value); }
 
-    private List<ExamDto> _all = [];
-
-    private string _title = "", _subject = "";
-    private int _duration = 60;
-    private bool _shuffleQ = true, _shuffleO = true;
+    // ── Create/Edit form ──
     private bool _showCreateForm;
-    public string Title { get => _title; set => Set(ref _title, value); }
-    public string Subject { get => _subject; set => Set(ref _subject, value); }
-    public int Duration { get => _duration; set => Set(ref _duration, value); }
-    public bool ShuffleQuestions { get => _shuffleQ; set => Set(ref _shuffleQ, value); }
-    public bool ShuffleOptions { get => _shuffleO; set => Set(ref _shuffleO, value); }
     public bool ShowCreateForm { get => _showCreateForm; set => Set(ref _showCreateForm, value); }
 
-    private string _createStatus = string.Empty;
-    public string CreateStatus { get => _createStatus; set => Set(ref _createStatus, value); }
-
     private bool _isEditing;
-    public bool IsEditing { get => _isEditing; set { Set(ref _isEditing, value); OnPropertyChanged(nameof(FormTitle)); OnPropertyChanged(nameof(SubmitButtonText)); } }
+    public bool IsEditing
+    {
+        get => _isEditing;
+        set { Set(ref _isEditing, value); OnPropertyChanged(nameof(FormTitle)); OnPropertyChanged(nameof(SubmitButtonText)); }
+    }
 
     private ExamDto? _selectedExam;
     public ExamDto? SelectedExam { get => _selectedExam; set => Set(ref _selectedExam, value); }
 
-    public string FormTitle => IsEditing ? "Edit Exam Settings" : "New Exam";
-    public string SubmitButtonText => IsEditing ? "Update Exam" : "Save Exam";
+    public string FormTitle => IsEditing ? "Edit Exam Template" : "New Exam Template";
+    public string SubmitButtonText => IsEditing ? "Update Template" : "Create Template";
 
+    // Template fields
+    private string _title = string.Empty;
+    public string Title { get => _title; set => Set(ref _title, value); }
+
+    private int _duration = 60;
+    public int Duration { get => _duration; set => Set(ref _duration, value); }
+
+    private bool _shuffleQ = true, _shuffleO = true;
+    public bool ShuffleQuestions { get => _shuffleQ; set => Set(ref _shuffleQ, value); }
+    public bool ShuffleOptions { get => _shuffleO; set => Set(ref _shuffleO, value); }
+
+    // Multi-subject configuration
+    public ObservableCollection<string> AvailableSubjects { get; } = [];
+    public ObservableCollection<ExamSubjectConfigVM> SubjectConfigs { get; } = [];
+
+    public bool CanAddSubject => SubjectConfigs.Count < 4;
+
+    private string _createStatus = string.Empty;
+    public string CreateStatus { get => _createStatus; set => Set(ref _createStatus, value); }
+
+    private bool _statusOk;
+    public bool StatusOk { get => _statusOk; set => Set(ref _statusOk, value); }
+
+    public int TotalQuestions => SubjectConfigs.Sum(s => s.QuestionCount);
+    public int TotalSubjects => SubjectConfigs.Count;
+
+    // ── Commands ──
     public RelayCommand RefreshCommand => new(async () => await LoadAsync());
-    public RelayCommand<ExamDto> DeleteCommand => new(async e => await DeleteAsync(e));
-    public RelayCommand ToggleCreateCommand => new(() => { IsEditing = false; ShowCreateForm = !ShowCreateForm; CreateStatus = string.Empty; ClearForm(); });
-    public RelayCommand CreateExamCommand => new(async () => await SaveExamAsync());
+    public RelayCommand ToggleCreateCommand => new(() =>
+    {
+        IsEditing = false;
+        ShowCreateForm = !ShowCreateForm;
+        CreateStatus = string.Empty;
+        if (ShowCreateForm) ClearForm();
+    });
+    public RelayCommand CreateTemplateCommand => new(async () => await SaveTemplateAsync());
+    public RelayCommand AddSubjectCommand => new(() => AddSubjectRow());
     public RelayCommand<ExamDto> EditCommand => new(e => StartEdit(e));
+    public RelayCommand<ExamDto> DeleteCommand => new(async e => await DeleteAsync(e));
 
     public async Task LoadAsync()
     {
         IsBusy = true;
         try
         {
+            // Load subjects from question bank
+            var subjects = await api.GetQuestionBankSubjectsAsync();
+            AvailableSubjects.Clear();
+            subjects?.ForEach(AvailableSubjects.Add);
+
+            // Load exams
             var list = await api.GetExamsAsync();
             _all = list ?? [];
             Exams.Clear();
@@ -369,61 +486,132 @@ public class ExamsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         finally { IsBusy = false; }
     }
 
+    private void AddSubjectRow()
+    {
+        if (SubjectConfigs.Count >= 4) return;
+        SubjectConfigs.Add(new ExamSubjectConfigVM(api, AvailableSubjects, RemoveSubjectRow));
+        NotifySummary();
+    }
+
+    private void RemoveSubjectRow(ExamSubjectConfigVM row)
+    {
+        SubjectConfigs.Remove(row);
+        NotifySummary();
+    }
+
+    private void NotifySummary()
+    {
+        OnPropertyChanged(nameof(CanAddSubject));
+        OnPropertyChanged(nameof(TotalSubjects));
+        OnPropertyChanged(nameof(TotalQuestions));
+    }
+
+    private async Task SaveTemplateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Title))
+        {
+            CreateStatus = "Exam name is required."; StatusOk = false; return;
+        }
+        if (SubjectConfigs.Count == 0)
+        {
+            CreateStatus = "Add at least one subject."; StatusOk = false; return;
+        }
+
+        // Validate each subject config
+        foreach (var cfg in SubjectConfigs)
+        {
+            if (string.IsNullOrWhiteSpace(cfg.SelectedSubject))
+            {
+                CreateStatus = "All subjects must be selected."; StatusOk = false; return;
+            }
+            if (cfg.GetSelectedYears().Count == 0)
+            {
+                CreateStatus = $"Select at least one year for {cfg.SelectedSubject}."; StatusOk = false; return;
+            }
+            if (cfg.QuestionCount <= 0)
+            {
+                CreateStatus = $"Question count must be greater than 0 for {cfg.SelectedSubject}."; StatusOk = false; return;
+            }
+        }
+
+        IsBusy = true;
+        BusyMessage = IsEditing ? "Updating template..." : "Creating template...";
+        try
+        {
+            if (IsEditing && SelectedExam != null)
+            {
+                // Delete old exam and recreate with new questions
+                await api.DeleteExamAsync(SelectedExam.Id);
+            }
+
+            // Build subject configs for the generate-exam API
+            var subjectDtos = SubjectConfigs.Select(s => new QuestionBankSubjectYearDto(
+                s.SelectedSubject,
+                s.GetSelectedYears(),
+                s.QuestionCount
+            )).ToList();
+
+            var dto = new ExamGenerateDto(Title, Duration, ShuffleQuestions, ShuffleOptions, subjectDtos);
+            var resp = await api.GenerateExamFromBankAsync(dto);
+
+            if (resp.IsSuccessStatusCode)
+            {
+                CreateStatus = IsEditing ? "Template updated successfully!" : "Template created successfully!";
+                StatusOk = true;
+                ClearForm();
+                ShowCreateForm = false;
+                IsEditing = false;
+                await LoadAsync();
+            }
+            else
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                CreateStatus = $"Failed: {body}"; StatusOk = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            CreateStatus = $"Error: {ex.Message}"; StatusOk = false;
+        }
+        finally { IsBusy = false; }
+    }
+
     private void StartEdit(ExamDto? e)
     {
         if (e is null) return;
         SelectedExam = e;
         Title = e.Title;
-        Subject = e.Subject;
         Duration = e.DurationMinutes;
         ShuffleQuestions = e.ShuffleQuestions;
         ShuffleOptions = e.ShuffleOptions;
+
+        // Parse subjects from the exam's Subject field (comma-separated)
+        SubjectConfigs.Clear();
+        var subjects = e.Subject.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var sub in subjects)
+        {
+            var row = new ExamSubjectConfigVM(api, AvailableSubjects, RemoveSubjectRow);
+            row.SelectedSubject = sub;
+            SubjectConfigs.Add(row);
+        }
+
         IsEditing = true;
         ShowCreateForm = true;
+        NotifySummary();
     }
 
     private void ClearForm()
     {
-        Title = Subject = string.Empty;
+        Title = string.Empty;
         Duration = 60;
         ShuffleQuestions = true;
         ShuffleOptions = true;
         SelectedExam = null;
+        SubjectConfigs.Clear();
+        CreateStatus = string.Empty;
+        NotifySummary();
     }
 
-    private async Task SaveExamAsync()
-    {
-        if (string.IsNullOrWhiteSpace(Title))
-        {
-            CreateStatus = "Title is required.";
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            HttpResponseMessage resp;
-            var dto = new ExamCreateDto(Title, Subject, Duration, ShuffleQuestions, ShuffleOptions);
-            
-            if (IsEditing && SelectedExam != null)
-                resp = await api.UpdateExamAsync(SelectedExam.Id, dto);
-            else
-                resp = await api.CreateExamAsync(dto);
-
-            if (!resp.IsSuccessStatusCode)
-            {
-                CreateStatus = IsEditing ? "Could not update exam." : "Could not create exam.";
-                return;
-            }
-
-            ClearForm();
-            ShowCreateForm = false;
-            CreateStatus = string.Empty;
-            IsEditing = false;
-            await LoadAsync();
-        }
-        finally { IsBusy = false; }
-    }
     private void FilterExams()
     {
         var q = Search.Trim();

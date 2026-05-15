@@ -24,10 +24,7 @@ public class SessionsController(AppDbContext db, SnapshotExportService exports) 
         var exam = await db.Exams.FindAsync(dto.ExamId);
         if (exam is null) return NotFound("Exam not found");
 
-        // Deactivate any existing active session for this exam
-        var existing = await db.ExamSessions.Where(s => s.ExamId == dto.ExamId && s.IsActive).ToListAsync();
-        existing.ForEach(s => { s.IsActive = false; s.EndedAt = DateTime.UtcNow; });
-
+        // Multiple simultaneous sessions are allowed
         var session = new ExamSession
         {
             ExamId = dto.ExamId,
