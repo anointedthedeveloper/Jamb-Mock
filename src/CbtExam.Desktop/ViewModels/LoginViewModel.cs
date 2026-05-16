@@ -238,10 +238,11 @@ public class LoginViewModel : BaseViewModel
             if (Application.Current?.Windows != null)
             {
                 foreach (Window window in Application.Current.Windows)
-            {
-                if (window is LoginWindow)
                 {
-                    window.Close();
+                    if (window is LoginWindow)
+                    {
+                        window.Close();
+                    }
                 }
             }
         }
