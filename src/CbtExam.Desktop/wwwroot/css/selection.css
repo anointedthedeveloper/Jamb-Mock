@@ -1,0 +1,87 @@
+/* ── Selection Page Specific Styles ── */
+.selection-container {
+  max-width: 800px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.selection-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  text-align: left;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+}
+
+.selection-header h2 { font-size: 24px; font-weight: 800; color: var(--text); }
+.selection-header p { color: var(--text-muted); font-size: 14px; }
+
+.exam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.exam-card-item {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.exam-card-item .card-glow {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(22, 163, 74, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.exam-card-item:hover .card-glow { opacity: 1; }
+
+.exam-card-item:hover {
+  border-color: var(--primary);
+  box-shadow: 0 10px 20px -5px rgba(22, 163, 74, 0.2);
+  transform: translateY(-4px);
+}
+
+.exam-card-item h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.exam-meta { font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px; }
+.meta-item { display: flex; align-items: center; gap: 8px; }
+
+.exam-badge { 
+  position: absolute; top: 12px; right: 12px;
+  padding: 4px 8px; font-size: 10px; font-weight: 800;
+  border-radius: 4px; background: var(--primary-light); color: var(--primary-dark);
+}
+
+.exam-badge.locked { background: #F1F5F9; color: #64748B; }
+
+.exam-card-item.muted { opacity: 0.7; cursor: not-allowed; }
+.card-desc { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+
+.portal-footer {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+}

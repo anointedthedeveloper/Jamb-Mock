@@ -3,19 +3,27 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CBT Exam System</title>
+<title>CBT Exam System | Login</title>
 <link rel="stylesheet" href="/css/style.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="portal-body">
+
+<div class="bg-waves">
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+</div>
 
 <!-- ── JOIN PAGE ── -->
-<div id="page-join" class="page active">
+<main id="page-join" class="page active">
   <div class="join-card">
     <div class="logo">
       <img class="dynamic-logo" src="/img/jamb.png" alt="Logo" onerror="this.src='/img/jamb.png'"/>
     </div>
     <h1>CBT Exam System</h1>
     <p class="subtitle">Secure Examination Environment</p>
+    
     <div class="form-group">
       <label>Session Code</label>
       <div class="input-wrapper">
@@ -23,6 +31,7 @@
         <input id="inp-code" type="text" placeholder="e.g. A1B2C3" maxlength="6" autocomplete="off"/>
       </div>
     </div>
+
     <div class="form-group">
       <label>Full Name</label>
       <div class="input-wrapper">
@@ -30,6 +39,7 @@
         <input id="inp-name" type="text" placeholder="Your full name" autocomplete="off"/>
       </div>
     </div>
+
     <div class="form-group">
       <label>Student ID</label>
       <div class="input-wrapper">
@@ -37,193 +47,15 @@
         <input id="inp-id" type="text" placeholder="Your student ID" autocomplete="off"/>
       </div>
     </div>
+
     <div id="join-error" class="error-msg hidden"></div>
+    
     <button id="btn-join" class="btn btn-primary btn-full" onclick="joinExam()">
-      <span>Join Exam</span>
+      Join Exam
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-arrow"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
     </button>
   </div>
-</div>
-
-<!-- ── SELECTION PAGE ── -->
-<div id="page-selection" class="page">
-  <div class="selection-container">
-    <div class="selection-header">
-      <div class="logo-small">
-        <img class="dynamic-logo" src="/img/jamb.png" alt="Logo" onerror="this.src='/img/jamb.png'"/>
-      </div>
-      <div>
-        <h2>Select Your Exam</h2>
-        <p>Available sessions for your profile</p>
-      </div>
-    </div>
-    <div id="exam-list" class="exam-grid">
-      <!-- Example Card -->
-      <div class="exam-card-item" onclick="showPage('page-waiting')">
-        <div class="badge">ACTIVE</div>
-        <h3>Post-UTME Screening 2026</h3>
-        <div class="meta">
-          <span>40 Questions</span>
-          <span>60 Minutes</span>
-        </div>
-      </div>
-    </div>
-    <button class="btn btn-outline btn-full" style="margin-top:20px;" onclick="showPage('page-join')">Back to Login</button>
-  </div>
-</div>
-<div id="page-waiting" class="page">
-  <div class="join-card">
-    <div class="logo">
-      <img class="dynamic-logo" src="/img/jamb.png" alt="Logo" onerror="this.src='/img/jamb.png'"/>
-    </div>
-    <div class="status-icon-wrapper">
-      <div class="pulse-ring"></div>
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-timer"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>
-    </div>
-    <h2>Waiting Room</h2>
-    <p class="subtitle">Exam access is being prepared. Stay on this page.</p>
-    <div class="status-badge">
-      <span class="dot"></span>
-      <p id="waiting-status">Connecting...</p>
-    </div>
-    <button class="btn btn-outline btn-full" onclick="continueFromWaiting()">Continue</button>
-  </div>
-</div>
-
-<!-- ── EXAM PAGE ── -->
-<div id="page-exam" class="page">
-  <header class="exam-header">
-    <div class="header-left">
-      <div class="exam-title-badge">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        <span id="exam-title">Exam</span>
-      </div>
-    </div>
-    <div class="header-right">
-      <div class="timer-box">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="timer-icon"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span id="timer">00:00</span>
-      </div>
-      <div class="progress-info">
-        <div class="progress-label">Progress</div>
-        <span id="progress-text">0 / 0</span>
-      </div>
-    </div>
-  </header>
-
-  <div class="exam-body">
-    <!-- Question Navigator -->
-    <aside class="question-nav">
-      <h4>Navigator</h4>
-      <div id="question-nav" class="nav-grid"></div>
-    </aside>
-
-    <!-- Question Panel -->
-    <main class="question-panel">
-      <div id="question-container"></div>
-      <div class="nav-buttons">
-        <button class="btn btn-outline" id="btn-prev" onclick="prevQuestion()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-          <span>Previous</span>
-        </button>
-        <button class="btn btn-outline" id="btn-next" onclick="nextQuestion()">
-          <span>Next</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
-        <button class="btn btn-outline" onclick="toggleFlagCurrent()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
-          <span>Flag</span>
-        </button>
-        <button class="btn btn-outline" onclick="clearCurrentAnswer()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-          <span>Clear</span>
-        </button>
-        <button class="btn btn-outline" onclick="saveAndExit()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          <span>Save</span>
-        </button>
-        <button class="btn btn-outline" onclick="toggleCalculator()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
-          <span>Calc</span>
-        </button>
-        <button class="btn btn-danger" id="btn-submit" onclick="confirmSubmit()">Submit</button>
-      </div>
-      <div id="camera-panel" class="camera-panel">
-        <video id="camera-preview" autoplay muted playsinline></video>
-        <canvas id="camera-canvas" style="display:none;"></canvas>
-        <button class="btn btn-outline btn-sm" onclick="captureSnapshot()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-          <span>Snapshot</span>
-        </button>
-      </div>
-    </main>
-  </div>
-</div>
-
-<!-- ── RESUME PAGE ── -->
-<div id="page-resume" class="page">
-  <div class="join-card">
-    <div class="status-icon-wrapper blue">
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-    </div>
-    <h2>Resume Exam</h2>
-    <p class="subtitle">We found saved progress for this exam.</p>
-    <div id="resume-status" class="status-badge blue"></div>
-    <button class="btn btn-primary btn-full" onclick="resumeExam()">Resume Now</button>
-  </div>
-</div>
-
-<!-- ── RESULT PAGE ── -->
-<div id="page-result" class="page">
-  <div class="result-card">
-    <div class="result-icon-wrapper" id="result-icon-container">
-       <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-party-popper"><path d="M5.8 11.3 2 22l10.7-3.8"/><path d="M4 3h.01"/><path d="M9 2h.01"/><path d="M14 3h.01"/><path d="M3 9h.01"/><path d="M21 2l-5 5"/><path d="m5 15 3-3"/><path d="m15 5 3-3"/><path d="M18 8h.01"/><path d="M17 13h.01"/><path d="M21 10h.01"/><path d="M20 17h.01"/><path d="M22 15h.01"/><path d="M13 21h.01"/></svg>
-    </div>
-    <h2>Exam Submitted!</h2>
-    <div class="score-display">
-      <span id="result-score">0</span><span class="score-sep">/</span><span id="result-total">0</span>
-    </div>
-    <div class="score-pct-badge">
-      <span id="result-pct">0%</span>
-    </div>
-    <p id="result-msg" class="result-msg"></p>
-    <button class="btn btn-outline btn-full" style="margin-top:24px;" onclick="showPage('page-review')">Review Answers</button>
-  </div>
-</div>
-
-
-<!-- ── REVIEW PAGE ── -->
-<div id="page-review" class="page">
-  <div class="join-card">
-    <h2>Answer Review</h2>
-    <div id="review-list"></div>
-    <button class="btn btn-outline btn-full" onclick="showPage('page-result')">Back to Result</button>
-  </div>
-</div>
-
-<div id="calculator-modal" class="modal-overlay hidden">
-  <div class="modal">
-    <h3>Calculator</h3>
-    <input id="calc-input" type="text" placeholder="e.g. (4+7)*2" style="width:100%;padding:8px;" />
-    <p id="calc-output"></p>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeCalculator()">Close</button>
-      <button class="btn btn-primary" onclick="runCalculator()">Calculate</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── SUBMIT CONFIRM MODAL ── -->
-<div id="modal-overlay" class="modal-overlay hidden">
-  <div class="modal">
-    <h3>Submit Exam?</h3>
-    <p id="modal-msg">Are you sure you want to submit? You cannot change answers after submission.</p>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger" onclick="submitExam()">Yes, Submit</button>
-    </div>
-  </div>
-</div>
+</main>
 
 <script src="/js/app.js"></script>
 </body>

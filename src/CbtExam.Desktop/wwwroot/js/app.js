@@ -1,4 +1,3 @@
-// ── State ──────────────────────────────────────────────────────────────────
 const state = {
   studentExamId: null,
   sessionId: null,
@@ -13,6 +12,22 @@ const state = {
   secondsLeft: 0,
   submitted: false
 };
+
+// ── Persistence ────────────────────────────────────────────────────────────
+function saveGlobalState() {
+  localStorage.setItem('cbt_global_state', JSON.stringify(state));
+}
+
+function loadGlobalState() {
+  const saved = localStorage.getItem('cbt_global_state');
+  if (saved) {
+    const data = JSON.parse(saved);
+    Object.assign(state, data);
+  }
+}
+
+// Load state immediately on every page
+loadGlobalState();
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -106,15 +121,13 @@ async function joinExam() {
     $('exam-title').textContent = data.examTitle;
     errEl.classList.add('hidden');
     
-    // Show selection page if multiple exams exist, otherwise go to waiting
+    saveGlobalState();
+
+    // Navigate to separate pages
     if (data.availableExams && data.availableExams.length > 1) {
-      renderExamSelection(data.availableExams);
-      showPage('page-selection');
+      location.href = 'selection.html';
     } else {
-      showPage('page-waiting');
-      await loadQuestions();
-      await loadServerProgress();
-      maybeResumePage();
+      location.href = 'waiting.html';
     }
 
   } catch (err) {
@@ -125,31 +138,27 @@ async function joinExam() {
   }
 }
 
-function renderExamSelection(exams) {
-  const list = $('exam-list');
-  list.innerHTML = exams.map(e => `
-    <div class="exam-card-item" onclick="selectExamSession(${e.examId})">
-      <div class="badge">${e.status || 'ACTIVE'}</div>
-      <h3>${e.title}</h3>
-      <div class="meta">
-        <span>${e.questionCount} Questions</span>
-        <span>${e.duration} Minutes</span>
-      </div>
-    </div>
-  `).join('');
-}
-
 async function selectExamSession(examId) {
   state.examId = examId;
-  showPage('page-waiting');
-  await loadQuestions();
-  await loadServerProgress();
-  maybeResumePage();
+  saveGlobalState();
+  location.href = 'waiting.html';
 }
 
 function continueFromWaiting() {
-  if (!state.questions.length) return;
-  startExamNow();
+  location.href = 'exam.html';
+}
+
+function startExamNow() {
+  // If on index/waiting, go to exam.html
+  if (!location.pathname.includes('exam.html')) {
+    location.href = 'exam.html';
+    return;
+  }
+  requestFullscreen();
+  if (!state.timerInterval) startTimer(state.durationMinutes * 60);
+  startHeartbeat();
+  renderNavigator();
+  renderQuestion();
 }
 
 function maybeResumePage() {

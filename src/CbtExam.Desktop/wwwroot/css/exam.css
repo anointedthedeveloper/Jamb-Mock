@@ -1,0 +1,154 @@
+/* ── Exam Workspace Specific Styles ── */
+.exam-layout {
+  background: #F1F5F9;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.exam-header-modern {
+  background: white;
+  height: 80px;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  z-index: 100;
+}
+
+.header-content {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-section { display: flex; align-items: center; gap: 16px; }
+.dynamic-logo-mini { height: 40px; width: auto; }
+.brand-section .divider { width: 1px; height: 30px; background: var(--border); }
+.brand-section h1 { font-size: 18px; color: var(--text); margin: 0; font-weight: 800; }
+
+.stats-section { display: flex; align-items: center; gap: 24px; }
+.stat-box {
+  background: #F8FAFC;
+  padding: 8px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  border: 1.5px solid var(--border);
+}
+
+.stat-box.timer { 
+  color: var(--primary-dark); 
+  border-color: var(--primary-light);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+}
+
+.progress-ring-container { position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+#progress-pct { position: absolute; font-size: 10px; font-weight: 800; color: var(--text); }
+
+.user-section { display: flex; align-items: center; gap: 12px; }
+.user-avatar { 
+  width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); 
+  display: flex; align-items: center; justify-content: center; color: var(--primary-dark);
+}
+.user-info { display: flex; flex-direction: column; line-height: 1.2; }
+.u-name { font-weight: 700; font-size: 14px; }
+.u-id { font-size: 12px; color: var(--text-muted); }
+
+.exam-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 32px;
+  padding: 32px;
+  overflow: hidden;
+}
+
+.sidebar-nav { height: 100%; overflow-y: auto; }
+.nav-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  height: 100%;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+
+.nav-header { margin-bottom: 24px; }
+.nav-header h3 { font-size: 16px; margin-bottom: 4px; font-weight: 700; }
+.nav-header p { font-size: 13px; color: var(--text-muted); }
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.nav-legend { display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--text-muted); }
+.leg-item { display: flex; align-items: center; gap: 8px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot.current { background: var(--accent); }
+.dot.answered { background: var(--primary); }
+.dot.flagged { background: var(--danger); }
+
+.question-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+}
+
+.question-card-modern {
+  background: white;
+  border-radius: 24px;
+  padding: 48px;
+  flex: 1;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+.q-num { font-size: 14px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+
+.btn-icon-flag {
+  background: #FFF1F2;
+  color: #E11D48;
+  border: none;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.btn-icon-flag:hover { transform: scale(1.1); background: #FFE4E6; }
+
+.q-text { font-size: 20px; font-weight: 600; line-height: 1.6; color: var(--text); margin-bottom: 40px; }
+
+.options-grid { display: grid; gap: 16px; }
+
+.exam-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+
+.central-controls { display: flex; gap: 12px; }
