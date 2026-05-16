@@ -12,23 +12,29 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
+                        <Border Background="{TemplateBinding Background}"
                                 BorderBrush="#C0C0C0"
                                 BorderThickness="1"
                                 Padding="{TemplateBinding Padding}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="MouseOver">
+                                        <VisualState.Setters>
+                                            <Setter Property="BorderBrush" Value="#808080"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Property="Background" Value="#EEEEEE"/>
+                                            <Setter Property="BorderBrush" Value="#BBBBBB"/>
+                                            <Setter Property="Opacity" Value="0.5"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
                             <ContentPresenter x:Name="PART_ContentHost"/>
                         </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#808080"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Background" Value="#EEEEEE"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#BBBBBB"/>
-                                <Setter Property="Opacity" Value="0.5"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -348,7 +354,7 @@
                     </Border>
 
                 </StackPanel>
-            </StackPanel>
             </ScrollViewer>
         </Border>
+    </UserControl.Resources>
 </UserControl>
