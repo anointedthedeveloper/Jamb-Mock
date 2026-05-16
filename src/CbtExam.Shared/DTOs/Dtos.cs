@@ -45,7 +45,8 @@ public record StudentStatusDto(
     int BatteryLevel,
     bool IsOnline,
     string ConnectionState,
-    string DeviceName = "");
+    string DeviceName = "",
+    string DeviceId = "");
 
 // --- Results ---
 public record ResultDto(int StudentExamId, string FullName, string StudentId, int Score, int Total, double Percentage, DateTime? SubmittedAt)
@@ -58,7 +59,7 @@ public record ActivityLogDto(int StudentExamId, string Activity, DateTime Timest
 
 // --- Tab switch report ---
 public record TabSwitchDto(int StudentExamId);
-public record DeviceHeartbeatDto(int StudentExamId, int CurrentQuestion, int BatteryLevel, bool IsOnline, string ConnectionState, string DeviceName = "");
+public record DeviceHeartbeatDto(int StudentExamId, int CurrentQuestion, int BatteryLevel, bool IsOnline, string ConnectionState, string DeviceName = "", string DeviceId = "");
 public record SnapshotDto(int StudentExamId, string ImageBase64);
 
 // --- Student admin management ---

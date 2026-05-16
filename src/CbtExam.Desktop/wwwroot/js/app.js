@@ -473,10 +473,20 @@ function startHeartbeat() {
         batteryLevel: battery,
         isOnline: navigator.onLine,
         connectionState: navigator.onLine ? 'online' : 'offline',
-        deviceName: getDeviceName()
+        deviceName: getDeviceName(),
+        deviceId: getOrCreateDeviceId()
       })
     });
   }, 10000);
+}
+
+function getOrCreateDeviceId() {
+  let id = localStorage.getItem('cbt_device_id');
+  if (!id) {
+    id = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    localStorage.setItem('cbt_device_id', id);
+  }
+  return id;
 }
 
 async function getBatteryLevel() {

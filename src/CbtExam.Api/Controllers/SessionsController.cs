@@ -75,7 +75,7 @@ public class SessionsController(AppDbContext db, SnapshotExportService exports) 
             .Select(se => new StudentStatusDto(
                 se.Id, se.Student!.FullName, se.Student.StudentId,
                 se.JoinedAt, se.IsSubmitted, se.TabSwitchCount,
-                se.Answers.Count, se.Answers.Count, 0, !se.IsSubmitted, se.IsSubmitted ? "submitted" : "online", ""))
+                se.Answers.Count, se.Answers.Count, 0, !se.IsSubmitted, se.IsSubmitted ? "submitted" : "online", "", ""))
             .ToListAsync());
 
     [HttpGet("{id}/results")]
