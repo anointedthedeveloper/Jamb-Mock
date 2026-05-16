@@ -2074,6 +2074,7 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public RelayCommand SaveCommand => new(async () => await SaveAsync());
     public RelayCommand DeleteCommand => new(async () => await DeleteAsync());
     public RelayCommand PasswordCommand => new(async () => await UpdatePasswordAsync());
+    public RelayCommand BulkImportCommand => new(async () => await BulkImportAsync());
     public RelayCommand UploadCsvCommand => new(async () => await UploadCsvAsync());
     public RelayCommand PrintCommand => new(PrintStudents);
     public RelayCommand<StudentAdminDto> PickCommand => new(s => Pick(s));
@@ -2174,6 +2175,51 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
                 Status = "File loaded. Click 'Import Students' to proceed.";
             }
             catch (Exception ex) { Status = $"Error loading file: {ex.Message}"; }
+        }
+    }
+
+    private async Task BulkImportAsync()
+    {
+        if (string.IsNullOrWhiteSpace(BulkCsv)) { BulkStatus = "No data to import."; BulkSuccess = false; OnPropertyChanged("BulkStatus"); return; }
+        
+        IsBusy = true;
+        BulkStatus = "Processing...";
+        BulkSuccess = true;
+        OnPropertyChanged("BulkStatus");
+
+        try
+        {
+            var lines = BulkCsv.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            int count = 0;
+            foreach (var line in lines)
+            {
+                var parts = line.Split(',');
+                if (parts.Length < 2) continue;
+
+                var name = parts[0].Trim();
+                var id = parts[1].Trim();
+                var pass = parts.Length > 2 ? parts[2].Trim() : Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
+
+                await api.UpsertStudentAsync(new StudentUpsertDto(null, name, id, true, pass));
+                count++;
+            }
+
+            BulkStatus = $"Successfully imported {count} students.";
+            BulkSuccess = true;
+            BulkCsv = string.Empty;
+            OnPropertyChanged("BulkCsv");
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            BulkStatus = $"Error: {ex.Message}";
+            BulkSuccess = false;
+        }
+        finally
+        {
+            IsBusy = false;
+            OnPropertyChanged("BulkStatus");
+            OnPropertyChanged("BulkSuccess");
         }
     }
 
