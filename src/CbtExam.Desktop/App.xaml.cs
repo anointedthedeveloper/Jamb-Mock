@@ -34,31 +34,13 @@ public partial class App : Application
         catch { }
     }
 
-    // ── Shell Integration ─────────────────────────────────────────────────
-    [DllImport("shell32.dll", SetLastError = true)]
-    private static extern int SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string AppID);
-
     // ── Startup ────────────────────────────────────────────────────────────
     protected override void OnStartup(StartupEventArgs e)
     {
-        // Fix taskbar grouping and icons - v5 forces a fresh identity
-        try { SetCurrentProcessExplicitAppUserModelID("Anobyte.CbtExam.Admin.v5"); } catch { }
-
         base.OnStartup(e);
 
         // Ensure app doesn't close when switching between windows
         ShutdownMode = ShutdownMode.OnLastWindowClose;
-
-        // Force icon to be set at the OS level as soon as window handle exists
-        EventManager.RegisterClassHandler(typeof(Window), FrameworkElement.LoadedEvent, new RoutedEventHandler((s, e) =>
-        {
-            if (s is Window window)
-            {
-                try {
-                    window.Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/Resources/appicon.ico"));
-                } catch { }
-            }
-        }));
 
         DispatcherUnhandledException          += OnDispatcherUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
