@@ -1,78 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Select Exam | CBT Portal</title>
-<link rel="stylesheet" href="/css/style.css"/>
-<link rel="stylesheet" href="/css/selection.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAMB CBT Mock System | Available Exams</title>
+    <link rel="icon" type="image/png" href="/img/jamb.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="/css/selection.css">
 </head>
-<body class="portal-body">
+<body>
+    <div class="login-card">
+        <!-- LEFT PANEL (BRANDING) -->
+        <div class="left-panel">
+            <div class="flowing-gradient"></div>
+            <div class="hex-grid-overlay"></div>
+            <div class="wave-decor"></div>
 
-<div class="bg-waves">
-  <div class="wave"></div>
-  <div class="wave"></div>
-</div>
+            <div class="left-content-top">
+                <div class="jamb-logo-container">
+                    <img class="main-logo-img" src="/img/jamb.png" alt="JAMB Logo">
+                </div>
+                <h1>Exam Readiness. <br><span class="green-text">Success. Excellence.</span></h1>
+                <p class="tagline">Choose your session below. Every mock exam is a step closer to your desired UTME score. Ensure you are ready before clicking 'Start Session'.</p>
 
-<main id="page-selection" class="page active">
-  <div class="selection-container">
-    <div class="selection-header">
-      <div class="logo-wrapper">
-        <img class="dynamic-logo" src="/img/jamb.png" alt="Logo" onerror="this.src='/img/jamb.png'"/>
-      </div>
-      <div class="header-text">
-        <h2>Available Examinations</h2>
-        <p>Please select a session to proceed to the instructions page.</p>
-      </div>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <div class="feature-title">Secure Mode</div>
+                        <div class="feature-desc">Active proctoring and monitoring enabled.</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        </div>
+                        <div class="feature-title">Real-time Sync</div>
+                        <div class="feature-desc">Progress is saved instantly to our servers.</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div class="feature-title">Timed Sessions</div>
+                        <div class="feature-desc">Simulates the exact UTME exam duration.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="shield-container">
+                <div class="shield-base"></div>
+                <div class="shield-3d">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL (CONTENT) -->
+        <div class="right-panel internal-workspace">
+            <header class="workspace-header">
+                <div class="small-logo-box">
+                    <img src="/img/jamb.png" alt="Logo">
+                </div>
+                <div class="header-divider"></div>
+                <span class="page-indicator">Selection Portal</span>
+            </header>
+
+            <div class="content-body">
+                <div class="welcome-badge">Available Examinations</div>
+                <h2>Select Your Session</h2>
+                <p class="instruction-text">Please pick one of the active exam sessions listed below to proceed.</p>
+
+                <div class="candidate-notes-modern">
+                    <div class="note-header">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span>Candidate Guidelines</span>
+                    </div>
+                    <ul class="note-list">
+                        <li>Ensure you have a stable internet connection before starting.</li>
+                        <li>The exam timer starts immediately after clicking "Start Session".</li>
+                        <li>Closing the window will NOT pause the exam timer.</li>
+                    </ul>
+                </div>
+
+                <div class="exam-list-modern">
+                    <!-- Active Exam -->
+                    <div class="exam-card-modern" onclick="location.href='waiting.html'">
+                        <div class="exam-card-info">
+                            <div class="exam-type-badge">ACTIVE</div>
+                            <h3>Post-UTME Screening 2026</h3>
+                            <div class="exam-meta-pills">
+                                <span class="meta-pill">40 Questions</span>
+                                <span class="meta-pill">60 Minutes</span>
+                            </div>
+                        </div>
+                        <button class="action-btn">Start Session</button>
+                    </div>
+
+                    <!-- Locked Exam -->
+                    <div class="exam-card-modern locked">
+                        <div class="exam-card-info">
+                            <div class="exam-type-badge gray">LOCKED</div>
+                            <h3>MOCK Exam Series II</h3>
+                            <p class="exam-lock-reason">Scheduled for May 20th, 2026. Unlocked by Admin only.</p>
+                        </div>
+                        <button class="action-btn" disabled>Unavailable</button>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="workspace-footer">
+                <button class="btn-back" onclick="location.href='index.html'">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    Sign Out
+                </button>
+                <div class="copyright">© 2026 JAMB Mock System</div>
+            </footer>
+        </div>
     </div>
 
-    <div class="exam-grid" id="exam-list">
-      <!-- Example Active Card -->
-      <div class="exam-card-item" onclick="location.href='waiting.html'">
-        <div class="card-glow"></div>
-        <div class="exam-badge">ACTIVE</div>
-        <div class="exam-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <h3>Post-UTME Screening 2026</h3>
-        <div class="exam-meta">
-          <div class="meta-item">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>40 Questions</span>
-          </div>
-          <div class="meta-item">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span>60 Minutes</span>
-          </div>
-        </div>
-        <button class="btn btn-primary btn-full">Start Session</button>
-      </div>
-
-      <!-- Example Locked Card -->
-      <div class="exam-card-item muted">
-        <div class="exam-badge locked">LOCKED</div>
-        <div class="exam-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <h3>MOCK Exam Series II</h3>
-        <p class="card-desc">Scheduled for May 20th, 2026. This session will be unlocked by the administrator at the scheduled time.</p>
-      </div>
-    </div>
-
-    <div class="portal-footer">
-      <div class="footer-info">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span>Your progress is automatically saved.</span>
-      </div>
-      <button class="btn btn-outline" onclick="location.href='index.html'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        Sign Out
-      </button>
-    </div>
-  </div>
-</main>
-
-<script src="/js/app.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 </html>

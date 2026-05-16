@@ -159,15 +159,16 @@ body::after {
 
 .left-panel h1 {
     font-size: clamp(24px, 3.5vw, 36px);
-    font-weight: 700;
+    font-weight: 300; /* Lighter weight for main words */
     line-height: 1.2;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.7); /* Muted silver/white */
     margin-bottom: 8px;
     letter-spacing: -0.5px;
 }
 
 .left-panel h1 span.green-text {
     color: #10b981;
+    font-weight: 800; /* Bold weight for emphasis */
     display: block;
     margin-top: 4px;
     text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
@@ -339,6 +340,15 @@ body::after {
     box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1);
 }
 
+/* Fix browser autofill tint */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 50px white inset !important;
+    -webkit-text-fill-color: var(--text-dark) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
 .input-icon-left {
     position: absolute;
     left: 16px;
@@ -408,6 +418,12 @@ body::after {
 
 .submit-btn:hover svg {
     transform: translateX(4px);
+}
+
+.submit-btn:active {
+    transform: translateY(1px);
+    background: #14532d;
+    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
 }
 
 .divider-container {
