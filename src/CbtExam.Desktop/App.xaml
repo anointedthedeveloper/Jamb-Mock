@@ -21,40 +21,32 @@
             <conv:PassThroughConverter           x:Key="PassThroughConverter"/>
 
             <!-- ── Semantic brushes (all replaced at runtime by ApplyTheme) ── -->
-            <!-- Page background -->
             <SolidColorBrush x:Key="BgBrush"            Color="#F1F5F9"/>
-            <!-- Card / panel surface -->
             <SolidColorBrush x:Key="CardBrush"          Color="#FFFFFF"/>
-            <!-- Elevated surface (sidebar, header) -->
             <SolidColorBrush x:Key="SurfaceBrush"       Color="#FFFFFF"/>
-            <!-- Input background (TextBox, ComboBox) -->
             <SolidColorBrush x:Key="InputBgBrush"       Color="#FFFFFF"/>
-            <!-- Input border -->
             <SolidColorBrush x:Key="InputBorderBrush"   Color="#E2E8F0"/>
-            <!-- Primary text -->
             <SolidColorBrush x:Key="TextPrimaryBrush"   Color="#0F172A"/>
-            <!-- Secondary / muted text -->
             <SolidColorBrush x:Key="TextSecondaryBrush" Color="#64748B"/>
-            <!-- Divider / border -->
             <SolidColorBrush x:Key="BorderBrush"        Color="#E2E8F0"/>
-            <!-- Sidebar nav hover bg -->
             <SolidColorBrush x:Key="NavHoverBrush"      Color="#F8FAFC"/>
-            <!-- Sidebar nav hover text -->
             <SolidColorBrush x:Key="NavHoverFgBrush"    Color="#16A34A"/>
-            <!-- Sidebar nav active bg -->
             <SolidColorBrush x:Key="NavActiveBrush"     Color="#F0FDF4"/>
-            <!-- Sidebar nav active text -->
             <SolidColorBrush x:Key="NavActiveFgBrush"   Color="#15803D"/>
-            <!-- DataGrid row hover -->
             <SolidColorBrush x:Key="RowHoverBrush"      Color="#F8FAFC"/>
-            <!-- DataGrid row selected -->
             <SolidColorBrush x:Key="RowSelectedBrush"   Color="#F0FDF4"/>
-            <!-- DataGrid header bg -->
             <SolidColorBrush x:Key="HeaderBgBrush"      Color="#F8FAFC"/>
-            <!-- Accent (primary action color — changes with accent pick) -->
             <SolidColorBrush x:Key="AccentBrush"        Color="#16A34A"/>
             <SolidColorBrush x:Key="AccentDarkBrush"    Color="#15803D"/>
-            <!-- Fixed semantic brushes (never change with theme) -->
+            
+            <!-- Premium Brushes -->
+            <LinearGradientBrush x:Key="PremiumGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#064E3B" Offset="0"/>
+                <GradientStop Color="#059669" Offset="1"/>
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="GlassBrush" Color="#BFFFFFFF"/> <!-- 75% White -->
+            <SolidColorBrush x:Key="GlassBorderBrush" Color="#4DFFFFFF"/> <!-- 30% White -->
+
             <SolidColorBrush x:Key="GreenBrush"         Color="#10B981"/>
             <SolidColorBrush x:Key="GreenLightBrush"    Color="#D1FAE5"/>
             <SolidColorBrush x:Key="YellowBrush"        Color="#F59E0B"/>

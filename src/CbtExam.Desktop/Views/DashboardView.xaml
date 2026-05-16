@@ -229,7 +229,6 @@
                             </StackPanel>
                         </StackPanel>
                     </Border>
-             </Border>
                     
                     <UniformGrid.Triggers>
                         <EventTrigger RoutedEvent="Loaded">
@@ -243,6 +242,8 @@
                                     <DoubleAnimation Storyboard.TargetName="Card3" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="0" Duration="0:0:0.4" BeginTime="0:0:0.2"><DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
                                     <DoubleAnimation Storyboard.TargetName="Card4" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.4" BeginTime="0:0:0.3"><DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
                                     <DoubleAnimation Storyboard.TargetName="Card4" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="0" Duration="0:0:0.4" BeginTime="0:0:0.3"><DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="Card5" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.4" BeginTime="0:0:0.4"><DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="Card5" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="0" Duration="0:0:0.4" BeginTime="0:0:0.4"><DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
