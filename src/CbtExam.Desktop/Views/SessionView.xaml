@@ -59,17 +59,17 @@
                                             <Ellipse Width="16" Height="16" Fill="#40FFFFFF"/>
                                             <Ellipse Width="8" Height="8" Fill="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Grid>
-                                        <TextBlock Text="LIVE SESSION" FontSize="11" FontWeight="Black" Foreground="#A7F3D0" VerticalAlignment="Center" LetterSpacing="1.5"/>
+                                        <TextBlock Text="LIVE SESSION" FontSize="11" FontWeight="Black" Foreground="#A7F3D0" VerticalAlignment="Center"/>
                                     </StackPanel>
                                     <TextBlock Text="{Binding ExamTitle}" FontSize="26" FontWeight="Bold" Foreground="White"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                         <StackPanel Margin="0,0,48,0">
-                                            <TextBlock Text="ACCESS CODE" FontSize="10" Foreground="#A7F3D0" FontWeight="Black" LetterSpacing="1"/>
+                                            <TextBlock Text="ACCESS CODE" FontSize="10" Foreground="#A7F3D0" FontWeight="Black"/>
                                             <TextBlock Text="{Binding SessionCode}"
                                                        FontSize="32" FontWeight="Black" Foreground="White" FontFamily="Consolas" Margin="0,6,0,0"/>
                                         </StackPanel>
                                         <StackPanel>
-                                            <TextBlock Text="CANDIDATES" FontSize="10" Foreground="#A7F3D0" FontWeight="Black" LetterSpacing="1"/>
+                                            <TextBlock Text="CANDIDATES" FontSize="10" Foreground="#A7F3D0" FontWeight="Black"/>
                                             <TextBlock Text="{Binding StudentCount}"
                                                        FontSize="32" FontWeight="Black" Foreground="White" Margin="0,6,0,0"/>
                                         </StackPanel>
@@ -123,7 +123,7 @@
                         <TextBlock Text="Select an exam configuration to deploy a new live session room."
                                    FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,24"/>
                         
-                        <TextBlock Text="CHOOSE EXAM TEMPLATE" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,8" LetterSpacing="1"/>
+                        <TextBlock Text="CHOOSE EXAM TEMPLATE" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,8"/>
                         <ComboBox ItemsSource="{Binding Exams}" SelectedItem="{Binding SelectedExam}"
                                   DisplayMemberPath="Title" Width="380" HorizontalAlignment="Left" Height="46"/>
                     </StackPanel>

@@ -88,11 +88,11 @@
                                 <ColumnDefinition Width="90"/>
                                 <ColumnDefinition Width="80"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="#" Margin="24,0,0,0" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
-                            <TextBlock Grid.Column="1" Text="FULL NAME" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
-                            <TextBlock Grid.Column="2" Text="STUDENT ID" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
-                            <TextBlock Grid.Column="3" Text="STATUS" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
-                            <TextBlock Grid.Column="4" Text="ACTIONS" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                            <TextBlock Text="#" Margin="24,0,0,0" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="FULL NAME" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="2" Text="STUDENT ID" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="3" Text="STATUS" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="4" Text="ACTIONS" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </Grid>
                     </Border>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -189,15 +189,15 @@
                         </StackPanel>
 
                         <TextBlock Text="FULL NAME *" FontSize="10" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,6" LetterSpacing="1"/>
+                                   Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,6"/>
                         <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" Height="42"/>
 
                         <TextBlock Text="STUDENT ID (AUTO IF BLANK)" FontSize="10" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,6" LetterSpacing="1"/>
+                                   Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,6"/>
                         <TextBox Text="{Binding StudentId, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" Height="42"/>
 
                         <TextBlock Text="PASSWORD (AUTO IF BLANK)" FontSize="10" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,6" LetterSpacing="1"/>
+                                   Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,6"/>
                         <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20" Height="42"/>
 
                         <CheckBox Content="Allow Login Access" IsChecked="{Binding IsActive}" Margin="2,0,0,24" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"/>
@@ -209,7 +209,7 @@
                                     Padding="16" Margin="0,0,0,20">
                                 <StackPanel>
                                     <TextBlock Text="SECURITY" FontSize="10" FontWeight="Bold"
-                                               Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,10" LetterSpacing="1"/>
+                                               Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,10"/>
                                     <TextBlock Text="Update Password" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
                                     <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" Height="36"/>
                                     <Button Content="Set New Password" Command="{Binding PasswordCommand}"
@@ -264,7 +264,7 @@
                         </StackPanel>
 
                         <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
-                                   Margin="2,0,0,12" TextWrapping="Wrap" LineHeight="1.5">
+                                   Margin="2,0,0,12" TextWrapping="Wrap">
                             Use CSV format: <Run FontWeight="Bold" FontFamily="Consolas" Foreground="{DynamicResource TextPrimaryBrush}">Full Name,Username,Password</Run>
                         </TextBlock>
 

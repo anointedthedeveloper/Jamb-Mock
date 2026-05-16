@@ -37,7 +37,7 @@
             <Border Style="{StaticResource Card}" Padding="24,16" Margin="0,0,0,24">
                 <StackPanel Orientation="Horizontal">
                     <Border Background="{DynamicResource NavActiveBrush}" CornerRadius="10" Padding="12,6" Margin="0,0,16,0">
-                         <TextBlock Text="ACTIVE FILTER" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" LetterSpacing="1" VerticalAlignment="Center"/>
+                         <TextBlock Text="ACTIVE FILTER" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
                     </Border>
                     
                     <TextBlock Text="Session:" FontSize="13" FontWeight="SemiBold"
@@ -57,7 +57,7 @@
                          Visibility="{Binding Results.Count, Converter={StaticResource IntToVis}}">
                 <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,16,0">
                     <StackPanel>
-                        <TextBlock Text="AVERAGE PERFORMANCE" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Text="AVERAGE PERFORMANCE" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock FontSize="36" FontWeight="Black" Foreground="{DynamicResource AccentBrush}" Margin="0,8,0,0">
                             <Run Text="{Binding AvgScore}"/><Run Text="%" FontSize="20"/>
                         </TextBlock>
@@ -65,13 +65,13 @@
                 </Border>
                 <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,16,0">
                     <StackPanel>
-                        <TextBlock Text="TOTAL PASSED" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Text="TOTAL PASSED" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock Text="{Binding PassCount}" FontSize="36" FontWeight="Black" Foreground="#16A34A" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Card}" Padding="24">
                     <StackPanel>
-                        <TextBlock Text="TOTAL FAILED" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Text="TOTAL FAILED" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock Text="{Binding FailCount}" FontSize="36" FontWeight="Black" Foreground="#DC2626" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Border>

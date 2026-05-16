@@ -35,19 +35,19 @@
             <UniformGrid Columns="3" Margin="0,0,0,24">
                 <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,16,0">
                     <StackPanel>
-                        <TextBlock Text="TOTAL EXAMS" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Text="TOTAL EXAMS" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock Text="{Binding TotalExams, Mode=OneWay}" FontSize="36" FontWeight="Black" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,16,0">
                     <StackPanel>
-                        <TextBlock Text="TOTAL SESSIONS" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Text="TOTAL SESSIONS" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock Text="{Binding TotalSessions, Mode=OneWay}" FontSize="36" FontWeight="Black" Foreground="#16A34A" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Card}" Padding="24">
                     <StackPanel>
-                        <TextBlock Text="CANDIDATES TESTED" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Text="CANDIDATES TESTED" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock Text="{Binding TotalStudents, Mode=OneWay}" FontSize="36" FontWeight="Black" Foreground="{DynamicResource AccentBrush}" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Border>
@@ -61,7 +61,7 @@
                             <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" Foreground="#16A34A" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Exam Summary" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,16,0,6"/>
-                        <TextBlock Text="Complete overview of all exam templates and configurations." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" LineHeight="1.5"/>
+                        <TextBlock Text="Complete overview of all exam templates and configurations." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"/>
                         <Button Content="Generate Report" Style="{StaticResource PrimaryBtn}" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Padding="16,8" HorizontalAlignment="Left" Margin="0,20,0,0"/>
                     </StackPanel>
                 </Border>
@@ -71,7 +71,7 @@
                             <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" Foreground="#3B82F6" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Student Analysis" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,16,0,6"/>
-                        <TextBlock Text="Detailed performance metrics and competency analysis per student." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" LineHeight="1.5"/>
+                        <TextBlock Text="Detailed performance metrics and competency analysis per student." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"/>
                         <Button Content="Generate Report" Style="{StaticResource PrimaryBtn}" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Padding="16,8" HorizontalAlignment="Left" Margin="0,20,0,0"/>
                     </StackPanel>
                 </Border>
@@ -81,7 +81,7 @@
                             <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" Foreground="#F59E0B" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Session Activity" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,16,0,6"/>
-                        <TextBlock Text="Audit log of session times, proctor actions, and connectivity events." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" LineHeight="1.5"/>
+                        <TextBlock Text="Audit log of session times, proctor actions, and connectivity events." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"/>
                         <Button Content="Generate Report" Style="{StaticResource PrimaryBtn}" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Padding="16,8" HorizontalAlignment="Left" Margin="0,20,0,0"/>
                     </StackPanel>
                 </Border>

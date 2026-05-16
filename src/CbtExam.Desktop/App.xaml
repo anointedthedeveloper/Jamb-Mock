@@ -11,6 +11,7 @@
 
             <!-- ── Converters ──────────────────────────────────────────── -->
             <conv:BoolToVisibilityConverter      x:Key="BoolToVis"/>
+            <conv:BoolToVisibilityInverseConverter x:Key="BoolToVisInverse"/>
             <conv:InverseBoolConverter           x:Key="InvBool"/>
             <conv:BoolToColorConverter           x:Key="BoolToColor"/>
             <conv:NonEmptyToVisibilityConverter  x:Key="NonEmptyToVis"/>

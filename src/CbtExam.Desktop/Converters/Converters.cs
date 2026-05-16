@@ -13,6 +13,14 @@ public class BoolToVisibilityConverter : IValueConverter
         v is Visibility.Visible;
 }
 
+public class BoolToVisibilityInverseConverter : IValueConverter
+{
+    public object Convert(object v, Type t, object p, CultureInfo c) =>
+        v is true ? Visibility.Collapsed : Visibility.Visible;
+    public object ConvertBack(object v, Type t, object p, CultureInfo c) =>
+        v is not Visibility.Visible;
+}
+
 public class InverseBoolConverter : IValueConverter
 {
     public object Convert(object v, Type t, object p, CultureInfo c) => v is bool b && !b;
