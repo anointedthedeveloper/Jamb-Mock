@@ -25,13 +25,12 @@ if exist "%OUTPUT%" (
 if not exist "%OUTPUT%" mkdir "%OUTPUT%"
 
 echo [3/4] Restoring NuGet packages...
-dotnet restore CbtExam.sln --runtime win-x64
+dotnet restore "%PROJECT%" --runtime win-x64
 
 echo [4/4] Building and Publishing (Release win-x64)...
 dotnet publish "%PROJECT%" ^
   --configuration Release ^
   --runtime win-x64 ^
-  --no-restore ^
   --self-contained true ^
   -p:PublishSingleFile=true ^
   -p:IncludeNativeLibrariesForSelfExtract=true ^
