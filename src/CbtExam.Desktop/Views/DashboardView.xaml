@@ -163,7 +163,9 @@
                             </StackPanel>
                         </Grid>
                     </Grid>
-                     <!-- 5 stat cards with hover lift and entrance animation -->
+                </Border>
+
+                <!-- 5 stat cards with hover lift and entrance animation -->
                 <UniformGrid Grid.Column="1" Columns="3" Rows="2">
                     <Border x:Name="Card1" Style="{StaticResource Card}" Padding="20" Margin="0,0,12,12" Opacity="0">
                         <Border.RenderTransform><TranslateTransform Y="20"/></Border.RenderTransform>
