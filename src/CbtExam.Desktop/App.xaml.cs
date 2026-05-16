@@ -41,8 +41,8 @@ public partial class App : Application
     // ── Startup ────────────────────────────────────────────────────────────
     protected override void OnStartup(StartupEventArgs e)
     {
-        // Fix taskbar grouping and icons
-        try { SetCurrentProcessExplicitAppUserModelID("Anobyte.CbtExam.Admin"); } catch { }
+        // Fix taskbar grouping and icons - v2 forces a cache refresh
+        try { SetCurrentProcessExplicitAppUserModelID("Anobyte.CbtExam.Admin.v2"); } catch { }
 
         base.OnStartup(e);
         
