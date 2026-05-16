@@ -123,9 +123,11 @@ function togglePassword() {
   inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 function handleLogin() {
-  // Logic to transition to selection.html
   location.href = 'selection.html';
 }
+document.getElementById('inp-pass').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') handleLogin();
+});
 </script>
 </body>
 </html>
