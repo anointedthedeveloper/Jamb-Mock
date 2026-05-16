@@ -41,8 +41,8 @@ public partial class App : Application
     // ── Startup ────────────────────────────────────────────────────────────
     protected override void OnStartup(StartupEventArgs e)
     {
-        // Fix taskbar grouping and icons - v4 forces a fresh identity
-        try { SetCurrentProcessExplicitAppUserModelID("Anobyte.CbtExam.Admin.v4"); } catch { }
+        // Fix taskbar grouping and icons - v5 forces a fresh identity
+        try { SetCurrentProcessExplicitAppUserModelID("Anobyte.CbtExam.Admin.v5"); } catch { }
 
         base.OnStartup(e);
 
@@ -55,7 +55,7 @@ public partial class App : Application
             if (s is Window window)
             {
                 try {
-                    window.Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/CbtExam;component/Resources/appicon.ico"));
+                    window.Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/Resources/appicon.ico"));
                 } catch { }
             }
         }));

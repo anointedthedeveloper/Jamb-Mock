@@ -6,7 +6,7 @@
         <ResourceDictionary>
             <!-- ── Global Window Style ────────────────────────────────── -->
             <Style TargetType="{x:Type Window}">
-                <Setter Property="Icon" Value="pack://application:,,,/CbtExam;component/Resources/appicon.ico"/>
+                <Setter Property="Icon" Value="/Resources/appicon.ico"/>
             </Style>
 
             <!-- ── Converters ──────────────────────────────────────────── -->
