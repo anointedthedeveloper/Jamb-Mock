@@ -101,8 +101,8 @@
 
                 <div class="sync-progress-section">
                     <div class="progress-header">
-                        <span id="waiting-status">Synchronizing questions...</span>
-                        <span id="progress-percent">40%</span>
+                        <span id="waiting-status">Waiting for admin to start exam...</span>
+                        <span id="progress-percent">0%</span>
                     </div>
                     <div class="loading-bar-container">
                         <div class="loading-bar-progress" id="loading-bar"></div>
@@ -114,7 +114,42 @@
                 </button>
             </div>
 
-            <div class="info-alert-box mt-6">
+            <!-- Keyboard Controls Guide -->
+            <div class="controls-guide">
+                <h4>Keyboard Controls</h4>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <div class="control-key">A</div>
+                        <div class="control-desc">Select Option A</div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-key">B</div>
+                        <div class="control-desc">Select Option B</div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-key">C</div>
+                        <div class="control-desc">Select Option C</div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-key">D</div>
+                        <div class="control-desc">Select Option D</div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-key">P</div>
+                        <div class="control-desc">Previous Question</div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-key">N</div>
+                        <div class="control-desc">Next Question</div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-key">S</div>
+                        <div class="control-desc">Submit Exam</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-alert-box">
                 <div class="info-alert-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -124,14 +159,8 @@
                     </svg>
                 </div>
                 <div class="info-alert-text">
-                    Do not refresh this page. The "Start Examination" button will activate automatically once the
-                    coordinator releases the paper.
+                    Do not refresh this page. You will be automatically redirected to the exam page once the coordinator starts the session.
                 </div>
-            </div>
-
-            <div class="disclaimer-text">
-                <strong>Important:</strong> Ensure your internet connection is stable. If you experience any issues,
-                please alert the invigilator immediately.
             </div>
 
             <footer class="workspace-footer"
@@ -145,7 +174,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const studentName = localStorage.getItem('studentName') || 'Candidate';
+            const studentId = localStorage.getItem('studentId') || '';
             const examTitle = localStorage.getItem('selectedExamTitle') || 'Selected Examination';
+            const selectedExamId = parseInt(localStorage.getItem('selectedExamId')) || 0;
             const currentYear = new Date().getFullYear();
 
             document.getElementById('wait-candidate-name').textContent = studentName;
@@ -153,39 +184,105 @@
             document.getElementById('userAvatar').textContent = studentName.charAt(0).toUpperCase();
             document.getElementById('currentYear').textContent = currentYear;
 
-            // Simulate progress
-            let progress = 40;
             const progressBar = document.getElementById('loading-bar');
             const percentText = document.getElementById('progress-percent');
             const statusText = document.getElementById('waiting-status');
+            const btn = document.getElementById('btn-start-exam');
 
-            const interval = setInterval(() => {
-                if (progress < 100) {
-                    progress += Math.floor(Math.random() * 5) + 1;
-                    if (progress > 100) progress = 100;
-                    progressBar.style.width = progress + '%';
-                    percentText.textContent = progress + '%';
-                } else {
-                    clearInterval(interval);
+            let pollingInterval;
+            let downloading = false;
+
+            // Step 1: Poll for active session
+            const checkSession = async () => {
+                if (downloading) return; // Prevent multiple joins
+                try {
+                    const response = await fetch(`${API_BASE}/Sessions`);
+                    if (!response.ok) return;
+                    
+                    const sessions = await response.json();
+                    const activeSession = sessions.find(s => s.examId === selectedExamId && s.isActive);
+                    
+                    if (activeSession) {
+                        clearInterval(pollingInterval);
+                        startExamProcess(activeSession);
+                    }
+                } catch (err) {
+                    console.error('Polling error', err);
                 }
-            }, 300);
+            };
 
-            // Simulate server signal
-            setTimeout(() => {
-                const btn = document.getElementById('btn-start-exam');
-                
-                statusText.textContent = 'All synchronization complete. Ready to start.';
-                statusText.style.color = '#10b981';
-                percentText.textContent = '100%';
-                progressBar.style.width = '100%';
-                progressBar.style.background = '#10b981';
-                progressBar.style.boxShadow = '0 0 15px rgba(16, 185, 129, 0.4)';
+            // Start polling every 3 seconds
+            pollingInterval = setInterval(checkSession, 3000);
 
-                btn.disabled = false;
-                btn.classList.remove('disabled');
-                btn.innerHTML = '<span>Start Examination Now</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>';
-                btn.onclick = () => window.location.href = 'exam.html';
-            }, 5000);
+            // Step 2: Join, Download, Redirect
+            const startExamProcess = async (session) => {
+                downloading = true;
+                statusText.textContent = 'Session found. Joining...';
+                updateProgress(20);
+
+                try {
+                    // Join Session
+                    const joinRes = await fetch(`${API_BASE}/Student/join`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sessionCode: session.sessionCode,
+                            fullName: studentName,
+                            studentId: studentId,
+                            deviceId: navigator.userAgent,
+                            deviceName: 'Student Device'
+                        })
+                    });
+
+                    if (!joinRes.ok) throw new Error('Failed to join');
+                    const joinData = await joinRes.json();
+                    const studentExamId = joinData.studentExamId;
+                    
+                    // Save context
+                    localStorage.setItem('studentExamId', studentExamId);
+                    localStorage.setItem('sessionId', joinData.sessionId);
+                    localStorage.setItem('examDuration', joinData.durationMinutes);
+
+                    statusText.textContent = 'Downloading questions for offline support...';
+                    updateProgress(50);
+
+                    // Download Questions (Aggressive Caching)
+                    const qRes = await fetch(`${API_BASE}/Student/${studentExamId}/questions`);
+                    if (!qRes.ok) throw new Error('Failed to fetch questions');
+                    const questions = await qRes.json();
+
+                    // Cache to local storage
+                    localStorage.setItem('cachedQuestions', JSON.stringify(questions));
+                    updateProgress(100);
+
+                    statusText.textContent = 'All synchronization complete. Ready to start.';
+                    statusText.style.color = '#10b981';
+                    
+                    btn.disabled = false;
+                    btn.classList.remove('disabled');
+                    btn.innerHTML = '<span>Redirecting to Exam...</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>';
+                    
+                    // Auto redirect
+                    setTimeout(() => {
+                        window.location.href = 'exam.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error(error);
+                    statusText.textContent = 'Error connecting to exam. Retrying...';
+                    downloading = false;
+                    pollingInterval = setInterval(checkSession, 5000); // Resume polling
+                }
+            };
+
+            function updateProgress(percent) {
+                progressBar.style.width = percent + '%';
+                percentText.textContent = percent + '%';
+                if(percent === 100) {
+                    progressBar.style.background = '#10b981';
+                    progressBar.style.boxShadow = '0 0 15px rgba(16, 185, 129, 0.4)';
+                }
+            }
         });
     </script>
 </body>
