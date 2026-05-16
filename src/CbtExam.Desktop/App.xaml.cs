@@ -41,13 +41,24 @@ public partial class App : Application
     // ── Startup ────────────────────────────────────────────────────────────
     protected override void OnStartup(StartupEventArgs e)
     {
-        // Fix taskbar grouping and icons - v2 forces a cache refresh
-        try { SetCurrentProcessExplicitAppUserModelID("Anobyte.CbtExam.Admin.v2"); } catch { }
+        // Fix taskbar grouping and icons - v3 forces a fresh identity
+        try { SetCurrentProcessExplicitAppUserModelID("Anobyte.CbtExam.Admin.v3"); } catch { }
 
         base.OnStartup(e);
-        
-        // Ensure app doesn't close when switching between Login and Main windows
+
+        // Ensure app doesn't close when switching between windows
         ShutdownMode = ShutdownMode.OnLastWindowClose;
+
+        // Force icon to be set at the OS level as soon as window handle exists
+        EventManager.RegisterClassHandler(typeof(Window), Window.SourceInitializedEvent, new RoutedEventHandler((s, e) =>
+        {
+            if (s is Window window)
+            {
+                try {
+                    window.Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/CbtExam;component/Resources/jamb.png"));
+                } catch { }
+            }
+        }));
 
         DispatcherUnhandledException          += OnDispatcherUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
@@ -55,7 +66,6 @@ public partial class App : Application
         
         LoadTheme();
 
-        // Manually show the first window since we removed StartupUri
         var login = new Views.LoginWindow();
         login.Show();
     }

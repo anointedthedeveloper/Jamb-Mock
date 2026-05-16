@@ -226,23 +226,24 @@ public class LoginViewModel : BaseViewModel
                 ClearSavedCredentials();
             }
 
-            // Open main window and close login
+            // Close login window immediately to prevent taskbar grouping lag
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is LoginWindow)
+                {
+                    window.Hide(); // Hide immediately
+                    window.Close();
+                    break;
+                }
+            }
+
+            // Open main window
             var mainWindow = new MainWindow();
             if (Application.Current != null)
             {
                 Application.Current.MainWindow = mainWindow;
             }
             mainWindow.Show();
-            
-            // Close login window
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window is LoginWindow)
-                {
-                    window.Close();
-                    break;
-                }
-            }
         }
         else
         {
