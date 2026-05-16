@@ -4,6 +4,55 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" Background="{DynamicResource BgBrush}">
         <StackPanel Margin="32,24,32,32">
 
+            <!-- ── System Health Bar ── -->
+            <Border Style="{StaticResource Card}" Padding="20,12" Margin="0,0,0,24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Animated pulse dot -->
+                        <Grid Width="20" Height="20" Margin="0,0,12,0">
+                            <Ellipse x:Name="PulseDot" Width="20" Height="20" Fill="{DynamicResource AccentBrush}" Opacity="0.2"/>
+                            <Ellipse Width="10" Height="10" Fill="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Grid.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="PulseDot" Storyboard.TargetProperty="Opacity" From="0.4" To="0" Duration="0:0:1.5"/>
+                                            <DoubleAnimation Storyboard.TargetName="PulseDot" Storyboard.TargetProperty="Width" From="10" To="28" Duration="0:0:1.5"/>
+                                            <DoubleAnimation Storyboard.TargetName="PulseDot" Storyboard.TargetProperty="Height" From="10" To="28" Duration="0:0:1.5"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Grid.Triggers>
+                        </Grid>
+                        <TextBlock Text="System Health" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"
+                                   Margin="0,0,12,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="All systems operational and secure" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="{DynamicResource NavActiveBrush}" CornerRadius="12" Padding="12,6" Margin="0,0,12,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,8,0"
+                                         Fill="{Binding DataContext.ServerRunning, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToColor}}"/>
+                                <TextBlock Text="{Binding DataContext.ServerStatusText, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneWay}"
+                                           FontSize="12" FontWeight="Bold" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource AccentBrush}"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="12,6">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"
+                                           Foreground="{Binding LatencyColor}"/>
+                                <TextBlock Text="{Binding Latency}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
 
             <!-- ── Page Header ── -->
             <Grid Margin="0,0,0,28">

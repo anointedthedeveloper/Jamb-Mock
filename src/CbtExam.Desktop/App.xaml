@@ -210,7 +210,6 @@
                 <Setter Property="BorderThickness"         Value="0"/>
                 <Setter Property="Padding"                 Value="16,11"/>
                 <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="Cursor"                  Value="Hand"/>
                 <Setter Property="FontSize"                Value="13"/>
                 <Setter Property="Template">
@@ -218,8 +217,7 @@
                         <ControlTemplate TargetType="Button">
                             <Border x:Name="bd" Background="{TemplateBinding Background}"
                                     CornerRadius="8" Margin="8,2" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">

@@ -35,16 +35,14 @@
         </Style>
         <Style x:Key="SideIcon" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
-            <Setter Property="FontSize" Value="18"/>
-            <Setter Property="Width" Value="32"/>
+            <Setter Property="FontSize" Value="17"/>
+            <Setter Property="Width" Value="28"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="TextAlignment" Value="Center"/>
         </Style>
         <Style x:Key="SideLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="4,0,0,0"/>
         </Style>
         <Style x:Key="RailBtn" TargetType="Button" BasedOn="{StaticResource NavBtn}">
             <Setter Property="Width" Value="44"/>
@@ -60,8 +58,13 @@
                         <Border x:Name="bd" Background="{TemplateBinding Background}"
                                 CornerRadius="8" Margin="0,2" Padding="0"
                                 Width="44" Height="42">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextAlignment" Value="Center"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -292,27 +295,11 @@
                 <!-- Server dot -->
                 <Button Grid.Row="2" Command="{Binding ToggleServerCommand}" ToolTip="Server Status"
                         Style="{StaticResource RailBtn}" HorizontalAlignment="Center" Margin="0,0,0,16">
-                    <Grid>
-                        <!-- Pulse effect for the dot -->
-                        <Ellipse Width="12" Height="12" Fill="{Binding ServerRunning, Converter={StaticResource BoolToColor}}" Opacity="0.3">
-                            <Ellipse.Triggers>
-                                <EventTrigger RoutedEvent="Loaded">
-                                    <BeginStoryboard>
-                                        <Storyboard RepeatBehavior="Forever">
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.4" To="0" Duration="0:0:1.5"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="Width" From="12" To="22" Duration="0:0:1.5"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="Height" From="12" To="22" Duration="0:0:1.5"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </EventTrigger>
-                            </Ellipse.Triggers>
-                        </Ellipse>
-                        <Border Width="12" Height="12" CornerRadius="6" Background="{Binding ServerRunning, Converter={StaticResource BoolToColor}}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="{Binding ServerRunning, Converter={StaticResource BoolToColor}}" Opacity="0.6"/>
-                            </Border.Effect>
-                        </Border>
-                    </Grid>
+                    <Border Width="12" Height="12" CornerRadius="6" Background="{Binding ServerRunning, Converter={StaticResource BoolToColor}}">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="{Binding ServerRunning, Converter={StaticResource BoolToColor}}" Opacity="0.6"/>
+                        </Border.Effect>
+                    </Border>
                 </Button>
             </Grid>
         </Border>
@@ -481,38 +468,12 @@
                     </StackPanel>
 
                     <!-- Live Metric Ticker -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <!-- System Health Status -->
-                        <Border Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,16,0">
-                            <StackPanel Orientation="Horizontal">
-                                <Grid Width="16" Height="16" Margin="0,0,8,0">
-                                    <Ellipse x:Name="PulseDot" Width="16" Height="16" Fill="{DynamicResource AccentBrush}" Opacity="0.2">
-                                        <Ellipse.Triggers>
-                                            <EventTrigger RoutedEvent="Loaded">
-                                                <BeginStoryboard>
-                                                    <Storyboard RepeatBehavior="Forever">
-                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.4" To="0" Duration="0:0:1.5"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Width" From="10" To="22" Duration="0:0:1.5"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Height" From="10" To="22" Duration="0:0:1.5"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </EventTrigger>
-                                        </Ellipse.Triggers>
-                                    </Ellipse>
-                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Grid>
-                                <TextBlock Text="System Health:" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Operational" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16,8" MinWidth="200" MaxWidth="400">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding LiveMetricIcon}" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#10B981" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                <TextBlock Text="{Binding LiveMetricText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" FontWeight="Medium" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
+                    <Border Grid.Column="1" Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16,8" Margin="40,0" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="260" MaxWidth="500">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding LiveMetricIcon}" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#10B981" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding LiveMetricText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" FontWeight="Medium" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </Border>
 
                     <!-- Persistent Server Info Header -->
                     <Border Grid.Column="2" Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12,6" Margin="0,0,24,0" 
