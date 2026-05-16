@@ -9,33 +9,49 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Grid Grid.Row="0" Margin="0,0,0,20">
-            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <Grid Grid.Row="0" Margin="0,0,0,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
             <StackPanel>
-                <TextBlock Text="Devices" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="{Binding SessionInfo, Mode=OneWay}" FontSize="13"
-                           Foreground="{StaticResource TextSecondaryBrush}" Margin="0,3,0,0"/>
+                <TextBlock Text="Live Devices" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock Text="{Binding SessionInfo, Mode=OneWay}" FontSize="14"
+                           Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0"/>
             </StackPanel>
-            <Button Grid.Column="1" Content="↻  Refresh" Command="{Binding RefreshCommand}"
-                    Style="{StaticResource PrimaryBtn}" Padding="14,8" VerticalAlignment="Center"/>
+            <Button Grid.Column="1" Command="{Binding RefreshCommand}"
+                    Style="{StaticResource PrimaryBtn}" Background="{DynamicResource CardBrush}"
+                    Foreground="{DynamicResource TextPrimaryBrush}" Padding="16,10" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Refresh Nodes" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
         </Grid>
 
         <!-- Stat pills -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,16">
-            <Border CornerRadius="8" Background="White" BorderBrush="#E2E8F0" BorderThickness="1"
-                    Padding="20,12" Margin="0,0,12,0">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,24">
+            <Border CornerRadius="16" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                    Padding="24,16" Margin="0,0,16,0" MinWidth="180">
                 <StackPanel>
-                    <TextBlock Text="Total Devices" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    <TextBlock Text="{Binding Total, Mode=OneWay}" FontSize="28" FontWeight="Bold"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="TOTAL NODES" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                    <TextBlock Text="{Binding Total, Mode=OneWay}" FontSize="32" FontWeight="Bold"
+                               Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
             </Border>
-            <Border CornerRadius="8" Background="#F0FDF4" BorderBrush="#BBF7D0" BorderThickness="1"
-                    Padding="20,12">
-                <StackPanel>
-                    <TextBlock Text="Online" FontSize="11" Foreground="#16A34A"/>
-                    <TextBlock Text="{Binding Online, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="#16A34A"/>
-                </StackPanel>
+            <Border CornerRadius="16" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource PremiumGradient}" BorderThickness="1"
+                    Padding="24,16" MinWidth="180">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Text="ONLINE NOW" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Text="{Binding Online, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <Ellipse Width="8" Height="8" Fill="{DynamicResource AccentBrush}" HorizontalAlignment="Right" VerticalAlignment="Top">
+                        <Ellipse.Effect>
+                            <DropShadowEffect BlurRadius="8" Color="#3B82F6" Opacity="0.6" ShadowDepth="0"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+                </Grid>
             </Border>
         </StackPanel>
 
@@ -48,19 +64,19 @@
                 </Grid.RowDefinitions>
                 <!-- Table header -->
                 <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="14,14,0,0" Padding="0,0,0,0">
-                    <Grid Height="40">
+                    <Grid Height="44">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="130"/>
-                            <ColumnDefinition Width="110"/>
-                            <ColumnDefinition Width="110"/>
-                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="100"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Device / Student" Margin="20,0,0,0" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="Student ID" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="2" Text="Connected" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="3" Text="Status" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="4" Text="Battery" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="DEVICE / STUDENT" Margin="24,0,0,0" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Grid.Column="1" Text="STUDENT ID" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Grid.Column="2" Text="CONNECTED" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Grid.Column="3" Text="STATUS" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
+                        <TextBlock Grid.Column="4" Text="BATTERY" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" LetterSpacing="1"/>
                     </Grid>
                 </Border>
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -68,18 +84,18 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Background="Transparent">
-                                    <Grid Height="54">
+                                    <Grid Height="60">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="130"/>
-                                            <ColumnDefinition Width="110"/>
-                                            <ColumnDefinition Width="110"/>
-                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="140"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="100"/>
                                         </Grid.ColumnDefinitions>
                                         
-                                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
-                                            <Border Width="36" Height="36" CornerRadius="10" Background="{DynamicResource NavActiveBrush}" Margin="0,0,12,0">
-                                                <TextBlock Text="&#xE770;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource AccentBrush}"
+                                        <StackPanel Orientation="Horizontal" Margin="24,0,0,0" VerticalAlignment="Center">
+                                            <Border Width="40" Height="40" CornerRadius="12" Background="{DynamicResource NavActiveBrush}" Margin="0,0,14,0">
+                                                <TextBlock Text="&#xE770;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="{DynamicResource AccentBrush}"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <StackPanel VerticalAlignment="Center">
@@ -88,19 +104,23 @@
                                             </StackPanel>
                                         </StackPanel>
 
-                                        <TextBlock Grid.Column="1" Text="{Binding StudentId}" VerticalAlignment="Center" FontSize="12" FontFamily="Consolas" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding StudentId}" VerticalAlignment="Center" FontSize="12" FontFamily="Consolas" Foreground="{DynamicResource TextPrimaryBrush}"/>
                                         <TextBlock Grid.Column="2" Text="{Binding JoinedAt}" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                         
-                                        <Border Grid.Column="3" CornerRadius="6" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <Border Grid.Column="3" CornerRadius="8" Padding="12,5" HorizontalAlignment="Left" VerticalAlignment="Center">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#F1F5F9"/>
+                                                    <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Status}" Value="Connected">
-                                                            <Setter Property="Background" Value="#F0FDF4"/>
+                                                            <Setter Property="Background" Value="#1016A34A"/>
+                                                            <Setter Property="BorderBrush" Value="#3016A34A"/>
+                                                            <Setter Property="BorderThickness" Value="1"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Submitted">
-                                                            <Setter Property="Background" Value="#EFF6FF"/>
+                                                            <Setter Property="Background" Value="#103B82F6"/>
+                                                            <Setter Property="BorderBrush" Value="#303B82F6"/>
+                                                            <Setter Property="BorderThickness" Value="1"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -108,13 +128,13 @@
                                             <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="Bold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="#64748B"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Status}" Value="Connected">
                                                                 <Setter Property="Foreground" Value="#16A34A"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Status}" Value="Submitted">
-                                                                <Setter Property="Foreground" Value="#2563EB"/>
+                                                                <Setter Property="Foreground" Value="#3B82F6"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -123,7 +143,7 @@
                                         </Border>
 
                                         <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
-                                            <TextBlock Text="&#xEBB0;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center">
+                                            <TextBlock Text="&#xEBB0;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="#16A34A"/>
@@ -136,7 +156,7 @@
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-                                            <TextBlock Text="{Binding Battery, StringFormat='{}{0}%'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Battery, StringFormat='{}{0}%'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
