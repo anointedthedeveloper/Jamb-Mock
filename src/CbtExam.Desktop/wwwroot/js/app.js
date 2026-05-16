@@ -472,7 +472,8 @@ function startHeartbeat() {
         currentQuestion: state.currentIndex + 1,
         batteryLevel: battery,
         isOnline: navigator.onLine,
-        connectionState: navigator.onLine ? 'online' : 'offline'
+        connectionState: navigator.onLine ? 'online' : 'offline',
+        deviceName: getDeviceName()
       })
     });
   }, 10000);
@@ -486,6 +487,16 @@ async function getBatteryLevel() {
   } catch {
     return -1;
   }
+}
+
+function getDeviceName() {
+  const ua = navigator.userAgent;
+  if (ua.includes('Windows')) return 'Windows PC';
+  if (ua.includes('Macintosh')) return 'MacBook';
+  if (ua.includes('Android')) return 'Android Device';
+  if (ua.includes('iPhone')) return 'iPhone';
+  if (ua.includes('iPad')) return 'iPad';
+  return 'Web Client';
 }
 
 // ── Utilities ──────────────────────────────────────────────────────────────

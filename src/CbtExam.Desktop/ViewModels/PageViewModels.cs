@@ -1014,7 +1014,7 @@ public class DevicesViewModel : BaseViewModel, IRefreshable
                         s.JoinedAt.ToLocalTime().ToString("HH:mm:ss"),
                         s.IsSubmitted ? "Submitted" : s.ConnectionState,
                         s.TabSwitchCount,
-                        s.BatteryLevel, s.IsOnline));
+                        s.BatteryLevel, s.IsOnline, s.DeviceName));
                 }
                 Total = students.Count;
                 Online = students.Count(s => !s.IsSubmitted && s.IsOnline);
@@ -1026,7 +1026,7 @@ public class DevicesViewModel : BaseViewModel, IRefreshable
 
 public record ExamSubjectConfig(string Subject, List<int> Years, int QuestionCount);
 
-public record DeviceRow(string Name, string StudentId, string JoinedAt, string Status, int TabSwitches, int Battery, bool Online);
+public record DeviceRow(string Name, string StudentId, string JoinedAt, string Status, int TabSwitches, int Battery, bool Online, string DeviceName = "");
 
 public record QuestionBankRow(int Serial, int Id, string Subject, int Year, int QuestionNumber, string Preview);
 

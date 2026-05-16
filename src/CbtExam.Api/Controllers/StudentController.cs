@@ -201,7 +201,7 @@ public class StudentController(AppDbContext db, IHubContext<ExamHub> hub, Snapsh
             .Where(se => se.SessionId == sessionId)
             .Select(se => new StudentStatusDto(
                 se.Id, se.Student!.FullName, se.Student.StudentId, se.JoinedAt, se.IsSubmitted, se.TabSwitchCount,
-                se.Answers.Count, se.Answers.Count, 0, !se.IsSubmitted, se.IsSubmitted ? "submitted" : "online"))
+                se.Answers.Count, se.Answers.Count, 0, !se.IsSubmitted, se.IsSubmitted ? "submitted" : "online", ""))
             .ToListAsync();
         if (heartbeat is not null)
         {
@@ -212,7 +212,8 @@ public class StudentController(AppDbContext db, IHubContext<ExamHub> hub, Snapsh
                         CurrentQuestion = heartbeat.CurrentQuestion,
                         BatteryLevel = heartbeat.BatteryLevel,
                         IsOnline = heartbeat.IsOnline,
-                        ConnectionState = heartbeat.ConnectionState
+                        ConnectionState = heartbeat.ConnectionState,
+                        DeviceName = heartbeat.DeviceName
                     }
                     : s)
                 .ToList();
