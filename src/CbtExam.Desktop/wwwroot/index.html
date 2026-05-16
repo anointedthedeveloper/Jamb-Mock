@@ -5,58 +5,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CBT Exam System | Login</title>
 <link rel="stylesheet" href="/css/style.css"/>
+<link rel="stylesheet" href="/css/login.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="portal-body">
+<body class="login-split">
 
-<div class="bg-waves">
-  <div class="wave"></div>
-  <div class="wave"></div>
-  <div class="wave"></div>
+<div class="login-left">
+  <div class="hex-grid"></div>
+  <div class="content-wrapper">
+    <div class="logo-top">
+      <img src="/img/jamb.png" alt="Logo"/>
+    </div>
+    
+    <div class="hero-text">
+      <h1>Secure. Reliable.</h1>
+      <h1 class="highlight">Built for Excellence.</h1>
+      <p class="hero-subtitle">Access your CBT exam with confidence in a secure and trusted environment.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="f-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="f-text">
+          <h3>Secure Testing</h3>
+          <p>Your data is protected at every step.</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="f-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6-7 6 7-6 7V22"/></svg>
+        </div>
+        <div class="f-text">
+          <h3>Fast Login</h3>
+          <p>Quick access, so you can focus on what matters.</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="f-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="f-text">
+          <h3>Trusted Platform</h3>
+          <p>Used by thousands of students nationwide.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="illustration-container">
+      <div class="pedestal">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="glow-point"></div>
+      </div>
+      <div class="shield-3d">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- ── JOIN PAGE ── -->
-<main id="page-join" class="page active">
-  <div class="join-card">
-    <div class="logo">
-      <img class="dynamic-logo" src="/img/jamb.png" alt="Logo" onerror="this.src='/img/jamb.png'"/>
-    </div>
-    <h1>CBT Exam System</h1>
-    <p class="subtitle">Secure Examination Environment</p>
-    
-    <div class="form-group">
-      <label>Session Code</label>
-      <div class="input-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <input id="inp-code" type="text" placeholder="e.g. A1B2C3" maxlength="6" autocomplete="off"/>
-      </div>
-    </div>
+<div class="login-right">
+  <div class="login-form-container">
+    <span class="welcome-label">Welcome Back!</span>
+    <h2>CBT Exam System</h2>
+    <p class="form-subtitle">Please sign in to continue to your exam portal.</p>
 
-    <div class="form-group">
-      <label>Full Name</label>
+    <div class="form-group mt-8">
+      <label>Username</label>
       <div class="input-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <input id="inp-name" type="text" placeholder="Your full name" autocomplete="off"/>
+        <input id="inp-user" type="text" placeholder="Enter your username" autocomplete="off"/>
       </div>
     </div>
 
     <div class="form-group">
-      <label>Student ID</label>
+      <label>Password</label>
       <div class="input-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7h18"/><path d="M3 11h18"/><path d="M3 15h18"/><path d="M3 19h18"/></svg>
-        <input id="inp-id" type="text" placeholder="Your student ID" autocomplete="off"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input id="inp-pass" type="password" placeholder="Enter your password" autocomplete="off"/>
+        <button class="toggle-password" onclick="togglePassword()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
       </div>
     </div>
 
-    <div id="join-error" class="error-msg hidden"></div>
-    
-    <button id="btn-join" class="btn btn-primary btn-full" onclick="joinExam()">
-      Join Exam
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-arrow"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    <button id="btn-login" class="btn btn-primary btn-full mt-6" onclick="handleLogin()">
+      Sign In &rarr;
     </button>
+
+    <div class="security-divider">
+      <div class="line"></div>
+      <div class="security-note">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        Secure and monitored environment
+      </div>
+      <div class="line"></div>
+    </div>
+
+    <div class="info-card-bottom">
+      <div class="info-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+      <p>This is a secure testing platform. All activity is monitored and recorded.</p>
+    </div>
   </div>
-</main>
+</div>
 
 <script src="/js/app.js"></script>
+<script>
+function togglePassword() {
+  const inp = document.getElementById('inp-pass');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function handleLogin() {
+  // Logic to transition to selection.html
+  location.href = 'selection.html';
+}
+</script>
 </body>
 </html>
