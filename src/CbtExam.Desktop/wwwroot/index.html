@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT Exam System | Student Portal</title>
+    <title>JAMB CBT Mock System | Student Portal</title>
     <link rel="icon" type="image/png" href="/img/jamb.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
@@ -30,21 +30,21 @@
                 <div class="features-grid">
                     <div class="feature-item">
                         <div class="feature-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         </div>
                         <div class="feature-title">Secure Testing</div>
                         <div class="feature-desc">Your data is protected at every step.</div>
                     </div>
                     <div class="feature-item">
                         <div class="feature-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         </div>
                         <div class="feature-title">Fast Login</div>
                         <div class="feature-desc">Quick access, so you can focus on what matters.</div>
                     </div>
                     <div class="feature-item">
                         <div class="feature-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         </div>
                         <div class="feature-title">Trusted Platform</div>
                         <div class="feature-desc">Used by thousands of students nationwide.</div>
@@ -55,10 +55,15 @@
             <div class="shield-container">
                 <div class="shield-base"></div>
                 <div class="shield-3d">
-                    <svg viewBox="0 0 50 60" width="50" height="60" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M25,2 L45,10 L45,30 C45,45 25,58 25,58 C25,58 5,45 5,30 L5,10 Z" fill="#15803d" opacity="0.4"/>
-                        <path d="M25,5 L41,12 L41,30 C41,43 25,54 25,54 C25,54 9,43 9,30 L9,12 Z" fill="#16a34a"/>
-                        <path d="M22,38 L15,31 L18,28 L22,32 L32,22 L35,25 Z" fill="#ffffff"/>
+                    <svg viewBox="0 0 50 60" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+                                <stop offset="100%" style="stop-color:#064e3b;stop-opacity:0.8" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M25,2 L45,10 L45,30 C45,45 25,58 25,58 C25,58 5,45 5,30 L5,10 Z" fill="url(#shieldGrad)" stroke="#10b981" stroke-width="2"/>
+                        <path d="M18,30 L23,35 L33,25" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
             </div>
@@ -67,9 +72,9 @@
 
         <div class="right-panel">
             
-            <div class="welcome-badge">Welcome Back!</div>
-            <h2>CBT Exam System</h2>
-            <p class="instruction-text">Please sign in to continue to your exam portal.</p>
+            <div class="welcome-badge">UTME Preparation Portal</div>
+            <h2>JAMB CBT Mock System</h2>
+            <p class="instruction-text">A simulation environment designed to help you prepare for the official UTME exam.</p>
 
             <form id="loginForm" onsubmit="handleLogin(event)">
                 
@@ -77,7 +82,7 @@
                     <label for="username">Username</label>
                     <div class="input-wrapper">
                         <div class="input-icon-left">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </div>
                         <input type="text" id="username" placeholder="Enter your username" required autocomplete="username">
                     </div>
@@ -87,7 +92,7 @@
                     <label for="password">Password</label>
                     <div class="input-wrapper">
                         <div class="input-icon-left">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         </div>
                         <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
                         <button type="button" class="password-toggle" id="passwordToggle" onclick="togglePasswordVisibility()" aria-label="Toggle visibility">
@@ -117,6 +122,10 @@
                 <div class="info-alert-text">
                     This is a secure testing platform. All activity is monitored and recorded.
                 </div>
+            </div>
+
+            <div class="disclaimer-text">
+                <strong>Disclaimer:</strong> This application is a mock examination system created solely for the purpose of candidate preparation. It is NOT an official JAMB application and is not affiliated with, endorsed by, or connected to the Joint Admissions and Matriculation Board (JAMB) in any way.
             </div>
 
         </div>

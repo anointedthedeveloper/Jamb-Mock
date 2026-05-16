@@ -1,33 +1,31 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --primary:      #059669;
-  --primary-dark: #065F46;
-  --primary-light:#D1FAE5;
-  --accent:       #3B82F6;
-  --accent-dark:  #1D4ED8;
-  --accent-light: #DBEAFE;
+  --primary:      #16A34A;
+  --primary-dark: #15803D;
+  --primary-light:#F0FDF4;
+  --accent:       #10B981;
+  --accent-dark:  #059669;
+  --accent-light: #ECFDF5;
   --danger:       #EF4444;
   --danger-bg:    #FEF2F2;
   --white:        #FFFFFF;
-  --bg:           #0F172A;
-  --card:         #1E293B;
-  --text:         #F8FAFC;
-  --text-muted:   #94A3B8;
-  --border:       #334155;
+  --bg:           #020b08;
+  --card:         #FFFFFF;
+  --text:         #0F172A;
+  --text-muted:   #64748B;
+  --border:       #E2E8F0;
   --radius-lg:    24px;
   --radius-md:    16px;
   --radius-sm:    12px;
   --shadow-sm:    0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md:    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg:    0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
-  --shadow-xl:    0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  --glass:        rgba(30, 41, 59, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow-md:    0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-lg:    0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-xl:    0 30px 50px -12px rgba(0, 0, 0, 0.2);
 }
 
 body {
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Outfit', 'Inter', sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;

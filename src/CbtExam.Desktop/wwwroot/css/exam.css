@@ -26,9 +26,8 @@
 .brand-section { display: flex; align-items: center; gap: 16px; }
 
 .logo-container-mini {
-  background: white;
-  padding: 4px;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,6 +82,14 @@
 }
 
 .sidebar-nav { height: 100%; overflow-y: auto; }
+.nav-c.glass {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+}
+
 .nav-card {
   background: var(--card);
   border-radius: var(--radius-md);

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | CBT Exam System</title>
+    <link rel="icon" type="image/png" href="/img/jamb.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-green: #10a353;
+            --brand-dark: #022C22;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #020b08;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .background-glow {
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, rgba(16, 163, 83, 0.15) 0%, transparent 70%);
+            z-index: 1;
+        }
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+        }
+        .error-code {
+            font-size: 150px;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1;
+            background: linear-gradient(to bottom, #ffffff, #10a353);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0.8;
+        }
+        h1 {
+            font-size: 40px;
+            margin: 20px 0 10px;
+            letter-spacing: -1px;
+        }
+        p {
+            font-size: 18px;
+            color: #94a3b8;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: #16a34a;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(22, 163, 74, 0.3);
+        }
+        .back-btn:hover {
+            background: #15803d;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(22, 163, 74, 0.4);
+        }
+        .jamb-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-glow"></div>
+    <div class="container">
+        <img src="/img/jamb.png" alt="JAMB Logo" class="jamb-logo">
+        <div class="error-code">404</div>
+        <h1>Lost in the System?</h1>
+        <p>The page you are looking for doesn't exist or has been moved to another secure sector.</p>
+        <a href="index.html" class="back-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Return to Login
+        </a>
+    </div>
+</body>
+</html>
