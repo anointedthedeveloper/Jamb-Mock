@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\appicon.ico" />

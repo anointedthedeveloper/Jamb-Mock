@@ -282,7 +282,7 @@
 
             <!-- ── TextBox ────────────────────────────────────────── -->
             <Style TargetType="TextBox">
-                <Setter Property="Padding"         Value="10,8"/>
+                <Setter Property="Padding"         Value="10,6"/>
                 <Setter Property="MinHeight"       Value="42"/>
                 <Setter Property="BorderBrush"     Value="{DynamicResource InputBorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
@@ -299,7 +299,7 @@
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="8" Padding="{TemplateBinding Padding}">
                                 <ScrollViewer x:Name="PART_ContentHost"
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              VerticalAlignment="Stretch"
                                               Foreground="{TemplateBinding Foreground}"/>
                             </Border>
                             <ControlTemplate.Triggers>

@@ -5,6 +5,8 @@ using System.Text.Json;
 using System.Net.Http;
 using System.IO;
 using System.Windows;
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
 
 namespace CbtExam.Desktop.ViewModels;
 
@@ -2234,6 +2236,18 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public RelayCommand PrintCommand => new(PrintStudents);
     public RelayCommand<StudentAdminDto> PickCommand => new(s => Pick(s));
     public RelayCommand ClearCommand => new(Clear);
+    public RelayCommand CopySampleCommand => new(() =>
+    {
+        try
+        {
+            Clipboard.SetText("John Doe,johndoe,1234\nJane Smith,janesmith,abcd");
+            Status = "Sample format copied to clipboard.";
+        }
+        catch (Exception ex)
+        {
+            Status = $"Failed to copy: {ex.Message}";
+        }
+    });
 
     public bool IsEditing => Selected != null;
     public string BulkCsv { get; set; } = string.Empty;
@@ -2432,93 +2446,125 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 
     private void PrintStudents()
     {
-        var doc = new System.Windows.Documents.FlowDocument
+        var sfd = new Microsoft.Win32.SaveFileDialog
         {
-            PagePadding = new System.Windows.Thickness(50),
-            ColumnWidth = double.PositiveInfinity,
-            FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
-            Background = System.Windows.Media.Brushes.White,
-            Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#0F172A"))
+            Filter = "PDF Files (*.pdf)|*.pdf",
+            FileName = "Student_Roster.pdf",
+            Title = "Save Student Roster PDF"
         };
 
-        var titleParagraph = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("STUDENT ROSTER & CREDENTIALS"))
+        if (sfd.ShowDialog() != true) return;
+
+        try
         {
-            FontSize = 20,
-            FontWeight = System.Windows.FontWeights.ExtraBold,
-            Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#16A34A")),
-            Margin = new System.Windows.Thickness(0, 0, 0, 4),
-            TextAlignment = System.Windows.TextAlignment.Center
-        };
-        doc.Blocks.Add(titleParagraph);
+            using (var document = new PdfDocument())
+            {
+                document.Info.Title = "Student Roster & Credentials";
+                
+                var page = document.AddPage();
+                page.Size = PdfSharp.PageSize.A4;
+                page.Orientation = PdfSharp.PageOrientation.Portrait;
+                
+                var gfx = XGraphics.FromPdfPage(page);
+                
+#pragma warning disable CS0618
+                var titleFont = new XFont("Segoe UI", 18, XFontStyleEx.Bold);
+                var subTitleFont = new XFont("Segoe UI", 9, XFontStyleEx.Regular);
+                var headerFont = new XFont("Segoe UI", 10, XFontStyleEx.Bold);
+                var regularFont = new XFont("Segoe UI", 10, XFontStyleEx.Regular);
+                var monoFont = new XFont("Consolas", 10, XFontStyleEx.Regular);
+#pragma warning restore CS0618
 
-        var subtitle = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run($"Generated on {DateTime.Now:MMMM dd, yyyy - hh:mm tt} | Total: {Students.Count} Candidates"))
-        {
-            FontSize = 10,
-            Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#64748B")),
-            Margin = new System.Windows.Thickness(0, 0, 0, 24),
-            TextAlignment = System.Windows.TextAlignment.Center
-        };
-        doc.Blocks.Add(subtitle);
+                var textDark = XBrushes.DarkSlateGray;
+                var textMuted = XBrushes.Gray;
+                var textPrimary = XBrushes.ForestGreen;
+                var borderPen = new XPen(XColors.LightGray, 0.75);
+                var zebraBrush = new XSolidBrush(XColor.FromArgb(248, 250, 252));
+                var headerBg = new XSolidBrush(XColor.FromArgb(241, 245, 249));
 
-        var table = new System.Windows.Documents.Table
-        {
-            CellSpacing = 0,
-            BorderBrush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#E2E8F0")),
-            BorderThickness = new System.Windows.Thickness(0, 1, 0, 1),
-            Margin = new System.Windows.Thickness(0, 0, 0, 20)
-        };
+                double margin = 40;
+                double width = page.Width.Point - (margin * 2);
+                
+                double y = margin;
+                gfx.DrawString("STUDENT ROSTER & CREDENTIALS", titleFont, textPrimary, new XRect(margin, y, width, 30), XStringFormats.TopLeft);
+                y += 24;
+                
+                string subText = $"Generated on {DateTime.Now:MMMM dd, yyyy - hh:mm tt}  |  Total: {Students.Count} Candidates";
+                gfx.DrawString(subText, subTitleFont, textMuted, new XRect(margin, y, width, 15), XStringFormats.TopLeft);
+                y += 24;
+                
+                gfx.DrawLine(new XPen(XColor.FromArgb(22, 163, 74), 1.5), margin, y, page.Width.Point - margin, y);
+                y += 16;
 
-        table.Columns.Add(new System.Windows.Documents.TableColumn { Width = new System.Windows.GridLength(50) });
-        table.Columns.Add(new System.Windows.Documents.TableColumn { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
-        table.Columns.Add(new System.Windows.Documents.TableColumn { Width = new System.Windows.GridLength(180) });
-        table.Columns.Add(new System.Windows.Documents.TableColumn { Width = new System.Windows.GridLength(140) });
+                double colNoWidth = 40;
+                double colPassWidth = 100;
+                double colUserWidth = 130;
+                double colNameWidth = width - colNoWidth - colPassWidth - colUserWidth;
 
-        var rowGroup = new System.Windows.Documents.TableRowGroup();
-        table.RowGroups.Add(rowGroup);
+                double colNoX = margin;
+                double colNameX = colNoX + colNoWidth;
+                double colUserX = colNameX + colNameWidth;
+                double colPassX = colUserX + colUserWidth;
+                
+                double rowHeight = 25;
+                
+                gfx.DrawRectangle(headerBg, colNoX, y, width, rowHeight);
+                gfx.DrawRectangle(borderPen, colNoX, y, width, rowHeight);
 
-        var headerRow = new System.Windows.Documents.TableRow { Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#F8FAFC")), FontWeight = System.Windows.FontWeights.Bold };
-        headerRow.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("#")), true));
-        headerRow.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("FULL NAME")), true));
-        headerRow.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("USERNAME (STUDENT ID)")), true));
-        headerRow.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("PASSWORD")), true));
-        rowGroup.Rows.Add(headerRow);
+                gfx.DrawString("#", headerFont, textDark, new XRect(colNoX + 6, y + 6, colNoWidth - 12, rowHeight - 12), XStringFormats.CenterLeft);
+                gfx.DrawString("FULL NAME", headerFont, textDark, new XRect(colNameX + 8, y + 6, colNameWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+                gfx.DrawString("USERNAME (STUDENT ID)", headerFont, textDark, new XRect(colUserX + 8, y + 6, colUserWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+                gfx.DrawString("PASSWORD", headerFont, textDark, new XRect(colPassX + 8, y + 6, colPassWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+                
+                y += rowHeight;
 
-        int idx = 1;
-        foreach (var s in Students)
-        {
-            var isEven = idx % 2 == 0;
-            var rowBg = isEven ? new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#F8FAFC")) : System.Windows.Media.Brushes.Transparent;
-            
-            var row = new System.Windows.Documents.TableRow { Background = rowBg };
-            row.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(idx.ToString()))));
-            row.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(s.FullName)) { FontWeight = System.Windows.FontWeights.SemiBold }));
-            row.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(s.StudentId))));
-            row.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(s.Password)) { FontFamily = new System.Windows.Media.FontFamily("Consolas"), FontSize = 12 }));
-            rowGroup.Rows.Add(row);
-            idx++;
+                int idx = 1;
+                foreach (var s in Students)
+                {
+                    if (y + rowHeight > page.Height.Point - margin)
+                    {
+                        page = document.AddPage();
+                        page.Size = PdfSharp.PageSize.A4;
+                        page.Orientation = PdfSharp.PageOrientation.Portrait;
+                        gfx = XGraphics.FromPdfPage(page);
+                        
+                        y = margin;
+                        
+                        gfx.DrawRectangle(headerBg, colNoX, y, width, rowHeight);
+                        gfx.DrawRectangle(borderPen, colNoX, y, width, rowHeight);
+
+                        gfx.DrawString("#", headerFont, textDark, new XRect(colNoX + 6, y + 6, colNoWidth - 12, rowHeight - 12), XStringFormats.CenterLeft);
+                        gfx.DrawString("FULL NAME", headerFont, textDark, new XRect(colNameX + 8, y + 6, colNameWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+                        gfx.DrawString("USERNAME (STUDENT ID)", headerFont, textDark, new XRect(colUserX + 8, y + 6, colUserWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+                        gfx.DrawString("PASSWORD", headerFont, textDark, new XRect(colPassX + 8, y + 6, colPassWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+                        
+                        y += rowHeight;
+                    }
+
+                    if (idx % 2 == 0)
+                    {
+                        gfx.DrawRectangle(zebraBrush, colNoX, y, width, rowHeight);
+                    }
+                    
+                    gfx.DrawRectangle(borderPen, colNoX, y, width, rowHeight);
+
+                    gfx.DrawString(idx.ToString(), regularFont, textDark, new XRect(colNoX + 6, y + 6, colNoWidth - 12, rowHeight - 12), XStringFormats.CenterLeft);
+                    gfx.DrawString(s.FullName, regularFont, textDark, new XRect(colNameX + 8, y + 6, colNameWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+                    gfx.DrawString(s.StudentId, regularFont, textDark, new XRect(colUserX + 8, y + 6, colUserWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+                    gfx.DrawString(s.Password, monoFont, textPrimary, new XRect(colPassX + 8, y + 6, colPassWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+
+                    y += rowHeight;
+                    idx++;
+                }
+
+                document.Save(sfd.FileName);
+            }
+            Status = "PDF Roster exported successfully!";
         }
-
-        doc.Blocks.Add(table);
-
-        var pd = new System.Windows.Controls.PrintDialog();
-        if (pd.ShowDialog() == true)
+        catch (Exception ex)
         {
-            pd.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator, "Student Roster Export");
+            Status = $"Failed to export PDF: {ex.Message}";
         }
-    }
-
-    private System.Windows.Documents.TableCell CreateCell(System.Windows.Documents.Paragraph paragraph, bool isHeader = false)
-    {
-        paragraph.Margin = new System.Windows.Thickness(0);
-        paragraph.FontSize = isHeader ? 11 : 12;
-        if (isHeader) paragraph.Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#64748B"));
-        
-        return new System.Windows.Documents.TableCell(paragraph)
-        {
-            Padding = new System.Windows.Thickness(12, 10, 12, 10),
-            BorderBrush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#E5E7EB")),
-            BorderThickness = new System.Windows.Thickness(0, 0, 0, 1)
-        };
     }
 }
 
