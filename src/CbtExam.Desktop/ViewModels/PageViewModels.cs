@@ -392,7 +392,10 @@ public class ExamSubjectConfigVM : BaseViewModel
         get => _questionCount;
         set
         {
-            if (Set(ref _questionCount, value))
+            var val = value;
+            if (PoolSize > 0 && val > PoolSize) val = PoolSize;
+            
+            if (Set(ref _questionCount, val))
             {
                 OnPropertyChanged(nameof(HasPoolWarning));
                 OnPropertyChanged(nameof(PoolWarningText));
@@ -460,7 +463,15 @@ public class ExamSubjectConfigVM : BaseViewModel
     {
         var selectedYears = GetSelectedYears();
         PoolSize = _bankQuestions.Count(q => selectedYears.Contains(q.Year));
-        _onChanged();
+        
+        if (PoolSize > 0 && QuestionCount > PoolSize)
+        {
+            QuestionCount = PoolSize;
+        }
+        else
+        {
+            _onChanged();
+        }
     }
 }
 
@@ -2039,6 +2050,60 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
         return Task.CompletedTask; 
     }
 
+    private string _adminPassword = "ADMIN123";
+    public string AdminPassword { get => _adminPassword; set { Set(ref _adminPassword, value); SaveSettings(); } }
+
+    private string _securityStatus = string.Empty;
+    public string SecurityStatus { get => _securityStatus; set => Set(ref _securityStatus, value); }
+
+    private string _securityStatusColor = "#16A34A";
+    public string SecurityStatusColor { get => _securityStatusColor; set => Set(ref _securityStatusColor, value); }
+
+    public RelayCommand<object> ChangeAdminPasswordCommand => new(parameter =>
+    {
+        if (parameter is System.Windows.FrameworkElement element)
+        {
+            var currentBox = element.FindName("CurrentPasswordBox") as System.Windows.Controls.PasswordBox;
+            var newBox = element.FindName("NewPasswordBox") as System.Windows.Controls.PasswordBox;
+            var confirmBox = element.FindName("ConfirmPasswordBox") as System.Windows.Controls.PasswordBox;
+
+            if (currentBox == null || newBox == null || confirmBox == null) return;
+
+            string currentPass = currentBox.Password;
+            string newPass = newBox.Password;
+            string confirmPass = confirmBox.Password;
+
+            if (currentPass != AdminPassword)
+            {
+                SecurityStatus = "Incorrect current password.";
+                SecurityStatusColor = "#DC2626";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(newPass))
+            {
+                SecurityStatus = "New password cannot be empty.";
+                SecurityStatusColor = "#DC2626";
+                return;
+            }
+
+            if (newPass != confirmPass)
+            {
+                SecurityStatus = "Passwords do not match.";
+                SecurityStatusColor = "#DC2626";
+                return;
+            }
+
+            AdminPassword = newPass;
+            SecurityStatus = "Admin password updated successfully!";
+            SecurityStatusColor = "#16A34A";
+
+            currentBox.Clear();
+            newBox.Clear();
+            confirmBox.Clear();
+        }
+    });
+
     private void LoadSettings()
     {
         try
@@ -2062,6 +2127,7 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
                         SelectedAccent = data.Accent ?? "Teal";
                         SchoolLogoPath = data.SchoolLogoPath;
                         RepoUrl = data.RepoUrl ?? string.Empty;
+                        _adminPassword = data.AdminPassword ?? "ADMIN123";
                     }
                 }
             }
@@ -2069,7 +2135,6 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
         catch (System.Text.Json.JsonException ex)
         {
             App.Log("JSON parsing error in settings", ex);
-            // Try to delete corrupted file
             try
             {
                 var settingsFile = Path.Combine(
@@ -2080,7 +2145,7 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
                     File.Delete(settingsFile);
                 }
             }
-            catch { /* Ignore deletion errors */ }
+            catch { }
         }
         catch (Exception ex)
         {
@@ -2104,7 +2169,8 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
                 Theme = SelectedTheme,
                 Accent = SelectedAccent,
                 SchoolLogoPath = SchoolLogoPath,
-                RepoUrl = RepoUrl
+                RepoUrl = RepoUrl,
+                AdminPassword = AdminPassword
             };
 
             var json = System.Text.Json.JsonSerializer.Serialize(data, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
@@ -2126,6 +2192,7 @@ public class SettingsData
     public string Accent { get; set; } = "Teal";
     public string? SchoolLogoPath { get; set; }
     public string? RepoUrl { get; set; }
+    public string AdminPassword { get; set; } = "ADMIN123";
 }
 
 public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
@@ -2194,18 +2261,59 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         foreach (var s in list) Students.Add(s);
     }
 
+    private string GeneratePassword5Char()
+    {
+        const string chars = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz123456789";
+        var rng = new Random();
+        return new string(Enumerable.Repeat(chars, 5).Select(s => s[rng.Next(s.Length)]).ToArray());
+    }
+
+    private string GenerateUniqueUsername(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "student" + new Random().Next(1000, 9999);
+        var parts = name.Split(new[] { ' ', ',', '-' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(p => new string(p.Where(char.IsLetterOrDigit).ToArray()).ToLower())
+                        .Where(p => !string.IsNullOrEmpty(p))
+                        .ToList();
+
+        string baseName = "student";
+        if (parts.Count == 1) baseName = parts[0];
+        else if (parts.Count >= 2) baseName = parts[0] + parts[1];
+
+        string unique = baseName;
+        int counter = 1;
+        while (_all.Any(s => s.StudentId.Equals(unique, StringComparison.OrdinalIgnoreCase)))
+        {
+            unique = baseName + counter;
+            counter++;
+        }
+        return unique;
+    }
+
     private async Task SaveAsync()
     {
+        if (string.IsNullOrWhiteSpace(FullName))
+        {
+            Status = "Full Name is required.";
+            return;
+        }
+
+        var username = StudentId;
+        if (!IsEditing && string.IsNullOrWhiteSpace(username))
+        {
+            username = GenerateUniqueUsername(FullName);
+        }
+
         var password = NewPassword;
         if (!IsEditing && string.IsNullOrWhiteSpace(password))
         {
-            password = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
+            password = GeneratePassword5Char();
         }
 
-        var resp = await api.UpsertStudentAsync(new StudentUpsertDto(Selected?.Id, FullName, StudentId, IsActive, password));
+        var resp = await api.UpsertStudentAsync(new StudentUpsertDto(Selected?.Id, FullName, username, IsActive, password));
         if (resp.IsSuccessStatusCode)
         {
-            Status = IsEditing ? "Student updated." : $"Student added. Pass: {password}";
+            Status = IsEditing ? "Student updated." : $"Student added. Username: {username}, Password: {password}";
             Clear();
             await LoadAsync();
         }
@@ -2235,7 +2343,7 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         FullName = s.FullName;
         StudentId = s.StudentId;
         IsActive = s.IsActive;
-        NewPassword = string.Empty;
+        NewPassword = s.Password;
         OnPropertyChanged(nameof(IsEditing));
     }
 
@@ -2282,11 +2390,22 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             foreach (var line in lines)
             {
                 var parts = line.Split(',');
-                if (parts.Length < 2) continue;
+                if (parts.Length < 1) continue;
 
                 var name = parts[0].Trim();
-                var id = parts[1].Trim();
-                var pass = parts.Length > 2 ? parts[2].Trim() : Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
+                if (string.IsNullOrWhiteSpace(name)) continue;
+
+                var id = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    id = GenerateUniqueUsername(name);
+                }
+
+                var pass = parts.Length > 2 ? parts[2].Trim() : string.Empty;
+                if (string.IsNullOrWhiteSpace(pass))
+                {
+                    pass = GeneratePassword5Char();
+                }
 
                 await api.UpsertStudentAsync(new StudentUpsertDto(null, name, id, true, pass));
                 count++;
@@ -2313,13 +2432,94 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 
     private void PrintStudents()
     {
-        var doc = new System.Windows.Documents.FlowDocument();
-        doc.Blocks.Add(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("Student List")));
+        var doc = new System.Windows.Documents.FlowDocument
+        {
+            PagePadding = new System.Windows.Thickness(50),
+            ColumnWidth = double.PositiveInfinity,
+            FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
+            Background = System.Windows.Media.Brushes.White,
+            Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#0F172A"))
+        };
+
+        var titleParagraph = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("STUDENT ROSTER & CREDENTIALS"))
+        {
+            FontSize = 20,
+            FontWeight = System.Windows.FontWeights.ExtraBold,
+            Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#16A34A")),
+            Margin = new System.Windows.Thickness(0, 0, 0, 4),
+            TextAlignment = System.Windows.TextAlignment.Center
+        };
+        doc.Blocks.Add(titleParagraph);
+
+        var subtitle = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run($"Generated on {DateTime.Now:MMMM dd, yyyy - hh:mm tt} | Total: {Students.Count} Candidates"))
+        {
+            FontSize = 10,
+            Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#64748B")),
+            Margin = new System.Windows.Thickness(0, 0, 0, 24),
+            TextAlignment = System.Windows.TextAlignment.Center
+        };
+        doc.Blocks.Add(subtitle);
+
+        var table = new System.Windows.Documents.Table
+        {
+            CellSpacing = 0,
+            BorderBrush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#E2E8F0")),
+            BorderThickness = new System.Windows.Thickness(0, 1, 0, 1),
+            Margin = new System.Windows.Thickness(0, 0, 0, 20)
+        };
+
+        table.Columns.Add(new System.Windows.Documents.TableColumn { Width = new System.Windows.GridLength(50) });
+        table.Columns.Add(new System.Windows.Documents.TableColumn { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
+        table.Columns.Add(new System.Windows.Documents.TableColumn { Width = new System.Windows.GridLength(180) });
+        table.Columns.Add(new System.Windows.Documents.TableColumn { Width = new System.Windows.GridLength(140) });
+
+        var rowGroup = new System.Windows.Documents.TableRowGroup();
+        table.RowGroups.Add(rowGroup);
+
+        var headerRow = new System.Windows.Documents.TableRow { Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#F8FAFC")), FontWeight = System.Windows.FontWeights.Bold };
+        headerRow.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("#")), true));
+        headerRow.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("FULL NAME")), true));
+        headerRow.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("USERNAME (STUDENT ID)")), true));
+        headerRow.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("PASSWORD")), true));
+        rowGroup.Rows.Add(headerRow);
+
+        int idx = 1;
         foreach (var s in Students)
-            doc.Blocks.Add(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run($"{s.FullName}  —  ID: {s.StudentId}  —  Pass: {s.Password}")));
+        {
+            var isEven = idx % 2 == 0;
+            var rowBg = isEven ? new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#F8FAFC")) : System.Windows.Media.Brushes.Transparent;
+            
+            var row = new System.Windows.Documents.TableRow { Background = rowBg };
+            row.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(idx.ToString()))));
+            row.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(s.FullName)) { FontWeight = System.Windows.FontWeights.SemiBold }));
+            row.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(s.StudentId))));
+            row.Cells.Add(CreateCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(s.Password)) { FontFamily = new System.Windows.Media.FontFamily("Consolas"), FontSize = 12 }));
+            rowGroup.Rows.Add(row);
+            idx++;
+        }
+
+        doc.Blocks.Add(table);
+
         var pd = new System.Windows.Controls.PrintDialog();
         if (pd.ShowDialog() == true)
-            pd.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator, "Student List");
+        {
+            pd.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator, "Student Roster Export");
+        }
+    }
+
+    private System.Windows.Documents.TableCell CreateCell(System.Windows.Documents.Paragraph paragraph, bool isHeader = false)
+    {
+        paragraph.Margin = new System.Windows.Thickness(0);
+        paragraph.FontSize = isHeader ? 11 : 12;
+        if (isHeader) paragraph.Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#64748B"));
+        
+        return new System.Windows.Documents.TableCell(paragraph)
+        {
+            Padding = new System.Windows.Thickness(12, 10, 12, 10),
+            BorderBrush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#E5E7EB")),
+            BorderThickness = new System.Windows.Thickness(0, 0, 0, 1),
+            VerticalAlignment = System.Windows.VerticalAlignment.Center
+        };
     }
 }
 

@@ -82,17 +82,19 @@
                     <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="14,14,0,0" Padding="0,0,0,0">
                         <Grid Height="44">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="50"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="130"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="70"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="#" Margin="24,0,0,0" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Text="#" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                             <TextBlock Grid.Column="1" Text="FULL NAME" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="2" Text="STUDENT ID" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="3" Text="STATUS" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="4" Text="ACTIONS" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="2" Text="USERNAME" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="3" Text="PASSWORD" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="4" Text="STATUS" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="5" Text="ACTIONS" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </Grid>
                     </Border>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -112,21 +114,24 @@
                                         </Border.Style>
                                         <Grid Height="54">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="50"/>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="150"/>
-                                                <ColumnDefinition Width="90"/>
-                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="130"/>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="70"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Serial}" Margin="24,0,0,0" VerticalAlignment="Center"
+                                            <TextBlock Text="{Binding Id}" Margin="16,0,0,0" VerticalAlignment="Center"
                                                        FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                             <TextBlock Grid.Column="1" Text="{Binding FullName}" Margin="16,0,0,0"
                                                        VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
                                             <TextBlock Grid.Column="2" Text="{Binding StudentId}" VerticalAlignment="Center"
                                                        FontSize="13" FontFamily="Consolas" Foreground="{DynamicResource AccentBrush}"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Password}" VerticalAlignment="Center"
+                                                       FontSize="13" FontFamily="Consolas" Foreground="{DynamicResource TextPrimaryBrush}"/>
                                             
-                                            <Border Grid.Column="3" Width="10" Height="10" CornerRadius="5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Border Grid.Column="4" Width="10" Height="10" CornerRadius="5" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Setter Property="Background" Value="#DC2626"/>
@@ -144,7 +149,7 @@
                                                 </Border.Style>
                                             </Border>
 
-                                            <Button Grid.Column="4" Style="{StaticResource PrimaryBtn}"
+                                            <Button Grid.Column="5" Style="{StaticResource PrimaryBtn}"
                                                     Background="Transparent" Foreground="{DynamicResource AccentBrush}"
                                                     Padding="10,6" ToolTip="Edit Candidate"
                                                     Command="{Binding DataContext.PickCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -198,9 +203,7 @@
 
                         <TextBlock Text="PASSWORD (AUTO IF BLANK)" FontSize="10" FontWeight="Bold"
                                    Foreground="{DynamicResource TextSecondaryBrush}" Margin="2,0,0,6"/>
-                        <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,20" Height="42"/>
-
-                        <CheckBox Content="Allow Login Access" IsChecked="{Binding IsActive}" Margin="2,0,0,24" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,24" Height="42"/>
 
                         <!-- Password — only shown when editing -->
                         <StackPanel Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">

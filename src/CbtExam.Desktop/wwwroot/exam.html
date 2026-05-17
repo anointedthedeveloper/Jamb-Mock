@@ -106,8 +106,75 @@
   </section>
 </main>
 
-<div id="calculator-modal" class="modal-overlay hidden">
-  <!-- Calculator content -->
+<div id="calculator-modal" class="modal-overlay hidden" onclick="closeModalOnOuterClick(event, 'calculator-modal')">
+  <div class="calculator-card">
+    <div class="calc-header">
+      <h4>Scientific Calculator</h4>
+      <button class="calc-close-btn" onclick="toggleCalculator()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="calc-display" id="calc-display">0</div>
+    <div class="calc-buttons-grid">
+      <button class="calc-btn operator" onclick="pressCalc('sin')">sin</button>
+      <button class="calc-btn operator" onclick="pressCalc('cos')">cos</button>
+      <button class="calc-btn operator" onclick="pressCalc('tan')">tan</button>
+      <button class="calc-btn action" onclick="pressCalc('C')">C</button>
+      
+      <button class="calc-btn operator" onclick="pressCalc('log')">log</button>
+      <button class="calc-btn operator" onclick="pressCalc('ln')">ln</button>
+      <button class="calc-btn operator" onclick="pressCalc('sqrt')">√</button>
+      <button class="calc-btn operator" onclick="pressCalc('/')">/</button>
+      
+      <button class="calc-btn" onclick="pressCalc('7')">7</button>
+      <button class="calc-btn" onclick="pressCalc('8')">8</button>
+      <button class="calc-btn" onclick="pressCalc('9')">9</button>
+      <button class="calc-btn operator" onclick="pressCalc('*')">*</button>
+      
+      <button class="calc-btn" onclick="pressCalc('4')">4</button>
+      <button class="calc-btn" onclick="pressCalc('5')">5</button>
+      <button class="calc-btn" onclick="pressCalc('6')">6</button>
+      <button class="calc-btn operator" onclick="pressCalc('-')">-</button>
+      
+      <button class="calc-btn" onclick="pressCalc('1')">1</button>
+      <button class="calc-btn" onclick="pressCalc('2')">2</button>
+      <button class="calc-btn" onclick="pressCalc('3')">3</button>
+      <button class="calc-btn operator" onclick="pressCalc('+')">+</button>
+      
+      <button class="calc-btn" onclick="pressCalc('0')">0</button>
+      <button class="calc-btn" onclick="pressCalc('.')">.</button>
+      <button class="calc-btn equals" onclick="pressCalc('=')">=</button>
+    </div>
+  </div>
+</div>
+
+<div id="submit-confirm-modal" class="modal-overlay hidden" onclick="closeModalOnOuterClick(event, 'submit-confirm-modal')">
+  <div class="confirm-dialog">
+    <div class="completion-icon" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <h2 style="font-size: 20px; font-weight: 800;">Submit Examination?</h2>
+    <p>Are you sure you want to finish the exam? You will not be able to change your answers after submission.</p>
+    <div class="confirm-buttons">
+      <button class="btn btn-outline" onclick="closeSubmitConfirm()">Cancel</button>
+      <button class="btn btn-danger" onclick="submitExam(true)">Yes, Submit</button>
+    </div>
+  </div>
+</div>
+
+<div id="completion-modal" class="modal-overlay hidden">
+  <div class="completion-card">
+    <div class="completion-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <h2>Congratulations!</h2>
+    <p>Your screening examination has been submitted successfully.</p>
+    <div class="score-display-box">
+      <div class="score-num"><span id="score-text">0.0%</span></div>
+      <div class="score-label">Official Score</div>
+    </div>
+    <button class="btn btn-primary" onclick="exitExamPortal()" style="width: 100%; height: 48px; border-radius: 12px;">Close Portal</button>
+  </div>
 </div>
 
 <script src="/js/app.js"></script>

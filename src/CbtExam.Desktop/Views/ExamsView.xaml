@@ -393,8 +393,8 @@
                                                 <TextBlock Text="Configure random ordering of questions and choices." FontSize="11" Foreground="#64748B" Margin="0,2,0,12"/>
                                                 
                                                 <StackPanel Orientation="Horizontal">
-                                                    <CheckBox IsChecked="{Binding ShuffleQuestions}" Content="Shuffle Questions" Margin="0,0,24,0" FontSize="12" FontWeight="SemiBold" VerticalContentAlignment="Center"/>
-                                                    <CheckBox IsChecked="{Binding ShuffleOptions}" Content="Shuffle Options" FontSize="12" FontWeight="SemiBold" VerticalContentAlignment="Center"/>
+                                                    <CheckBox Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding ShuffleQuestions}" Content="Shuffle Questions" Margin="0,0,24,0"/>
+                                                    <CheckBox Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding ShuffleOptions}" Content="Shuffle Options"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>

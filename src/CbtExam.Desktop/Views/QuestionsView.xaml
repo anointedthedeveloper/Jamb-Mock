@@ -52,7 +52,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid Height="42">
-                    <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Padding="38,8,12,8" VerticalContentAlignment="Center"/>
+                    <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Padding="38,0,12,0" VerticalContentAlignment="Center"/>
                     <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                Foreground="{DynamicResource TextSecondaryBrush}"
                                VerticalAlignment="Center" HorizontalAlignment="Left" Margin="12,0,0,0" IsHitTestVisible="False"/>

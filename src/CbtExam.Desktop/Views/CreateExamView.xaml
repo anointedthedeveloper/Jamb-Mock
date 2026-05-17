@@ -156,12 +156,11 @@
                             </Grid>
 
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <CheckBox Content="Shuffle Questions" IsChecked="{Binding ShuffleQuestions}"
+                                <CheckBox Style="{StaticResource ToggleSwitchStyle}" Content="Shuffle Questions" IsChecked="{Binding ShuffleQuestions}"
                                           IsEnabled="{Binding ExamCreated, Converter={StaticResource InvBool}}"
-                                          Margin="0,0,24,0" FontSize="13"/>
-                                <CheckBox Content="Shuffle Options" IsChecked="{Binding ShuffleOptions}"
-                                          IsEnabled="{Binding ExamCreated, Converter={StaticResource InvBool}}"
-                                          FontSize="13"/>
+                                          Margin="0,0,24,0"/>
+                                <CheckBox Style="{StaticResource ToggleSwitchStyle}" Content="Shuffle Options" IsChecked="{Binding ShuffleOptions}"
+                                          IsEnabled="{Binding ExamCreated, Converter={StaticResource InvBool}}"/>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">

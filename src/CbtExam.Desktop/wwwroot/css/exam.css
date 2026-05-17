@@ -188,3 +188,329 @@
 }
 
 .central-controls { display: flex; gap: 16px; }
+
+/* ── Option Items Choice Toggles ── */
+.option-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.option-item:hover {
+  background: rgba(22, 163, 74, 0.04);
+  border-color: var(--primary);
+  transform: translateX(6px);
+}
+
+.option-item.selected {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: var(--primary);
+  box-shadow: 0 4px 20px rgba(22, 163, 74, 0.15);
+}
+
+.option-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--accent);
+  transition: all 0.25s;
+}
+
+.option-item:hover .option-letter {
+  background: var(--primary);
+  color: white;
+}
+
+.option-item.selected .option-letter {
+  background: var(--primary);
+  color: white;
+}
+
+.option-text {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* ── Navigator Buttons ── */
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.nav-btn:hover {
+  border-color: var(--primary);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+.nav-btn.current {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+}
+
+.nav-btn.answered {
+  background: rgba(22, 163, 74, 0.15);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.nav-btn.flagged {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  border-color: #EF4444;
+}
+
+.nav-btn.answered.flagged {
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.15) 0%, rgba(239, 68, 68, 0.15) 100%);
+  border-color: #EF4444;
+}
+
+/* ── Modal Overlay & Dialogs ── */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: all 0.3s;
+}
+
+.modal-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Scientific Calculator UI ── */
+.calculator-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  width: 320px;
+  padding: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: white;
+  animation: modalSlideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.calc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 12px;
+}
+
+.calc-header h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: #94a3b8;
+}
+
+.calc-close-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.calc-close-btn:hover {
+  color: #ef4444;
+}
+
+.calc-display {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: right;
+  font-family: 'Inter', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: #10b981;
+  min-height: 64px;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+.calc-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.calc-btn {
+  height: 48px;
+  border-radius: 10px;
+  border: none;
+  background: #334155;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.calc-btn:hover {
+  background: #475569;
+}
+
+.calc-btn.operator {
+  background: #f59e0b;
+  color: #0f172a;
+}
+
+.calc-btn.operator:hover {
+  background: #fbbf24;
+}
+
+.calc-btn.action {
+  background: #ef4444;
+}
+
+.calc-btn.action:hover {
+  background: #f87171;
+}
+
+.calc-btn.equals {
+  background: var(--primary);
+  grid-column: span 2;
+}
+
+.calc-btn.equals:hover {
+  background: var(--accent);
+}
+
+/* ── Beautiful Completion Card ── */
+.completion-card {
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  border-radius: 24px;
+  width: 440px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  color: white;
+  animation: modalSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(50px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.completion-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.completion-card h2 {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.completion-card p {
+  color: #94a3b8;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.score-display-box {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 20px 40px;
+  margin: 8px 0;
+}
+
+.score-num {
+  font-size: 36px;
+  font-weight: 800;
+  color: #10b981;
+}
+
+.score-label {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 4px;
+}
+
+.confirm-dialog {
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  border-radius: 20px;
+  width: 380px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: white;
+  animation: modalSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.confirm-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.confirm-buttons button {
+  flex: 1;
+}

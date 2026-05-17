@@ -260,8 +260,27 @@ public class LoginViewModel : BaseViewModel
     {
         try
         {
-            // For now, use default admin code validation
-            // In a full implementation, this would validate against the API
+            var settingsFile = Path.Combine(
+                Path.GetDirectoryName(Environment.ProcessPath) ?? AppDomain.CurrentDomain.BaseDirectory,
+                "settings.json");
+
+            if (File.Exists(settingsFile))
+            {
+                var json = File.ReadAllText(settingsFile);
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    using var doc = System.Text.Json.JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("AdminPassword", out var passProp))
+                    {
+                        var pwd = passProp.GetString();
+                        if (!string.IsNullOrEmpty(pwd))
+                        {
+                            return code == pwd;
+                        }
+                    }
+                }
+            }
+
             return code == "ADMIN123";
         }
         catch (Exception ex)

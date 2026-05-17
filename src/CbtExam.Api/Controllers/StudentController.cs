@@ -17,12 +17,17 @@ public class StudentController(AppDbContext db, IHubContext<ExamHub> hub, Snapsh
     [HttpPost("login")]
     public async Task<IActionResult> Login(StudentLoginDto dto)
     {
-        var student = await db.Students.FirstOrDefaultAsync(s => 
-            (s.StudentId == dto.StudentId || s.FullName == dto.StudentId) && 
-            s.Password == dto.Password && s.IsActive);
+        var username = (dto.StudentId ?? "").Trim();
+        var password = (dto.Password ?? "").Trim();
+
+        var activeStudents = await db.Students.Where(s => s.IsActive).ToListAsync();
+        var student = activeStudents.FirstOrDefault(s => 
+            (s.StudentId.Equals(username, StringComparison.OrdinalIgnoreCase) || 
+             s.FullName.Equals(username, StringComparison.OrdinalIgnoreCase)) && 
+            s.Password.Equals(password, StringComparison.OrdinalIgnoreCase));
 
         if (student is null) return Unauthorized(new { error = "Invalid student credentials or inactive account." });
-        return Ok(new StudentAdminDto(student.Id, student.FullName, student.StudentId, student.IsActive, ""));
+        return Ok(new StudentAdminDto(student.Id, student.FullName, student.StudentId, student.IsActive, student.Password));
     }
 
     // POST /api/student/join
