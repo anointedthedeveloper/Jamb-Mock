@@ -856,9 +856,66 @@ public class SessionViewModel(ApiClient api) : BaseViewModel, IRefreshable
 
     public bool HasActiveSessions => ActiveSessions.Count > 0;
 
+    private SessionDto? _currentRoom;
+    public SessionDto? CurrentRoom { get => _currentRoom; set => Set(ref _currentRoom, value); }
+    
+    private bool _isManagingRoom;
+    public bool IsManagingRoom { get => _isManagingRoom; set { Set(ref _isManagingRoom, value); OnPropertyChanged(nameof(IsNotManagingRoom)); } }
+    
+    public bool IsNotManagingRoom => !IsManagingRoom;
+
+    public ObservableCollection<StudentStatusDto> RoomStudents { get; } = [];
+
     public string GetJoinUrl(SessionDto session) => $"{api.BaseUrl}?code={session.SessionCode}";
 
-    public RelayCommand RefreshCommand => new(async () => await LoadAsync());
+    public RelayCommand RefreshCommand => new(async () => {
+        await LoadAsync();
+        if (IsManagingRoom && CurrentRoom != null) {
+            await RefreshRoomStudents();
+        }
+    });
+    
+    public RelayCommand<SessionDto> ManageRoomCommand => new(async s => {
+        if (s is null) return;
+        CurrentRoom = s;
+        IsManagingRoom = true;
+        await RefreshRoomStudents();
+    });
+    
+    public RelayCommand CloseRoomCommand => new(() => {
+        IsManagingRoom = false;
+        CurrentRoom = null;
+    });
+    
+    public RelayCommand BeginExamCommand => new(async () => {
+        if (CurrentRoom is null) return;
+        await api.BeginSessionAsync(CurrentRoom.Id);
+        await LoadAsync();
+        
+        var updated = ActiveSessions.FirstOrDefault(x => x.Id == CurrentRoom.Id);
+        if (updated != null) CurrentRoom = updated;
+        
+        NotificationsViewModel.Instance?.Add(new NotificationItem(
+            "Exam Countdown Triggered",
+            $"The 5-second countdown has started for candidates in room '{CurrentRoom.ExamTitle}'.",
+            DateTime.Now,
+            "success"
+        ));
+    });
+
+    private async Task RefreshRoomStudents() {
+        if (CurrentRoom is null) return;
+        var list = await api.GetStudentsAsync(CurrentRoom.Id);
+        App.Current.Dispatcher.Invoke(() => {
+            RoomStudents.Clear();
+            list?.ForEach(RoomStudents.Add);
+            
+            // Auto-refresh the current room state
+            var updated = ActiveSessions.FirstOrDefault(x => x.Id == CurrentRoom.Id);
+            if (updated != null) CurrentRoom = updated;
+        });
+    }
+
     public RelayCommand StartCommand => new(async () => await StartAsync());
     public RelayCommand<SessionDto> StopSessionCommand => new(async s => await StopSessionAsync(s));
     public RelayCommand EndAllCommand => new(async () => await EndAllAsync());

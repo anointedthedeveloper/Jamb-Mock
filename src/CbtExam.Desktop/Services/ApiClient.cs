@@ -36,6 +36,7 @@ public class ApiClient
     // Sessions
     public Task<List<SessionDto>?> GetSessionsAsync() => IsReady ? _http.GetFromJsonAsync<List<SessionDto>>("api/sessions") : Task.FromResult<List<SessionDto>?>([]);
     public Task<HttpResponseMessage> StartSessionAsync(int examId) => IsReady ? _http.PostAsJsonAsync("api/sessions/start", new SessionStartDto(examId)) : OfflineResponse();
+    public Task<HttpResponseMessage> BeginSessionAsync(int sessionId) => IsReady ? _http.PostAsync($"api/sessions/{sessionId}/begin", content: null) : OfflineResponse();
     public Task<HttpResponseMessage> StopSessionAsync(int sessionId) => IsReady ? _http.PostAsync($"api/sessions/{sessionId}/stop", content: null) : OfflineResponse();
     public Task<HttpResponseMessage> EndAllSessionsAsync() => IsReady ? _http.PostAsync("api/sessions/end-all", content: null) : OfflineResponse();
     public Task<HttpResponseMessage> ExportSnapshotAsync() => IsReady ? _http.PostAsync("api/sessions/export", content: null) : OfflineResponse();

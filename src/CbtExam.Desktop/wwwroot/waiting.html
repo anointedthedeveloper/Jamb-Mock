@@ -191,6 +191,7 @@
 
             let pollingInterval;
             let downloading = false;
+            let currentSession = null;
 
             // Step 1: Poll for active session
             const checkSession = async () => {
@@ -204,6 +205,7 @@
                     
                     if (activeSession) {
                         clearInterval(pollingInterval);
+                        currentSession = activeSession;
                         startExamProcess(activeSession);
                     }
                 } catch (err) {
@@ -214,7 +216,7 @@
             // Start polling every 3 seconds
             pollingInterval = setInterval(checkSession, 3000);
 
-            // Step 2: Join, Download, Redirect
+            // Step 2: Join, Download, and Wait for Admin to Start
             const startExamProcess = async (session) => {
                 downloading = true;
                 statusText.textContent = 'Session found. Joining...';
@@ -255,17 +257,13 @@
                     localStorage.setItem('cachedQuestions', JSON.stringify(questions));
                     updateProgress(100);
 
-                    statusText.textContent = 'All synchronization complete. Ready to start.';
+                    statusText.textContent = 'Synchronized! Waiting for Coordinator to Start Exam...';
                     statusText.style.color = '#10b981';
                     
-                    btn.disabled = false;
-                    btn.classList.remove('disabled');
-                    btn.innerHTML = '<span>Redirecting to Exam...</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>';
+                    btn.innerHTML = '<span>Awaiting Coordinator Signal...</span><div class="spinner"></div>';
                     
-                    // Auto redirect
-                    setTimeout(() => {
-                        window.location.href = 'exam.html';
-                    }, 1500);
+                    // NEW: Start fast-polling the session to see if Admin clicked Start
+                    setInterval(pollStartSignal, 1500);
 
                 } catch (error) {
                     console.error(error);
@@ -273,6 +271,72 @@
                     downloading = false;
                     pollingInterval = setInterval(checkSession, 5000); // Resume polling
                 }
+            };
+            
+            let starting = false;
+            
+            // Fast poll to check if IsStarted == true
+            const pollStartSignal = async () => {
+                if(starting || !currentSession) return;
+                try {
+                    const response = await fetch(`${API_BASE}/Sessions`);
+                    if (!response.ok) return;
+                    const sessions = await response.json();
+                    const s = sessions.find(x => x.id === currentSession.id);
+                    if(s && s.isStarted) {
+                        starting = true;
+                        triggerCountdown();
+                    }
+                } catch(e) {}
+            };
+
+            // Fullscreen 5-second synchronized countdown
+            const triggerCountdown = () => {
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0'; overlay.style.left = '0';
+                overlay.style.width = '100vw'; overlay.style.height = '100vh';
+                overlay.style.backgroundColor = '#020617';
+                overlay.style.zIndex = '9999';
+                overlay.style.display = 'flex';
+                overlay.style.flexDirection = 'column';
+                overlay.style.justifyContent = 'center';
+                overlay.style.alignItems = 'center';
+                overlay.style.color = 'white';
+                
+                const title = document.createElement('h2');
+                title.textContent = 'PREPARE TO BEGIN';
+                title.style.fontSize = '2rem';
+                title.style.color = '#10b981';
+                title.style.letterSpacing = '5px';
+                title.style.marginBottom = '2rem';
+                
+                const count = document.createElement('div');
+                count.style.fontSize = '12rem';
+                count.style.fontWeight = '900';
+                count.style.lineHeight = '1';
+                count.style.textShadow = '0 0 40px rgba(16, 185, 129, 0.5)';
+                
+                overlay.appendChild(title);
+                overlay.appendChild(count);
+                document.body.appendChild(overlay);
+                
+                let time = 5;
+                count.textContent = time;
+                
+                const int = setInterval(() => {
+                    time--;
+                    if(time > 0) {
+                        count.textContent = time;
+                        count.style.transform = 'scale(1.2)';
+                        setTimeout(() => count.style.transform = 'scale(1)', 200);
+                    } else {
+                        clearInterval(int);
+                        count.textContent = 'GO!';
+                        count.style.color = '#10b981';
+                        setTimeout(() => window.location.href = 'exam.html', 500);
+                    }
+                }, 1000);
             };
 
             function updateProgress(percent) {

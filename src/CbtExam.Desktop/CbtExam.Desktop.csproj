@@ -14,9 +14,11 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CbtExam.Api\CbtExam.Api.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\CbtExam.Api\CbtExam.Api.csproj" />
+      <ProjectReference Include="..\CbtExam.Shared\CbtExam.Shared.csproj" />
+      <ProjectReference Include="..\CbtExam.Data\CbtExam.Data.csproj" />
+    </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
     <PackageReference Include="PDFsharp" Version="6.2.4" />

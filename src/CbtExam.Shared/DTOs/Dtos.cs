@@ -7,6 +7,7 @@ public record ExamDto(int Id, string Title, string Subject, int DurationMinutes,
     // Year is parsed from Subject if stored as "Subject|Year"
     public string Year => Subject.Contains('|') ? Subject.Split('|')[1] : string.Empty;
     public string SubjectDisplay => Subject.Contains('|') ? Subject.Split('|')[0] : Subject;
+    public override string ToString() => Title;
 }
 
 // --- Question DTOs ---
