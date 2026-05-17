@@ -32,14 +32,17 @@ public static class ApiBootstrap
             Directory.CreateDirectory(dbDirectory);
 
         builder.Services.AddDbContext<AppDbContext>(o =>
-            o.UseSqlite($"Data Source={dbPath}"));
+            o.UseSqlite($"Data Source={dbPath};Cache=Shared;Pooling=True"));
 
         builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
             p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
         builder.Services.AddControllers()
             .AddApplicationPart(typeof(ApiBootstrap).Assembly);
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR(options => {
+            options.MaximumReceiveMessageSize = 32768;
+            options.EnableDetailedErrors = true;
+        });
         builder.Services.AddScoped<SnapshotExportService>();
 
         var app = builder.Build();
@@ -53,6 +56,10 @@ public static class ApiBootstrap
             try
             {
                 db.Database.EnsureCreated();
+                
+                // Enable Write-Ahead Logging for high concurrency (500+ users)
+                db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+                
                 // Verify schema is usable by probing known tables
                 _ = db.Students.Count();
                 _ = db.Exams.Count();
