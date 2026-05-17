@@ -182,3 +182,526 @@ function createExamCard(exam) {
     
     return div;
 }
+
+// ── Candidate Examination Runner Engine ──
+
+let questions = [];
+let currentIndex = 0;
+let studentExamId = null;
+let studentId = null;
+let studentName = null;
+let examDuration = 60; // default 60 minutes
+let timeRemaining = 3600;
+let timerInterval = null;
+let responses = {};
+let flagged = {};
+let examCompleted = false;
+let heartbeatInterval = null;
+
+// Add initialization checking for exam page
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('question-nav')) {
+        initializeExamPage();
+    }
+});
+
+async function initializeExamPage() {
+    studentExamId = localStorage.getItem('studentExamId');
+    studentId = localStorage.getItem('studentId') || '00000000';
+    studentName = localStorage.getItem('studentName') || 'Candidate';
+    examDuration = parseInt(localStorage.getItem('examDuration')) || 60;
+    
+    // Set user info in header
+    document.getElementById('user-name').textContent = studentName;
+    document.getElementById('user-id').textContent = `ID: ${studentId}`;
+    const avatar = document.getElementById('user-avatar-initial');
+    if (avatar) avatar.textContent = studentName.charAt(0).toUpperCase();
+
+    // Load cached questions
+    const cached = localStorage.getItem('cachedQuestions');
+    if (cached) {
+        questions = JSON.parse(cached);
+    } else {
+        // Fallback fetch
+        try {
+            const res = await fetch(`${API_BASE}/Student/${studentExamId}/questions`);
+            if (res.ok) {
+                questions = await res.json();
+                localStorage.setItem('cachedQuestions', JSON.stringify(questions));
+            } else {
+                showToast('Error', 'Could not load examination questions.', 'error');
+                return;
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Error', 'Connection failure. Could not download questions.', 'error');
+            return;
+        }
+    }
+
+    if (questions.length === 0) {
+        showToast('Empty Exam', 'There are no questions in this examination.', 'error');
+        return;
+    }
+
+    // Load saved answers
+    const savedAnswers = localStorage.getItem(`studentExamAnswers_${studentExamId}`);
+    if (savedAnswers) {
+        responses = JSON.parse(savedAnswers);
+    } else {
+        // Load initial progress from server in case of refresh or device switch
+        try {
+            const progressRes = await fetch(`${API_BASE}/Student/${studentExamId}/progress`);
+            if (progressRes.ok) {
+                const prog = await progressRes.json();
+                if (prog.answers) {
+                    prog.answers.forEach(a => {
+                        responses[a.questionId] = a.selectedAnswer;
+                    });
+                    localStorage.setItem(`studentExamAnswers_${studentExamId}`, JSON.stringify(responses));
+                }
+            }
+        } catch (e) {
+            console.warn("Could not load initial progress from API", e);
+        }
+    }
+
+    // Initialize UI
+    currentIndex = 0;
+    renderNavigator();
+    renderQuestion(currentIndex);
+    updateProgressRing();
+    
+    // Start countdown and backend updates
+    startTimer();
+    startHeartbeat();
+    setupEventListeners();
+}
+
+function setupEventListeners() {
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (examCompleted) return;
+        
+        // If calculator is open, do not trigger exam shortcuts
+        const calcModal = document.getElementById('calculator-modal');
+        if (calcModal && !calcModal.classList.contains('hidden')) {
+            return;
+        }
+
+        const key = e.key.toUpperCase();
+        if (key === 'A' || key === 'B' || key === 'C' || key === 'D') {
+            const currentQ = questions[currentIndex];
+            if (currentQ && currentQ.options) {
+                const optIndex = key.charCodeAt(0) - 65; // 0, 1, 2, 3
+                if (optIndex < currentQ.options.length) {
+                    selectOption(currentQ.questionId, currentQ.options[optIndex]);
+                }
+            }
+        } else if (key === 'N' || e.key === 'ArrowRight') {
+            nextQuestion();
+        } else if (key === 'P' || e.key === 'ArrowLeft') {
+            prevQuestion();
+        } else if (key === 'S') {
+            confirmSubmit();
+        }
+    });
+
+    // Window blur tab-switch reporting
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && !examCompleted) {
+            fetch(`${API_BASE}/Student/tabswitch`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentExamId: parseInt(studentExamId) })
+            }).catch(err => console.error('Tab switch report error', err));
+            
+            showToast('Warning', 'Tab switching detected! This incident has been logged by the coordinator.', 'error');
+        }
+    });
+}
+
+function startTimer() {
+    let examStart = localStorage.getItem(`examStart_${studentExamId}`);
+    if (!examStart) {
+        examStart = Date.now();
+        localStorage.setItem(`examStart_${studentExamId}`, examStart);
+    }
+    
+    const durationSeconds = examDuration * 60;
+    
+    const updateTimerDisplay = () => {
+        const elapsedSeconds = Math.floor((Date.now() - parseInt(examStart)) / 1000);
+        timeRemaining = durationSeconds - elapsedSeconds;
+        
+        if (timeRemaining <= 0) {
+            timeRemaining = 0;
+            document.getElementById('timer').textContent = "00:00:00";
+            clearInterval(timerInterval);
+            // Automatic submit on timeout
+            submitExam(false);
+            return;
+        }
+        
+        const hrs = Math.floor(timeRemaining / 3600);
+        const mins = Math.floor((timeRemaining % 3600) / 60);
+        const secs = timeRemaining % 60;
+        
+        document.getElementById('timer').textContent = 
+            `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+        // Alert visually in final 5 minutes
+        if (timeRemaining < 300) {
+            document.getElementById('timer').parentElement.classList.add('warning');
+        }
+    };
+    
+    updateTimerDisplay();
+    timerInterval = setInterval(updateTimerDisplay, 1000);
+}
+
+function startHeartbeat() {
+    const sendHeartbeat = async () => {
+        if (examCompleted) return;
+        try {
+            await fetch(`${API_BASE}/Student/heartbeat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    studentExamId: parseInt(studentExamId),
+                    currentQuestion: currentIndex + 1,
+                    batteryLevel: 100,
+                    isOnline: true,
+                    connectionState: "Excellent",
+                    deviceName: "Student Browser Session",
+                    deviceId: navigator.userAgent
+                })
+            });
+        } catch (e) {
+            console.warn("Heartbeat update failed.", e);
+        }
+    };
+    
+    sendHeartbeat();
+    heartbeatInterval = setInterval(sendHeartbeat, 10000);
+}
+
+function renderNavigator() {
+    const grid = document.getElementById('question-nav');
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    questions.forEach((q, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        
+        const qId = q.questionId;
+        const isCurrent = index === currentIndex;
+        const isAnswered = responses[qId] !== undefined;
+        const isFlagged = flagged[qId] === true;
+
+        if (isCurrent) btn.classList.add('current');
+        if (isAnswered) btn.classList.add('answered');
+        if (isFlagged) btn.classList.add('flagged');
+
+        btn.textContent = index + 1;
+        btn.onclick = () => jumpToQuestion(index);
+        grid.appendChild(btn);
+    });
+
+    // Update counts
+    const totalCount = questions.length;
+    const answeredCount = Object.keys(responses).length;
+    document.getElementById('total-count').textContent = totalCount;
+    document.getElementById('answered-count').textContent = answeredCount;
+}
+
+function renderQuestion(index) {
+    const q = questions[index];
+    if (!q) return;
+
+    document.getElementById('current-q-num').textContent = index + 1;
+    document.getElementById('question-text').textContent = q.text;
+
+    // Toggle Flag UI status
+    const flagBtn = document.getElementById('btn-flag');
+    if (flagBtn) {
+        if (flagged[q.questionId]) {
+            flagBtn.classList.add('flagged');
+            flagBtn.style.color = '#EF4444';
+        } else {
+            flagBtn.classList.remove('flagged');
+            flagBtn.style.color = '';
+        }
+    }
+
+    renderOptions(q);
+}
+
+function renderOptions(question) {
+    const list = document.getElementById('options-list');
+    if (!list) return;
+    list.innerHTML = "";
+    
+    const selectedAnswer = responses[question.questionId];
+    
+    question.options.forEach((optText, index) => {
+        const letter = String.fromCharCode(65 + index); // A, B, C, D
+        const isSelected = selectedAnswer === optText;
+        
+        const item = document.createElement('div');
+        item.className = `option-item ${isSelected ? 'selected' : ''}`;
+        item.onclick = () => selectOption(question.questionId, optText);
+        
+        item.innerHTML = `
+            <div class="option-letter">${letter}</div>
+            <div class="option-text">${optText}</div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+async function selectOption(questionId, optionText) {
+    if (examCompleted) return;
+    
+    responses[questionId] = optionText;
+    localStorage.setItem(`studentExamAnswers_${studentExamId}`, JSON.stringify(responses));
+    
+    // Refresh UIs
+    const currentQ = questions[currentIndex];
+    renderOptions(currentQ);
+    renderNavigator();
+    updateProgressRing();
+    
+    // Save progress to local DB
+    try {
+        await fetch(`${API_BASE}/Student/progress`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentExamId: parseInt(studentExamId),
+                questionId: questionId,
+                selectedAnswer: optionText
+            })
+        });
+    } catch (e) {
+        console.warn("Network offline. Option saved locally.", e);
+    }
+}
+
+async function clearCurrentAnswer() {
+    if (examCompleted) return;
+    const currentQ = questions[currentIndex];
+    if (!currentQ) return;
+    
+    delete responses[currentQ.questionId];
+    localStorage.setItem(`studentExamAnswers_${studentExamId}`, JSON.stringify(responses));
+    
+    renderOptions(currentQ);
+    renderNavigator();
+    updateProgressRing();
+    
+    try {
+        await fetch(`${API_BASE}/Student/progress`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentExamId: parseInt(studentExamId),
+                questionId: currentQ.questionId,
+                selectedAnswer: ""
+            })
+        });
+    } catch (e) {
+        console.warn("Failed to update clear selection in API", e);
+    }
+}
+
+function toggleFlagCurrent() {
+    if (examCompleted) return;
+    const currentQ = questions[currentIndex];
+    if (!currentQ) return;
+
+    flagged[currentQ.questionId] = !flagged[currentQ.questionId];
+    renderQuestion(currentIndex);
+    renderNavigator();
+}
+
+function jumpToQuestion(index) {
+    if (index < 0 || index >= questions.length) return;
+    currentIndex = index;
+    renderQuestion(currentIndex);
+    renderNavigator();
+}
+
+function nextQuestion() {
+    if (currentIndex < questions.length - 1) {
+        jumpToQuestion(currentIndex + 1);
+    }
+}
+
+function prevQuestion() {
+    if (currentIndex > 0) {
+        jumpToQuestion(currentIndex - 1);
+    }
+}
+
+function updateProgressRing() {
+    const ring = document.querySelector('.progress-ring__circle');
+    const pctSpan = document.getElementById('progress-pct');
+    if (!ring || !pctSpan) return;
+
+    const total = questions.length;
+    if (total === 0) return;
+
+    const answered = Object.keys(responses).length;
+    const pct = Math.round((answered / total) * 100);
+    pctSpan.textContent = `${pct}%`;
+
+    const radius = ring.r.baseVal.value;
+    const circumference = radius * 2 * Math.PI;
+    
+    ring.style.strokeDasharray = `${circumference} ${circumference}`;
+    const offset = circumference - (pct / 100) * circumference;
+    ring.style.strokeDashoffset = offset;
+}
+
+// ── Scientific Calculator UI Implementation ──
+
+let calcExpression = "";
+function toggleCalculator() {
+    const modal = document.getElementById('calculator-modal');
+    if (modal) {
+        modal.classList.toggle('hidden');
+        if (!modal.classList.contains('hidden')) {
+            calcExpression = "";
+            document.getElementById('calc-display').textContent = "0";
+        }
+    }
+}
+
+function pressCalc(val) {
+    const display = document.getElementById('calc-display');
+    if (!display) return;
+    
+    if (val === 'C') {
+        calcExpression = "";
+        display.textContent = "0";
+    } else if (val === '=') {
+        try {
+            let expr = calcExpression.replace(/√/g, 'Math.sqrt');
+            expr = expr.replace(/sin\(/g, 'Math.sin(');
+            expr = expr.replace(/cos\(/g, 'Math.cos(');
+            expr = expr.replace(/tan\(/g, 'Math.tan(');
+            expr = expr.replace(/log\(/g, 'Math.log10(');
+            expr = expr.replace(/ln\(/g, 'Math.log(');
+            
+            let result = eval(expr);
+            if (result === undefined || isNaN(result)) {
+                display.textContent = "Error";
+            } else {
+                result = Math.round(result * 100000000) / 100000000;
+                display.textContent = result.toString();
+                calcExpression = result.toString();
+            }
+        } catch (e) {
+            display.textContent = "Error";
+        }
+    } else if (['sin', 'cos', 'tan', 'log', 'ln', 'sqrt'].includes(val)) {
+        if (val === 'sqrt') {
+            calcExpression += "√(";
+        } else {
+            calcExpression += val + "(";
+        }
+        display.textContent = calcExpression;
+    } else {
+        if (calcExpression === "0" && !isNaN(val)) {
+            calcExpression = val;
+        } else {
+            calcExpression += val;
+        }
+        display.textContent = calcExpression;
+    }
+}
+
+// ── Submit Exam Logic ──
+
+function confirmSubmit() {
+    if (examCompleted) return;
+    const modal = document.getElementById('submit-confirm-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeSubmitConfirm() {
+    const modal = document.getElementById('submit-confirm-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function closeModalOnOuterClick(event, modalId) {
+    if (event.target.id === modalId) {
+        if (modalId === 'calculator-modal') {
+            toggleCalculator();
+        } else if (modalId === 'submit-confirm-modal') {
+            closeSubmitConfirm();
+        }
+    }
+}
+
+async function submitExam(manual = true) {
+    if (examCompleted) return;
+    examCompleted = true;
+    
+    // Disable inputs and overlays
+    closeSubmitConfirm();
+    clearInterval(timerInterval);
+    clearInterval(heartbeatInterval);
+
+    // Collect answers
+    const answersList = [];
+    questions.forEach(q => {
+        const ans = responses[q.questionId];
+        if (ans !== undefined) {
+            answersList.push({
+                questionId: q.questionId,
+                selectedAnswer: ans
+            });
+        }
+    });
+
+    try {
+        const submitRes = await fetch(`${API_BASE}/Student/submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentExamId: parseInt(studentExamId),
+                answers: answersList
+            })
+        });
+
+        if (submitRes.ok) {
+            const scoreResult = await submitRes.json();
+            // Display animated completion card
+            document.getElementById('score-text').textContent = `${scoreResult.percentage}%`;
+            document.getElementById('completion-modal').classList.remove('hidden');
+        } else {
+            showToast('Submission Failed', 'Server rejected direct submit. Retrying with local payload...', 'error');
+            examCompleted = false; // allow retry
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Connection Failure', 'Could not sync submit. Please alert the exam invigilator.', 'error');
+        examCompleted = false;
+    }
+}
+
+function exitExamPortal() {
+    // Clean up student local mock workspace
+    localStorage.removeItem('cachedQuestions');
+    localStorage.removeItem(`studentExamAnswers_${studentExamId}`);
+    localStorage.removeItem(`examStart_${studentExamId}`);
+    localStorage.removeItem('studentExamId');
+    localStorage.removeItem('selectedExamId');
+    localStorage.removeItem('selectedExamTitle');
+    localStorage.removeItem('examDuration');
+    
+    window.location.href = 'index.html';
+}
