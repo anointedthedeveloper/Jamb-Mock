@@ -21,8 +21,7 @@ try {
 
 function getBrowserAndOS() {
     const ua = navigator.userAgent;
-    let browser = "Other Browser";
-    let os = "Other OS";
+    let browser = "Browser";
 
     if (ua.indexOf("Firefox") > -1) browser = "Firefox";
     else if (ua.indexOf("Chrome") > -1 && ua.indexOf("Edge") === -1 && ua.indexOf("Edg") === -1) browser = "Chrome";
@@ -30,16 +29,7 @@ function getBrowserAndOS() {
     else if (ua.indexOf("Edge") > -1 || ua.indexOf("Edg") > -1) browser = "Edge";
     else if (ua.indexOf("Trident") > -1 || ua.indexOf("MSIE") > -1) browser = "IE";
 
-    if (ua.indexOf("Windows NT 10.0") > -1) os = "Windows 11/10";
-    else if (ua.indexOf("Windows NT 6.3") > -1) os = "Windows 8.1";
-    else if (ua.indexOf("Windows NT 6.2") > -1) os = "Windows 8";
-    else if (ua.indexOf("Windows NT 6.1") > -1) os = "Windows 7";
-    else if (ua.indexOf("Macintosh") > -1) os = "macOS";
-    else if (ua.indexOf("Android") > -1) os = "Android";
-    else if (ua.indexOf("iPhone") > -1 || ua.indexOf("iPad") > -1) os = "iOS";
-    else if (ua.indexOf("Linux") > -1) os = "Linux";
-
-    return `${browser} • ${os}`;
+    return browser;
 }
 
 async function runDeviceHeartbeat() {

@@ -269,6 +269,13 @@ public class CreateExamViewModel(ApiClient api) : BaseViewModel, IRefreshable
         CreatedExamTitle = Title;
         Status    = $"Exam \"{Title}\" created! Now add questions below.";
         IsSuccess = true;
+        
+        NotificationsViewModel.Instance?.Add(new NotificationItem(
+            "Exam Created",
+            $"New exam template '{Title}' created successfully.",
+            DateTime.Now,
+            "success"
+        ));
     }
 
     private async Task AddQuestionAsync()
@@ -883,6 +890,13 @@ public class SessionViewModel(ApiClient api) : BaseViewModel, IRefreshable
         if (SelectedExam is null) return;
         await api.StartSessionAsync(SelectedExam.Id);
         await LoadAsync();
+        
+        NotificationsViewModel.Instance?.Add(new NotificationItem(
+            "Session Started",
+            $"Started a new active live session for exam '{SelectedExam.Title}'. Code: {ActiveSessions.FirstOrDefault(s => s.ExamTitle == SelectedExam.Title)?.SessionCode ?? "N/A"}",
+            DateTime.Now,
+            "success"
+        ));
     }
 
     private async Task StopSessionAsync(SessionDto? session)
@@ -895,6 +909,13 @@ public class SessionViewModel(ApiClient api) : BaseViewModel, IRefreshable
         {
             await api.StopSessionAsync(session.Id);
             await LoadAsync();
+            
+            NotificationsViewModel.Instance?.Add(new NotificationItem(
+                "Session Stopped",
+                $"Stopped live session for exam '{session.ExamTitle}'. Session code {session.SessionCode} was closed.",
+                DateTime.Now,
+                "warning"
+            ));
         }
     }
 
@@ -908,6 +929,13 @@ public class SessionViewModel(ApiClient api) : BaseViewModel, IRefreshable
         {
             await api.EndAllSessionsAsync();
             await LoadAsync();
+            
+            NotificationsViewModel.Instance?.Add(new NotificationItem(
+                "All Sessions Ended",
+                "Ended all active examination sessions in the hall.",
+                DateTime.Now,
+                "error"
+            ));
         }
     }
 }
@@ -1050,12 +1078,15 @@ public class DevicesViewModel : BaseViewModel, IRefreshable
                     Devices.Add(new DeviceRow(
                         d.DeviceId,
                         d.StudentId,
+                        d.StudentName,
+                        d.ExamTitle,
+                        d.ExamStatus,
                         lastSeenFormatted,
                         status,
-                        0,
                         d.BatteryLevel,
                         d.IsOnline,
-                        d.DeviceName
+                        d.DeviceName,
+                        d.IpAddress
                     ));
                 }
                 Total = list.Count;
@@ -1069,7 +1100,7 @@ public class DevicesViewModel : BaseViewModel, IRefreshable
 
 public record ExamSubjectConfig(string Subject, List<int> Years, int QuestionCount);
 
-public record DeviceRow(string Name, string StudentId, string JoinedAt, string Status, int TabSwitches, int Battery, bool Online, string DeviceName = "");
+public record DeviceRow(string Name, string StudentId, string StudentName, string ExamTitle, string ExamStatus, string JoinedAt, string Status, int Battery, bool Online, string DeviceName, string IpAddress);
 
 public record QuestionBankRow(int Serial, int Id, string Subject, int Year, int QuestionNumber, string Preview);
 
@@ -2759,15 +2790,31 @@ public record NotificationItem(string Title, string Message, DateTime CreatedAt,
 
 public class NotificationsViewModel : BaseViewModel, IRefreshable
 {
+    public static NotificationsViewModel? Instance { get; private set; }
+
+    public NotificationsViewModel()
+    {
+        Instance = this;
+    }
+
     public ObservableCollection<NotificationItem> Items { get; } = [];
     public int UnreadCount => Items.Count;
     public Task LoadAsync() => Task.CompletedTask;
 
+    public RelayCommand ClearAllCommand => new(() =>
+    {
+        Items.Clear();
+        OnPropertyChanged(nameof(UnreadCount));
+    });
+
     public void Add(NotificationItem item)
     {
-        Items.Insert(0, item);
-        if (Items.Count > 100)
-            Items.RemoveAt(Items.Count - 1);
-        OnPropertyChanged(nameof(UnreadCount));
+        App.Current.Dispatcher.Invoke(() =>
+        {
+            Items.Insert(0, item);
+            if (Items.Count > 100)
+                Items.RemoveAt(Items.Count - 1);
+            OnPropertyChanged(nameof(UnreadCount));
+        });
     }
 }

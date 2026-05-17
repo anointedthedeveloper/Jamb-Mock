@@ -62,7 +62,7 @@ public record ActivityLogDto(int StudentExamId, string Activity, DateTime Timest
 public record TabSwitchDto(int StudentExamId);
 public record DeviceHeartbeatDto(int StudentExamId, int CurrentQuestion, int BatteryLevel, bool IsOnline, string ConnectionState, string DeviceName = "", string DeviceId = "");
 public record DeviceRegistrationDto(string DeviceId, string DeviceName, int BatteryLevel, string StudentId);
-public record DeviceDto(string DeviceId, string DeviceName, string IpAddress, DateTime LastSeen, bool IsOnline, int BatteryLevel, string StudentId);
+public record DeviceDto(string DeviceId, string DeviceName, string IpAddress, DateTime LastSeen, bool IsOnline, int BatteryLevel, string StudentId, string StudentName, string ExamTitle, string ExamStatus);
 public record SnapshotDto(int StudentExamId, string ImageBase64);
 
 // --- Student admin management ---

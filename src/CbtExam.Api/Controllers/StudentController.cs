@@ -261,9 +261,65 @@ public class StudentController(AppDbContext db, IHubContext<ExamHub> hub, Snapsh
             await db.SaveChangesAsync();
         }
 
-        var dtos = devices
-            .Select(d => new DeviceDto(d.DeviceId, d.DeviceName, d.IpAddress, d.LastSeen, d.IsOnline, d.BatteryLevel, d.StudentId))
-            .ToList();
+        var dtos = new List<DeviceDto>();
+        foreach (var d in devices)
+        {
+            string studentName = "Awaiting Login";
+            string examTitle = "—";
+            string examStatus = "Idle";
+
+            if (!string.IsNullOrWhiteSpace(d.StudentId) && d.StudentId != "Awaiting Login")
+            {
+                var student = await db.Students
+                    .Include(s => s.StudentExams)
+                    .ThenInclude(se => se.Session)
+                    .ThenInclude(s => s.Exam)
+                    .FirstOrDefaultAsync(s => s.StudentId == d.StudentId);
+                
+                if (student is not null)
+                {
+                    studentName = student.FullName;
+                    var studentExam = student.StudentExams
+                        .OrderByDescending(se => se.JoinedAt)
+                        .FirstOrDefault();
+
+                    if (studentExam is not null)
+                    {
+                        examTitle = studentExam.Session?.Exam?.Title ?? "—";
+                        if (studentExam.IsSubmitted)
+                        {
+                            examStatus = "Submitted";
+                        }
+                        else if (studentExam.Session?.IsStarted == true)
+                        {
+                            examStatus = "Examining";
+                        }
+                        else
+                        {
+                            examStatus = "Waiting Room";
+                        }
+                    }
+                    else
+                    {
+                        examStatus = "Selecting Exam";
+                    }
+                }
+            }
+
+            dtos.Add(new DeviceDto(
+                d.DeviceId,
+                d.DeviceName,
+                d.IpAddress,
+                d.LastSeen,
+                d.IsOnline,
+                d.BatteryLevel,
+                d.StudentId,
+                studentName,
+                examTitle,
+                examStatus
+            ));
+        }
+
         return Ok(dtos);
     }
 
