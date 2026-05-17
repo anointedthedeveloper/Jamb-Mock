@@ -17,7 +17,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="Exam Templates" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Design and manage your exam configurations. Configure subjects, pooling logic, and timing." FontSize="13" Foreground="#64748B" Margin="0,4,0,0"/>
+                    <TextBlock Text="Design and manage your exam configurations. Configure subjects, pooling logic, and timing." FontSize="13" Foreground="#64748B" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- Inline Search Bar (Constrained Width) -->

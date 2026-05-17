@@ -35,7 +35,9 @@ public class QuestionBankController(AppDbContext db) : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(dto.Text)) return BadRequest("Question text required.");
         if (dto.Options is null || dto.Options.Count < 2) return BadRequest("At least 2 options required.");
-        if (!dto.Options.Contains(dto.CorrectAnswer, StringComparer.OrdinalIgnoreCase))
+        
+        var resolvedAnswer = ResolveCorrectAnswer(dto.CorrectAnswer, dto.Options);
+        if (!dto.Options.Contains(resolvedAnswer, StringComparer.OrdinalIgnoreCase))
             return BadRequest("Correct answer must match one of the options.");
 
         var q = new QuestionBank
@@ -45,7 +47,7 @@ public class QuestionBankController(AppDbContext db) : ControllerBase
             QuestionNumber = dto.QuestionNumber,
             Text = dto.Text.Trim(),
             OptionsJson = JsonSerializer.Serialize(dto.Options),
-            CorrectAnswer = dto.CorrectAnswer
+            CorrectAnswer = resolvedAnswer
         };
         db.QuestionBank.Add(q);
         await db.SaveChangesAsync();
@@ -60,7 +62,8 @@ public class QuestionBankController(AppDbContext db) : ControllerBase
         foreach (var dto in questions)
         {
             if (string.IsNullOrWhiteSpace(dto.Text) || dto.Options is null || dto.Options.Count < 2) continue;
-            if (!dto.Options.Contains(dto.CorrectAnswer, StringComparer.OrdinalIgnoreCase)) continue;
+            var resolvedAnswer = ResolveCorrectAnswer(dto.CorrectAnswer, dto.Options);
+            if (!dto.Options.Contains(resolvedAnswer, StringComparer.OrdinalIgnoreCase)) continue;
             valid.Add(new QuestionBank
             {
                 Subject = dto.Subject.Trim(),
@@ -68,7 +71,7 @@ public class QuestionBankController(AppDbContext db) : ControllerBase
                 QuestionNumber = dto.QuestionNumber <= 0 ? valid.Count + 1 : dto.QuestionNumber,
                 Text = dto.Text.Trim(),
                 OptionsJson = JsonSerializer.Serialize(dto.Options),
-                CorrectAnswer = dto.CorrectAnswer
+                CorrectAnswer = resolvedAnswer
             });
         }
         db.QuestionBank.AddRange(valid);
@@ -86,7 +89,7 @@ public class QuestionBankController(AppDbContext db) : ControllerBase
         q.QuestionNumber = dto.QuestionNumber;
         q.Text = dto.Text.Trim();
         q.OptionsJson = JsonSerializer.Serialize(dto.Options);
-        q.CorrectAnswer = dto.CorrectAnswer;
+        q.CorrectAnswer = ResolveCorrectAnswer(dto.CorrectAnswer, dto.Options);
         await db.SaveChangesAsync();
         return Ok();
     }
@@ -144,5 +147,18 @@ public class QuestionBankController(AppDbContext db) : ControllerBase
         }
         await db.SaveChangesAsync();
         return Ok(exam.Id);
+     }
+
+    private static string ResolveCorrectAnswer(string correctAnswer, List<string> options)
+    {
+        if (options is null || options.Count == 0 || string.IsNullOrWhiteSpace(correctAnswer)) return correctAnswer;
+        
+        var clean = correctAnswer.Trim().ToUpper();
+        if (clean == "A" && options.Count >= 1) return options[0];
+        if (clean == "B" && options.Count >= 2) return options[1];
+        if (clean == "C" && options.Count >= 3) return options[2];
+        if (clean == "D" && options.Count >= 4) return options[3];
+        
+        return correctAnswer;
     }
 }

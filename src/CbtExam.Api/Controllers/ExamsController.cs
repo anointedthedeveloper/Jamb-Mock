@@ -73,7 +73,9 @@ public class ExamsController(AppDbContext db) : ControllerBase
         if (string.IsNullOrWhiteSpace(dto.Text)) return BadRequest("Question text is required.");
         if (dto.Options is null || dto.Options.Count < 2) return BadRequest("At least two options are required.");
         if (dto.Options.Any(o => string.IsNullOrWhiteSpace(o))) return BadRequest("Options cannot be blank.");
-        if (!dto.Options.Contains(dto.CorrectAnswer, StringComparer.OrdinalIgnoreCase))
+        
+        var resolvedAnswer = ResolveCorrectAnswer(dto.CorrectAnswer, dto.Options);
+        if (!dto.Options.Contains(resolvedAnswer, StringComparer.OrdinalIgnoreCase))
             return BadRequest("Correct answer must match one of the options.");
         var q = new Question
         {
@@ -81,7 +83,7 @@ public class ExamsController(AppDbContext db) : ControllerBase
             QuestionNumber = dto.QuestionNumber,
             Text = dto.Text,
             OptionsJson = JsonSerializer.Serialize(dto.Options),
-            CorrectAnswer = dto.CorrectAnswer
+            CorrectAnswer = resolvedAnswer
         };
         db.Questions.Add(q);
         await db.SaveChangesAsync();
@@ -100,14 +102,15 @@ public class ExamsController(AppDbContext db) : ControllerBase
         {
             if (string.IsNullOrWhiteSpace(dto.Text)) continue;
             if (dto.Options is null || dto.Options.Count < 2) continue;
-            if (!dto.Options.Contains(dto.CorrectAnswer, StringComparer.OrdinalIgnoreCase)) continue;
+            var resolvedAnswer = ResolveCorrectAnswer(dto.CorrectAnswer, dto.Options);
+            if (!dto.Options.Contains(resolvedAnswer, StringComparer.OrdinalIgnoreCase)) continue;
             valid.Add(new Question
             {
                 ExamId = id,
                 QuestionNumber = dto.QuestionNumber <= 0 ? valid.Count + 1 : dto.QuestionNumber,
                 Text = dto.Text,
                 OptionsJson = JsonSerializer.Serialize(dto.Options),
-                CorrectAnswer = dto.CorrectAnswer
+                CorrectAnswer = resolvedAnswer
             });
         }
 
@@ -128,5 +131,18 @@ public class ExamsController(AppDbContext db) : ControllerBase
         db.Questions.Remove(q);
         await db.SaveChangesAsync();
         return NoContent();
+    }
+
+    private static string ResolveCorrectAnswer(string correctAnswer, List<string> options)
+    {
+        if (options is null || options.Count == 0 || string.IsNullOrWhiteSpace(correctAnswer)) return correctAnswer;
+        
+        var clean = correctAnswer.Trim().ToUpper();
+        if (clean == "A" && options.Count >= 1) return options[0];
+        if (clean == "B" && options.Count >= 2) return options[1];
+        if (clean == "C" && options.Count >= 3) return options[2];
+        if (clean == "D" && options.Count >= 4) return options[3];
+        
+        return correctAnswer;
     }
 }

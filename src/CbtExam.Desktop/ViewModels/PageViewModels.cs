@@ -1454,7 +1454,18 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             Subject = standardizedSubject;
 
             var options = new List<string> { OptionA, OptionB, OptionC, OptionD };
-            var dto = new QuestionBankCreateDto(standardizedSubject, Year, 0, QuestionText, options, CorrectAnswer);
+            
+            // UI selects A, B, C, D; map it to the actual option content
+            var apiCorrectAnswer = CorrectAnswer switch
+            {
+                "A" => OptionA,
+                "B" => OptionB,
+                "C" => OptionC,
+                "D" => OptionD,
+                _ => CorrectAnswer
+            };
+
+            var dto = new QuestionBankCreateDto(standardizedSubject, Year, 0, QuestionText, options, apiCorrectAnswer);
 
             HttpResponseMessage resp;
             if (Selected is not null)
@@ -1470,7 +1481,9 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             }
             else
             {
-                Status = "Failed to save question."; StatusOk = false;
+                var errMsg = await resp.Content.ReadAsStringAsync();
+                Status = $"Error: {(!string.IsNullOrWhiteSpace(errMsg) ? errMsg : "Failed to save question.")}";
+                StatusOk = false;
             }
         }
         finally { IsBusy = false; }
@@ -1509,11 +1522,23 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
                 OptionB = options[1];
                 OptionC = options[2];
                 OptionD = options[3];
+
+                // Map database answer text back to UI dropdown letter
+                if (string.Equals(q.CorrectAnswer, OptionA, StringComparison.OrdinalIgnoreCase)) CorrectAnswer = "A";
+                else if (string.Equals(q.CorrectAnswer, OptionB, StringComparison.OrdinalIgnoreCase)) CorrectAnswer = "B";
+                else if (string.Equals(q.CorrectAnswer, OptionC, StringComparison.OrdinalIgnoreCase)) CorrectAnswer = "C";
+                else if (string.Equals(q.CorrectAnswer, OptionD, StringComparison.OrdinalIgnoreCase)) CorrectAnswer = "D";
+                else CorrectAnswer = q.CorrectAnswer;
+            }
+            else
+            {
+                CorrectAnswer = q.CorrectAnswer;
             }
         }
-        catch { /* Fallback */ }
-        
-        CorrectAnswer = q.CorrectAnswer;
+        catch 
+        { 
+            CorrectAnswer = q.CorrectAnswer; 
+        }
     }
 
     private async Task ImportJsonAsync()
@@ -2088,11 +2113,36 @@ public class SettingsViewModel : BaseViewModel, IRefreshable
             var resp = await api.ImportQuestionBankAsync(questions);
             if (resp.IsSuccessStatusCode)
             {
-                CopyStatus = $"Successfully imported {questions.Count} questions!";
+                try
+                {
+                    var responseJson = await resp.Content.ReadAsStringAsync();
+                    var importResult = JsonSerializer.Deserialize<Dictionary<string, int>>(responseJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (importResult != null && importResult.TryGetValue("imported", out int importedCount))
+                    {
+                        int skippedCount = importResult.TryGetValue("skipped", out int skipped) ? skipped : 0;
+                        if (skippedCount > 0)
+                        {
+                            CopyStatus = $"Successfully imported {importedCount} questions ({skippedCount} skipped due to formatting).";
+                        }
+                        else
+                        {
+                            CopyStatus = $"Successfully imported all {importedCount} questions!";
+                        }
+                    }
+                    else
+                    {
+                        CopyStatus = $"Successfully imported {questions.Count} questions!";
+                    }
+                }
+                catch
+                {
+                    CopyStatus = $"Successfully imported {questions.Count} questions!";
+                }
             }
             else
             {
-                CopyStatus = "Failed to import questions to server.";
+                var errMsg = await resp.Content.ReadAsStringAsync();
+                CopyStatus = $"Error: {(!string.IsNullOrWhiteSpace(errMsg) ? errMsg : "Failed to import questions to server.")}";
             }
         }
         catch (Exception ex)
