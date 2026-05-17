@@ -2542,7 +2542,6 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             
             gfx.DrawLine(dividerPen, margin, footerY, page.Width.Point - margin, footerY);
             gfx.DrawString("Powered by Anobyte Technologies", footerFont, footerMuted, new XRect(margin, footerY + 4, page.Width.Point - (margin * 2), 15), XStringFormats.TopLeft);
-            gfx.DrawString("Confidential Student Roster", footerFont, footerMuted, new XRect(margin, footerY + 4, page.Width.Point - (margin * 2), 15), XStringFormats.TopRight);
         }
         catch { }
     }
@@ -2598,107 +2597,136 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 #pragma warning disable CS0618
                 var titleFont = new XFont("Segoe UI", 18, XFontStyleEx.Bold);
                 var subTitleFont = new XFont("Segoe UI", 9, XFontStyleEx.Regular);
-                var headerFont = new XFont("Segoe UI", 10, XFontStyleEx.Bold);
-                var regularFont = new XFont("Segoe UI", 10, XFontStyleEx.Regular);
-                var monoFont = new XFont("Consolas", 10, XFontStyleEx.Regular);
+                var labelFont = new XFont("Segoe UI", 7, XFontStyleEx.Bold);
+                var valueFont = new XFont("Segoe UI", 9.5, XFontStyleEx.Bold);
+                var monoFont = new XFont("Consolas", 10, XFontStyleEx.Bold);
 #pragma warning restore CS0618
 
-                var textDark = XBrushes.DarkSlateGray;
-                var textMuted = XBrushes.Gray;
-                var textPrimary = XBrushes.ForestGreen;
-                var borderPen = new XPen(XColors.LightGray, 0.75);
-                var zebraBrush = new XSolidBrush(XColor.FromArgb(248, 250, 252));
-                var headerBg = new XSolidBrush(XColor.FromArgb(241, 245, 249));
+                var grayBrush = XBrushes.DarkGray;
+                var textCharcoal = new XSolidBrush(XColor.FromArgb(30, 41, 59)); // Slate-800 Charcoal
+                var primaryColorBrush = new XSolidBrush(XColor.FromArgb(13, 148, 136)); // Teal
+                
+                var dividerPen = new XPen(XColor.FromArgb(226, 232, 240), 1.0); // 1px light grey divider
+                var cardBorderPen = new XPen(XColor.FromArgb(203, 213, 225), 1.0) { DashStyle = XDashStyle.Dash }; // Dashed cut card border
+                var cardBg = new XSolidBrush(XColor.FromArgb(248, 250, 252)); // Slate 50 background
+                var capsuleBg = new XSolidBrush(XColor.FromArgb(241, 245, 249)); // Slate 100 capsule
+                var capsuleBorderPen = new XPen(XColor.FromArgb(226, 232, 240), 1.0);
+                var innerDividerPen = new XPen(XColor.FromArgb(241, 245, 249), 1.0);
 
                 double margin = 40;
                 double width = page.Width.Point - (margin * 2);
                 
                 double y = margin;
-                gfx.DrawString("STUDENT ROSTER & CREDENTIALS", titleFont, textPrimary, new XRect(margin, y, width, 30), XStringFormats.TopLeft);
                 
+                // Left Title
+                gfx.DrawString("STUDENT ROSTER & CREDENTIALS", titleFont, textCharcoal, new XRect(margin, y, width - 100, 22), XStringFormats.TopLeft);
+                
+                // Right Logo with preserved aspect ratio
                 if (logoImage != null)
                 {
                     try
                     {
-                        double logoW = 90;
-                        double logoH = 30;
+                        double logoH = 35; // Target height perfectly matches the 2 text rows
+                        double logoW = logoImage.PointWidth * (logoH / logoImage.PointHeight);
                         gfx.DrawImage(logoImage, page.Width.Point - margin - logoW, y, logoW, logoH);
                     }
                     catch { }
                 }
                 
-                y += 24;
+                y += 22;
                 
+                // Metadata under title
                 string subText = $"Generated on {DateTime.Now:MMMM dd, yyyy - hh:mm tt}  |  Total: {Students.Count} Candidates";
-                gfx.DrawString(subText, subTitleFont, textMuted, new XRect(margin, y, width, 15), XStringFormats.TopLeft);
-                y += 24;
+                gfx.DrawString(subText, subTitleFont, grayBrush, new XRect(margin, y, width - 100, 15), XStringFormats.TopLeft);
                 
-                gfx.DrawLine(new XPen(XColor.FromArgb(22, 163, 74), 1.5), margin, y, page.Width.Point - margin, y);
-                y += 16;
+                y += 22;
+                
+                // Architectural Divider line (1px slate-200)
+                gfx.DrawLine(dividerPen, margin, y, page.Width.Point - margin, y);
+                y += 18;
 
-                double colNoWidth = 40;
-                double colPassWidth = 100;
-                double colUserWidth = 130;
-                double colNameWidth = width - colNoWidth - colPassWidth - colUserWidth;
-
-                double colNoX = margin;
-                double colNameX = colNoX + colNoWidth;
-                double colUserX = colNameX + colNameWidth;
-                double colPassX = colUserX + colUserWidth;
-                
-                double rowHeight = 25;
-                
-                gfx.DrawRectangle(headerBg, colNoX, y, width, rowHeight);
-                gfx.DrawRectangle(borderPen, colNoX, y, width, rowHeight);
-
-                gfx.DrawString("#", headerFont, textDark, new XRect(colNoX + 6, y + 6, colNoWidth - 12, rowHeight - 12), XStringFormats.CenterLeft);
-                gfx.DrawString("FULL NAME", headerFont, textDark, new XRect(colNameX + 8, y + 6, colNameWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
-                gfx.DrawString("USERNAME (STUDENT ID)", headerFont, textDark, new XRect(colUserX + 8, y + 6, colUserWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
-                gfx.DrawString("PASSWORD", headerFont, textDark, new XRect(colPassX + 8, y + 6, colPassWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
-                
-                y += rowHeight;
+                // Card Grid Dimensions
+                double cardW = (width - 15) / 2; // 2 columns with 15pt gap
+                double cardH = 80;
+                double gapX = 15;
+                double gapY = 15;
 
                 DrawFooter(gfx, page, margin);
 
-                int idx = 1;
+                int idx = 0;
                 foreach (var s in Students)
                 {
-                    if (y + rowHeight > page.Height.Point - margin)
+                    // Compute absolute coordinates for this card
+                    int rowOnPage = idx / 2;
+                    int colOnPage = idx % 2;
+                    
+                    double cardX = margin + colOnPage * (cardW + gapX);
+                    double cardY = y + rowOnPage * (cardH + gapY);
+
+                    // Check page overflow
+                    if (cardY + cardH > page.Height.Point - margin - 20)
                     {
+                        // Add new page
                         page = document.AddPage();
                         page.Size = PdfSharp.PageSize.A4;
                         page.Orientation = PdfSharp.PageOrientation.Portrait;
                         gfx = XGraphics.FromPdfPage(page);
                         
-                        y = margin;
+                        y = margin + 10;
+                        idx = 0; // Reset index on new page for grid layout calculations
                         
-                        gfx.DrawRectangle(headerBg, colNoX, y, width, rowHeight);
-                        gfx.DrawRectangle(borderPen, colNoX, y, width, rowHeight);
-
-                        gfx.DrawString("#", headerFont, textDark, new XRect(colNoX + 6, y + 6, colNoWidth - 12, rowHeight - 12), XStringFormats.CenterLeft);
-                        gfx.DrawString("FULL NAME", headerFont, textDark, new XRect(colNameX + 8, y + 6, colNameWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
-                        gfx.DrawString("USERNAME (STUDENT ID)", headerFont, textDark, new XRect(colUserX + 8, y + 6, colUserWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
-                        gfx.DrawString("PASSWORD", headerFont, textDark, new XRect(colPassX + 8, y + 6, colPassWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
+                        rowOnPage = 0;
+                        colOnPage = 0;
+                        cardX = margin;
+                        cardY = y;
                         
-                        y += rowHeight;
-
                         DrawFooter(gfx, page, margin);
                     }
 
-                    if (idx % 2 == 0)
-                    {
-                        gfx.DrawRectangle(zebraBrush, colNoX, y, width, rowHeight);
-                    }
+                    // 1. Draw card background & dashed borders
+                    gfx.DrawRectangle(cardBg, cardX, cardY, cardW, cardH);
+                    gfx.DrawRectangle(cardBorderPen, cardX, cardY, cardW, cardH);
+
+                    // 2. Draw card header (CBT Token Title & Cut indicator)
+                    gfx.DrawString("Prep4Jamb CBT Login Token", labelFont, primaryColorBrush, new XRect(cardX + 10, cardY + 8, cardW - 20, 10), XStringFormats.TopLeft);
+                    gfx.DrawString("✂ Cut Here", labelFont, grayBrush, new XRect(cardX + 10, cardY + 8, cardW - 20, 10), XStringFormats.TopRight);
+
+                    // 3. Draw horizontal inner separator
+                    gfx.DrawLine(innerDividerPen, cardX + 10, cardY + 22, cardX + cardW - 10, cardY + 22);
+
+                    // 4. Details: NAME & USERNAME (Left half)
+                    gfx.DrawString("CANDIDATE NAME", labelFont, grayBrush, new XRect(cardX + 10, cardY + 28, 120, 10), XStringFormats.TopLeft);
+                    gfx.DrawString(s.FullName, valueFont, textCharcoal, new XRect(cardX + 10, cardY + 38, 120, 15), XStringFormats.TopLeft);
+
+                    gfx.DrawString("USERNAME / ID", labelFont, grayBrush, new XRect(cardX + 10, cardY + 54, 120, 10), XStringFormats.TopLeft);
+                    gfx.DrawString(s.StudentId, monoFont, textCharcoal, new XRect(cardX + 10, cardY + 64, 120, 15), XStringFormats.TopLeft);
+
+                    // 5. Details: PASSWORD capsule (Right half)
+                    gfx.DrawString("PASSWORD", labelFont, grayBrush, new XRect(cardX + 135, cardY + 32, cardW - 145, 10), XStringFormats.TopLeft);
                     
-                    gfx.DrawRectangle(borderPen, colNoX, y, width, rowHeight);
+                    double capX = cardX + 135;
+                    double capY = cardY + 45;
+                    double capW = cardW - 145;
+                    double capH = 22;
+                    gfx.DrawRectangle(capsuleBg, capX, capY, capW, capH);
+                    gfx.DrawRectangle(capsuleBorderPen, capX, capY, capW, capH);
+                    
+                    gfx.DrawString(s.Password, monoFont, primaryColorBrush, new XRect(capX, capY, capW, capH), XStringFormats.Center);
 
-                    gfx.DrawString(idx.ToString(), regularFont, textDark, new XRect(colNoX + 6, y + 6, colNoWidth - 12, rowHeight - 12), XStringFormats.CenterLeft);
-                    gfx.DrawString(s.FullName, regularFont, textDark, new XRect(colNameX + 8, y + 6, colNameWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
-                    gfx.DrawString(s.StudentId, regularFont, textDark, new XRect(colUserX + 8, y + 6, colUserWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
-                    gfx.DrawString(s.Password, monoFont, textPrimary, new XRect(colPassX + 8, y + 6, colPassWidth - 16, rowHeight - 12), XStringFormats.CenterLeft);
-
-                    y += rowHeight;
                     idx++;
+                }
+
+                // --- Page Number overlay pass ---
+                int totalPages = document.PageCount;
+                for (int pIdx = 0; pIdx < totalPages; pIdx++)
+                {
+                    var p = document.Pages[pIdx];
+                    var pGfx = XGraphics.FromPdfPage(p);
+#pragma warning disable CS0618
+                    var pageNumFont = new XFont("Segoe UI", 8, XFontStyleEx.Regular);
+#pragma warning restore CS0618
+                    double pageNumY = p.Height.Point - margin + 10;
+                    pGfx.DrawString($"Page {pIdx + 1} of {totalPages}", pageNumFont, grayBrush, new XRect(margin, pageNumY + 4, p.Width.Point - (margin * 2), 15), XStringFormats.TopRight);
                 }
 
                 document.Save(sfd.FileName);
