@@ -215,7 +215,15 @@
                             <!-- JSON Paste alternative -->
                             <Expander Header="Alternative: Paste Raw JSON" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" HorizontalAlignment="Stretch">
                                 <StackPanel Margin="0,10,0,0">
-                                    <TextBlock Text="Paste JSON content directly below:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                    <Grid Margin="0,0,0,6">
+                                        <TextBlock Text="Paste JSON content directly below:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                        <Button Command="{Binding CopyTemplateCommand}" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource AccentBrush}" Cursor="Hand" Padding="0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="12" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Copy Example Format" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
                                     <TextBox Text="{Binding JsonImport, UpdateSourceTrigger=PropertyChanged}" Height="120" TextWrapping="Wrap" AcceptsReturn="True" FontFamily="Consolas" FontSize="12" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12"/>
                                     <Button Command="{Binding ImportJsonCommand}" Style="{StaticResource PrimaryBtn}" Background="#059669" Padding="16,8" HorizontalAlignment="Left">
                                         <TextBlock Text="Parse &amp; Import JSON" FontSize="12" FontWeight="Bold"/>
