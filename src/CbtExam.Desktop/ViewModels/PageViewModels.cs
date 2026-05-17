@@ -2528,7 +2528,7 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         }
     }
 
-    private void DrawFooter(XGraphics gfx, PdfPage page, double margin)
+    private void DrawFooter(XGraphics gfx, PdfPage page, double margin, int pageNum, int totalPages)
     {
         try
         {
@@ -2542,6 +2542,7 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             
             gfx.DrawLine(dividerPen, margin, footerY, page.Width.Point - margin, footerY);
             gfx.DrawString("Powered by Anobyte Technologies", footerFont, footerMuted, new XRect(margin, footerY + 4, page.Width.Point - (margin * 2), 15), XStringFormats.TopLeft);
+            gfx.DrawString($"Page {pageNum} of {totalPages}", footerFont, footerMuted, new XRect(margin, footerY + 4, page.Width.Point - (margin * 2), 15), XStringFormats.TopRight);
         }
         catch { }
     }
@@ -2651,7 +2652,12 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
                 double gapX = 15;
                 double gapY = 15;
 
-                DrawFooter(gfx, page, margin);
+                int totalCandidates = Students.Count;
+                int totalPages = (int)Math.Ceiling(totalCandidates / 14.0);
+                if (totalPages < 1) totalPages = 1;
+                
+                int currentPageNum = 1;
+                DrawFooter(gfx, page, margin, currentPageNum, totalPages);
 
                 int idx = 0;
                 foreach (var s in Students)
@@ -2680,7 +2686,8 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
                         cardX = margin;
                         cardY = y;
                         
-                        DrawFooter(gfx, page, margin);
+                        currentPageNum++;
+                        DrawFooter(gfx, page, margin, currentPageNum, totalPages);
                     }
 
                     // 1. Draw card background & dashed borders
@@ -2716,22 +2723,13 @@ public class StudentsViewModel(ApiClient api) : BaseViewModel, IRefreshable
                     idx++;
                 }
 
-                // --- Page Number overlay pass ---
-                int totalPages = document.PageCount;
-                for (int pIdx = 0; pIdx < totalPages; pIdx++)
-                {
-                    var p = document.Pages[pIdx];
-                    var pGfx = XGraphics.FromPdfPage(p);
-#pragma warning disable CS0618
-                    var pageNumFont = new XFont("Segoe UI", 8, XFontStyleEx.Regular);
-#pragma warning restore CS0618
-                    double pageNumY = p.Height.Point - margin + 10;
-                    pGfx.DrawString($"Page {pIdx + 1} of {totalPages}", pageNumFont, grayBrush, new XRect(margin, pageNumY + 4, p.Width.Point - (margin * 2), 15), XStringFormats.TopRight);
-                }
-
                 document.Save(sfd.FileName);
             }
             Status = "PDF Roster exported successfully!";
+        }
+        catch (IOException)
+        {
+            Status = "Export failed: The PDF file is open in another program (like a PDF reader or browser). Please close it and try again.";
         }
         catch (Exception ex)
         {
