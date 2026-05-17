@@ -42,7 +42,7 @@
                                             <Style TargetType="Image">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding SchoolLogoImage}" Value="{x:Null}">
-                                                        <Setter Property="Source" Value="pack://application:,,,/Resources/jamb.png"/>
+                                                        <Setter Property="Source" Value="pack://application:,,,/Resources/prep4jamb.png"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
