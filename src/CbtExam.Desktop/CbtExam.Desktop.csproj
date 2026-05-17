@@ -22,7 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\appicon.ico" />
-    <Resource Include="Resources\jamb.png" />
+    <Resource Include="Resources\prep4jamb.png" />
     <None Update="Resources\appicon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
