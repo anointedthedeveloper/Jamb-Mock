@@ -10,42 +10,43 @@
             </Grid.RowDefinitions>
 
             <!-- Top Header & Search (Always Visible) -->
-            <StackPanel Grid.Row="0" Margin="26,26,26,0">
-                <Grid Margin="0,0,0,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock Text="Exam Templates" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBlock Text="Design and manage your exam configurations. Configure subjects, pooling logic, and timing." FontSize="13" Foreground="#64748B" Margin="0,6,0,0"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Command="{Binding RefreshCommand}" Style="{StaticResource PrimaryBtn}"
-                                Background="#F1F5F9" Foreground="#111827" Padding="13,9" Margin="0,0,8,0">
-                            <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets"/>
-                        </Button>
-                        <Button Command="{Binding ToggleCreateCommand}" Style="{StaticResource PrimaryBtn}"
-                                Background="#047857" Padding="16,9">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="+" FontSize="16" Margin="0,0,7,0"/>
-                                <TextBlock Text="New Template"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-
-                <!-- Search (Moved out of create form) -->
-                <Grid Height="44" Margin="0,0,0,16">
-                    <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Padding="40,8,12,8"/>
-                    <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8"
-                               VerticalAlignment="Center" HorizontalAlignment="Left" Margin="14,0,0,0" IsHitTestVisible="False"/>
-                    <TextBlock Text="Search templates by name or subject..." FontSize="13" Foreground="#94A3B8"
-                               VerticalAlignment="Center" HorizontalAlignment="Left" Margin="40,0,0,0"
-                               IsHitTestVisible="False"
-                               Visibility="{Binding Search, Converter={StaticResource EmptyStringToVis}}"/>
-                </Grid>
-            </StackPanel>
+            <Grid Grid.Row="0" Margin="26,24,26,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Exam Templates" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Design and manage your exam configurations. Configure subjects, pooling logic, and timing." FontSize="13" Foreground="#64748B" Margin="0,4,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Inline Search Bar (Constrained Width) -->
+                    <Grid Width="280" Height="38" Margin="0,0,12,0" VerticalAlignment="Center">
+                        <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10">
+                            <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Padding="36,8,12,8" FontSize="13"
+                                     Background="Transparent" BorderThickness="0" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        </Border>
+                        <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="#94A3B8"
+                                   VerticalAlignment="Center" HorizontalAlignment="Left" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                        <TextBlock Text="Search templates..." FontSize="13" Foreground="#94A3B8"
+                                   VerticalAlignment="Center" HorizontalAlignment="Left" Margin="36,0,0,0"
+                                   IsHitTestVisible="False"
+                                   Visibility="{Binding Search, Converter={StaticResource EmptyStringToVis}}"/>
+                    </Grid>
+                    
+                    <Button Command="{Binding RefreshCommand}" Style="{StaticResource PrimaryBtn}"
+                            Background="#F1F5F9" Foreground="#111827" Padding="12,8" Margin="0,0,8,0">
+                        <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                    </Button>
+                    <Button Command="{Binding ToggleCreateCommand}" Style="{StaticResource PrimaryBtn}"
+                            Background="#047857" Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="New Template" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
 
             <!-- Main Content Area -->
             <Grid Grid.Row="1">
@@ -54,10 +55,10 @@
                         
                         <!-- Create/Edit Form (Wizard) -->
                         <Border Visibility="{Binding ShowCreateForm, Converter={StaticResource BoolToVis}}"
-                                Background="{DynamicResource CardBrush}" CornerRadius="14" BorderBrush="#E5E7EB"
+                                Background="{DynamicResource CardBrush}" CornerRadius="16" BorderBrush="#E2E8F0"
                                 BorderThickness="1" Margin="0,0,0,20">
                             <Border.Effect>
-                                <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.08" Color="#111827"/>
+                                <DropShadowEffect BlurRadius="30" ShadowDepth="4" Opacity="0.05" Color="#000000"/>
                             </Border.Effect>
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -67,7 +68,7 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Form Header & Close -->
-                                <Border Background="#F8FAFC" CornerRadius="14,14,0,0" Padding="24,18">
+                                <Border Background="#F8FAFC" CornerRadius="16,16,0,0" Padding="24,18" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
                                     <Grid>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding FormTitle}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
@@ -92,48 +93,151 @@
                                         <!-- Step 1: General Info -->
                                         <StackPanel Visibility="{Binding IsStep1, Converter={StaticResource BoolToVis}}">
                                             <TextBlock Text="General Information" FontSize="16" FontWeight="Bold" Margin="0,0,0,4"/>
-                                            <TextBlock Text="Set the basic identity and timing for this exam template." FontSize="13" Foreground="#64748B" Margin="0,0,0,20"/>
+                                            <TextBlock Text="Set the basic identity and timing for this exam template." FontSize="13" Foreground="#64748B" Margin="0,0,0,24"/>
 
-                                            <Grid Margin="0,0,0,16">
+                                            <!-- Metadata Grid (Exam Name & Category) -->
+                                            <Grid Margin="0,0,0,20">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="2*"/>
                                                     <ColumnDefinition Width="1*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Margin="0,0,16,0">
-                                                    <TextBlock Text="Exam Name *" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,6"/>
-                                                    <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" FontSize="14" Padding="12,10"/>
+                                                    <TextBlock Text="Exam Name *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                                    <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="12,10">
+                                                        <Grid>
+                                                            <TextBox x:Name="TitleInput" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                            <TextBlock Text="e.g. JAMB Mock Exam 2026" FontSize="14" Foreground="#94A3B8" IsHitTestVisible="False" VerticalAlignment="Center"
+                                                                       Visibility="{Binding Title, Converter={StaticResource EmptyStringToVis}}"/>
+                                                        </Grid>
+                                                    </Border>
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="1">
-                                                    <TextBlock Text="Category / Tag (Optional)" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,6"/>
-                                                    <TextBox Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}" FontSize="14" Padding="12,10" Tag="e.g. Mock, Mid-Term"/>
+                                                    <TextBlock Text="Category / Tag (Optional)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                                    <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="12,10">
+                                                        <Grid>
+                                                            <TextBox Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                            <TextBlock Text="e.g. Mock, Mid-Term" FontSize="14" Foreground="#94A3B8" IsHitTestVisible="False" VerticalAlignment="Center"
+                                                                       Visibility="{Binding Category, Converter={StaticResource EmptyStringToVis}}"/>
+                                                        </Grid>
+                                                    </Border>
                                                 </StackPanel>
                                             </Grid>
 
+                                            <!-- Timing Control (Duration Input & Quick-Select Badges) -->
                                             <StackPanel Margin="0,0,0,16">
-                                                <TextBlock Text="Duration (minutes)" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,8"/>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="120"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBox Text="{Binding Duration, UpdateSourceTrigger=PropertyChanged}" FontSize="16" FontWeight="Bold" Padding="12,10" VerticalAlignment="Center"/>
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
-                                                        <Button Command="{Binding SetDuration30}" Content="30m" Style="{StaticResource PrimaryBtn}" Background="#F1F5F9" Foreground="#475569" Padding="12,6" Margin="0,0,8,0" FontSize="11"/>
-                                                        <Button Command="{Binding SetDuration45}" Content="45m" Style="{StaticResource PrimaryBtn}" Background="#F1F5F9" Foreground="#475569" Padding="12,6" Margin="0,0,8,0" FontSize="11"/>
-                                                        <Button Command="{Binding SetDuration60}" Content="60m" Style="{StaticResource PrimaryBtn}" Background="#F1F5F9" Foreground="#475569" Padding="12,6" Margin="0,0,8,0" FontSize="11"/>
-                                                        <Button Command="{Binding SetDuration90}" Content="90m" Style="{StaticResource PrimaryBtn}" Background="#F1F5F9" Foreground="#475569" Padding="12,6" Margin="0,0,8,0" FontSize="11"/>
-                                                        <Button Command="{Binding SetDuration120}" Content="120m" Style="{StaticResource PrimaryBtn}" Background="#F1F5F9" Foreground="#475569" Padding="12,6" FontSize="11"/>
+                                                <TextBlock Text="Duration (minutes) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <!-- Duration Input Box -->
+                                                    <Border Width="120" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="12,10">
+                                                        <TextBox Text="{Binding Duration, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalContentAlignment="Center"/>
+                                                    </Border>
+                                                    
+                                                    <!-- Quick-Select Pill Badges -->
+                                                    <StackPanel Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
+                                                        <StackPanel.Resources>
+                                                            <Style x:Key="DurationBadgeBtn" TargetType="Button">
+                                                                <Setter Property="Padding" Value="16,8"/>
+                                                                <Setter Property="FontSize" Value="12"/>
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="16" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </StackPanel.Resources>
+                                                        
+                                                        <Button Command="{Binding SetDuration30}" Margin="0,0,8,0">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource DurationBadgeBtn}">
+                                                                    <Setter Property="Background" Value="#F1F5F9"/>
+                                                                    <Setter Property="Foreground" Value="#475569"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Duration}" Value="30">
+                                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                                            <Setter Property="Foreground" Value="White"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                            30m
+                                                        </Button>
+                                                        
+                                                        <Button Command="{Binding SetDuration45}" Margin="0,0,8,0">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource DurationBadgeBtn}">
+                                                                    <Setter Property="Background" Value="#F1F5F9"/>
+                                                                    <Setter Property="Foreground" Value="#475569"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Duration}" Value="45">
+                                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                                            <Setter Property="Foreground" Value="White"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                            45m
+                                                        </Button>
+                                                        
+                                                        <Button Command="{Binding SetDuration60}" Margin="0,0,8,0">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource DurationBadgeBtn}">
+                                                                    <Setter Property="Background" Value="#F1F5F9"/>
+                                                                    <Setter Property="Foreground" Value="#475569"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Duration}" Value="60">
+                                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                                            <Setter Property="Foreground" Value="White"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                            60m
+                                                        </Button>
+                                                        
+                                                        <Button Command="{Binding SetDuration90}" Margin="0,0,8,0">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource DurationBadgeBtn}">
+                                                                    <Setter Property="Background" Value="#F1F5F9"/>
+                                                                    <Setter Property="Foreground" Value="#475569"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Duration}" Value="90">
+                                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                                            <Setter Property="Foreground" Value="White"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                            90m
+                                                        </Button>
+                                                        
+                                                        <Button Command="{Binding SetDuration120}">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource DurationBadgeBtn}">
+                                                                    <Setter Property="Background" Value="#F1F5F9"/>
+                                                                    <Setter Property="Foreground" Value="#475569"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Duration}" Value="120">
+                                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                                            <Setter Property="Foreground" Value="White"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                            120m
+                                                        </Button>
                                                     </StackPanel>
-                                                </Grid>
-                                            </StackPanel>
-
-                                            <StackPanel Margin="0,0,0,16">
-                                                <TextBlock Text="Access Password (Optional)" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,8"/>
-                                                <Grid Height="42">
-                                                    <TextBox Text="{Binding AccessPassword, UpdateSourceTrigger=PropertyChanged}" Padding="12,10,40,10" FontSize="14"/>
-                                                    <TextBlock Text="&#xE7B3;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,12,0" Foreground="#94A3B8" IsHitTestVisible="False"/>
-                                                </Grid>
-                                                <TextBlock Text="Students must enter this password to join the session." FontSize="11" Foreground="#94A3B8" Margin="4,4,0,0"/>
+                                                </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
 
@@ -371,11 +475,11 @@
                                 </Border>
 
                                 <!-- Form Footer (Floating/Sticky Style) -->
-                                <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="0,0,14,14" Padding="24,16" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0">
+                                <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="0,0,16,16" Padding="24,16" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0">
                                     <Grid>
                                         <StackPanel Orientation="Horizontal">
                                             <Button Command="{Binding PrevStepCommand}" Visibility="{Binding CanGoBack, Converter={StaticResource BoolToVis}}"
-                                                    Content="Previous" Style="{StaticResource PrimaryBtn}" Background="White" Foreground="#475569" BorderBrush="#CBD5E1" BorderThickness="1" Padding="20,10" Margin="0,0,12,0"/>
+                                                    Content="Previous" Style="{StaticResource PrimaryBtn}" Background="#F1F5F9" Foreground="#475569" Padding="20,10" Margin="0,0,12,0"/>
                                             <TextBlock Text="{Binding CreateStatus}" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -390,7 +494,7 @@
                                             </TextBlock>
                                         </StackPanel>
                                         <Button HorizontalAlignment="Right" Command="{Binding NextStepCommand}"
-                                                Style="{StaticResource PrimaryBtn}" Background="#047857" Padding="30,10">
+                                                Style="{StaticResource PrimaryBtn}" Background="{DynamicResource AccentBrush}" Padding="30,10">
                                             <TextBlock Text="{Binding NextButtonText}" FontSize="13" FontWeight="Bold"/>
                                         </Button>
                                     </Grid>
