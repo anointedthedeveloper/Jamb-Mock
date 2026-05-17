@@ -58,7 +58,7 @@
                                 Background="{DynamicResource CardBrush}" CornerRadius="16" BorderBrush="#E2E8F0"
                                 BorderThickness="1" Margin="0,0,0,20">
                             <Border.Effect>
-                                <DropShadowEffect BlurRadius="30" ShadowDepth="4" Opacity="0.05" Color="#000000"/>
+                                <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.06" Color="#94A3B8"/>
                             </Border.Effect>
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -97,7 +97,7 @@
                                             <!-- Exam Name -->
                                             <StackPanel Margin="0,0,20,0" VerticalAlignment="Top">
                                                 <TextBlock Text="Exam Name *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
-                                                <Border Height="40" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="16,0">
+                                                <Border Height="42" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16,0">
                                                     <Grid>
                                                         <TextBox x:Name="TitleInput" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                                                         <TextBlock Text="e.g. JAMB Mock Exam 2026" FontSize="13" Foreground="#94A3B8" IsHitTestVisible="False" VerticalAlignment="Center"
@@ -109,9 +109,9 @@
                                             <!-- Duration -->
                                             <StackPanel Grid.Column="1" VerticalAlignment="Top">
                                                 <TextBlock Text="Duration (minutes) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
-                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Height="40">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Height="42">
                                                     <!-- Compact Input -->
-                                                    <Border Width="70" Height="40" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="0" VerticalAlignment="Center">
+                                                    <Border Width="70" Height="42" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="0" VerticalAlignment="Center">
                                                         <TextBox Text="{Binding Duration, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Padding="0" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalContentAlignment="Center" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                                                     </Border>
                                                     
@@ -279,7 +279,7 @@
                                                                     <!-- Subject Dropdown -->
                                                                     <StackPanel Margin="0,0,16,0">
                                                                         <TextBlock Text="Select Subject" FontSize="11" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,4"/>
-                                                                        <ComboBox ItemsSource="{Binding AvailableSubjects}" SelectedItem="{Binding SelectedSubject}" Height="40" Padding="16,0" FontSize="13" VerticalContentAlignment="Center"/>
+                                                                        <ComboBox ItemsSource="{Binding AvailableSubjects}" SelectedItem="{Binding SelectedSubject}" Height="42" Padding="16,0" FontSize="13" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalContentAlignment="Center"/>
                                                                     </StackPanel>
                                                                     
                                                                     <!-- Questions Count & Delete Button -->
@@ -292,7 +292,7 @@
                                                                             </Grid.ColumnDefinitions>
                                                                             
                                                                             <!-- Numeric Input Box -->
-                                                                            <Border Height="40" CornerRadius="8" BorderThickness="1">
+                                                                            <Border Height="42" CornerRadius="8" BorderThickness="1">
                                                                                 <Border.Style>
                                                                                     <Style TargetType="Border">
                                                                                         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
@@ -310,7 +310,7 @@
                                                                             
                                                                             <!-- Perfectly Centered Remove Button -->
                                                                             <Button Grid.Column="1" Command="{Binding RemoveCommand}" VerticalAlignment="Center" Margin="12,0,0,0"
-                                                                                    Style="{StaticResource PrimaryBtn}" Background="Transparent" Foreground="#94A3B8" Padding="6" Height="40" Width="40">
+                                                                                    Style="{StaticResource PrimaryBtn}" Background="Transparent" Foreground="#94A3B8" Padding="6" Height="42" Width="42">
                                                                                 <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                                                             </Button>
                                                                         </Grid>

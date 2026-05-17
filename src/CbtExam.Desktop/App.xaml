@@ -296,7 +296,7 @@
                                     Background="{DynamicResource InputBgBrush}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                    CornerRadius="8" Padding="{TemplateBinding Padding}">
                                 <ScrollViewer x:Name="PART_ContentHost"
                                               Foreground="{TemplateBinding Foreground}"/>
                             </Border>
@@ -330,8 +330,8 @@
                                         <ControlTemplate TargetType="ToggleButton">
                                             <Border x:Name="bd"
                                                     Background="{DynamicResource InputBgBrush}"
-                                                    BorderBrush="{DynamicResource InputBorderBrush}"
-                                                    BorderThickness="1.5" CornerRadius="10" MinHeight="42"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" MinHeight="42"
                                                     Padding="{Binding Padding, RelativeSource={RelativeSource AncestorType=ComboBox}}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
@@ -363,7 +363,7 @@
                                           MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                         <Border Background="{DynamicResource CardBrush}"
                                                 BorderBrush="{DynamicResource InputBorderBrush}"
-                                                BorderThickness="1" CornerRadius="10" Margin="0,6,0,0">
+                                                BorderThickness="1" CornerRadius="8" Margin="0,6,0,0">
                                             <Border.Effect>
                                                 <DropShadowEffect BlurRadius="18" ShadowDepth="4" Opacity="0.14" Color="#000000"/>
                                             </Border.Effect>
