@@ -48,6 +48,12 @@ public partial class App : Application
     // ── Startup ────────────────────────────────────────────────────────────
     protected override void OnStartup(StartupEventArgs e)
     {
+        try
+        {
+            PdfSharp.Fonts.GlobalFontSettings.FontResolver = new SystemFontResolver();
+        }
+        catch { }
+
         // Fix taskbar grouping by binding to the executable path
         try 
         { 
@@ -253,5 +259,64 @@ public partial class App : Application
         var parts = File.ReadAllText(ThemeFile).Split('|');
         ApplyTheme(parts.Length >= 1 ? parts[0] : "Light",
                    parts.Length >= 2 ? parts[1] : "Teal");
+    }
+}
+
+public class SystemFontResolver : PdfSharp.Fonts.IFontResolver
+{
+    public PdfSharp.Fonts.FontResolverInfo? ResolveTypeface(string familyName, bool bold, bool italic)
+    {
+        string name = familyName.ToLower();
+        if (name == "segoe ui" || name == "segoeui")
+        {
+            if (bold && italic) return new PdfSharp.Fonts.FontResolverInfo("SegoeUI#bi");
+            if (bold) return new PdfSharp.Fonts.FontResolverInfo("SegoeUI#b");
+            if (italic) return new PdfSharp.Fonts.FontResolverInfo("SegoeUI#i");
+            return new PdfSharp.Fonts.FontResolverInfo("SegoeUI#r");
+        }
+        if (name == "consolas")
+        {
+            if (bold && italic) return new PdfSharp.Fonts.FontResolverInfo("Consolas#bi");
+            if (bold) return new PdfSharp.Fonts.FontResolverInfo("Consolas#b");
+            if (italic) return new PdfSharp.Fonts.FontResolverInfo("Consolas#i");
+            return new PdfSharp.Fonts.FontResolverInfo("Consolas#r");
+        }
+        
+        return new PdfSharp.Fonts.FontResolverInfo("SegoeUI#r");
+    }
+
+    public byte[]? GetFont(string faceName)
+    {
+        try
+        {
+            string fontFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts");
+            string file = faceName switch
+            {
+                "SegoeUI#r" => "segoeui.ttf",
+                "SegoeUI#b" => "segoeuib.ttf",
+                "SegoeUI#i" => "segoeuii.ttf",
+                "SegoeUI#bi" => "segoeuiz.ttf",
+                "Consolas#r" => "consola.ttf",
+                "Consolas#b" => "consolab.ttf",
+                "Consolas#i" => "consolai.ttf",
+                "Consolas#bi" => "consolaz.ttf",
+                _ => "segoeui.ttf"
+            };
+
+            string fullPath = Path.Combine(fontFolder, file);
+            if (File.Exists(fullPath))
+            {
+                return File.ReadAllBytes(fullPath);
+            }
+            
+            string defaultPath = Path.Combine(fontFolder, "segoeui.ttf");
+            if (File.Exists(defaultPath)) return File.ReadAllBytes(defaultPath);
+            
+            defaultPath = Path.Combine(fontFolder, "arial.ttf");
+            if (File.Exists(defaultPath)) return File.ReadAllBytes(defaultPath);
+        }
+        catch { }
+        
+        return null;
     }
 }
