@@ -1024,6 +1024,7 @@ public class DevicesViewModel : BaseViewModel, IRefreshable
 {
     private readonly ApiClient api;
     private System.Timers.Timer? _refreshTimer;
+    private List<DeviceDto>? _lastDevicesList;
 
     public ObservableCollection<DeviceRow> Devices { get; } = [];
 
@@ -1067,6 +1068,58 @@ public class DevicesViewModel : BaseViewModel, IRefreshable
 
             var list = await api.GetDevicesAsync();
             if (list is null) return;
+            
+            if (_lastDevicesList is null)
+            {
+                if (list.Count > 0)
+                {
+                    NotificationsViewModel.Instance?.Add(new NotificationItem(
+                        "Live Devices Monitor",
+                        $"Tracking {list.Count} registered node(s) on the local network.",
+                        DateTime.Now,
+                        "info"
+                    ));
+                }
+            }
+            else
+            {
+                foreach (var d in list)
+                {
+                    var prev = _lastDevicesList.FirstOrDefault(x => x.DeviceId == d.DeviceId);
+                    if (prev is null)
+                    {
+                        string info = string.IsNullOrEmpty(d.StudentId) || d.StudentId == "Awaiting Login" 
+                            ? "Idle" 
+                            : $"{d.StudentName} ({d.StudentId})";
+                            
+                        NotificationsViewModel.Instance?.Add(new NotificationItem(
+                            "Device Connected",
+                            $"New device {d.DeviceId} ({d.DeviceName} · {d.IpAddress}) connected. Candidate: {info}",
+                            DateTime.Now,
+                            "success"
+                        ));
+                    }
+                    else if (d.IsOnline && !prev.IsOnline)
+                    {
+                        NotificationsViewModel.Instance?.Add(new NotificationItem(
+                            "Device Back Online",
+                            $"Device {d.DeviceId} ({d.DeviceName} · {d.IpAddress}) reconnected successfully.",
+                            DateTime.Now,
+                            "success"
+                        ));
+                    }
+                    else if (!d.IsOnline && prev.IsOnline)
+                    {
+                        NotificationsViewModel.Instance?.Add(new NotificationItem(
+                            "Device Offline",
+                            $"Device {d.DeviceId} ({d.DeviceName} · {d.IpAddress}) went offline (heartbeat lost).",
+                            DateTime.Now,
+                            "error"
+                        ));
+                    }
+                }
+            }
+            _lastDevicesList = list.ToList();
 
             App.Current.Dispatcher.Invoke(() => {
                 Devices.Clear();

@@ -273,7 +273,7 @@ public class StudentController(AppDbContext db, IHubContext<ExamHub> hub, Snapsh
                 var student = await db.Students
                     .Include(s => s.StudentExams)
                     .ThenInclude(se => se.Session)
-                    .ThenInclude(s => s.Exam)
+                    .ThenInclude(session => session!.Exam)
                     .FirstOrDefaultAsync(s => s.StudentId == d.StudentId);
                 
                 if (student is not null)

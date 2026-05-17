@@ -1,4 +1,5 @@
 using CbtExam.Desktop.Services;
+using CbtExam.Shared.DTOs;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -125,10 +126,70 @@ public class MainViewModel : BaseViewModel
         });
         OpenNotificationsCommand = new RelayCommand(() => Navigate("Notifications"));
 
+        Notifications.Items.CollectionChanged += (s, e) => OnPropertyChanged(nameof(NotificationCount));
+
+        List<StudentStatusDto>? lastStudentStatuses = null;
+
         _monitorRealtime.StudentUpdated += payload =>
         {
-            Notifications.Add(new NotificationItem("Student activity", $"{payload.Count} student updates received.", DateTime.Now, "info"));
-            OnPropertyChanged(nameof(NotificationCount));
+            if (lastStudentStatuses is not null)
+            {
+                foreach (var current in payload)
+                {
+                    var prev = lastStudentStatuses.FirstOrDefault(x => x.StudentId == current.StudentId);
+                    if (prev is null)
+                    {
+                        Notifications.Add(new NotificationItem(
+                            "Candidate Logged In",
+                            $"Candidate {current.FullName} ({current.StudentId}) logged in and joined the waiting room.",
+                            DateTime.Now,
+                            "info"
+                        ));
+                    }
+                    else
+                    {
+                        if (current.ConnectionState == "Examining" && prev.ConnectionState != "Examining")
+                        {
+                            Notifications.Add(new NotificationItem(
+                                "Exam Started",
+                                $"Candidate {current.FullName} ({current.StudentId}) has started the examination.",
+                                DateTime.Now,
+                                "success"
+                            ));
+                        }
+
+                        if (current.IsSubmitted && !prev.IsSubmitted)
+                        {
+                            Notifications.Add(new NotificationItem(
+                                "Exam Submitted",
+                                $"Candidate {current.FullName} ({current.StudentId}) submitted their exam.",
+                                DateTime.Now,
+                                "success"
+                            ));
+                        }
+
+                        if (current.TabSwitchCount > prev.TabSwitchCount)
+                        {
+                            Notifications.Add(new NotificationItem(
+                                "Cheat Warning",
+                                $"Candidate {current.FullName} ({current.StudentId}) switched tabs / lost focus ({current.TabSwitchCount} times)!",
+                                DateTime.Now,
+                                "error"
+                            ));
+                        }
+                    }
+                }
+            }
+            else if (payload.Count > 0)
+            {
+                Notifications.Add(new NotificationItem(
+                    "Live Monitor Connected",
+                    $"Connected to session room. {payload.Count} active candidate nodes synced.",
+                    DateTime.Now,
+                    "info"
+                ));
+            }
+            lastStudentStatuses = payload.ToList();
 
             var newlySubmitted = payload.LastOrDefault(s => s.IsSubmitted);
             if (newlySubmitted != null)
