@@ -1051,13 +1051,7 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public ObservableCollection<QuestionBankRow> Questions { get; } = [];
     private List<QuestionBankDto> _all = [];
 
-    private QuestionBankDto? _selected;
-    public QuestionBankDto? Selected
-    {
-        get => _selected;
-        set { Set(ref _selected, value); OnPropertyChanged(nameof(IsEditing)); }
-    }
-    public bool IsEditing => Selected is not null;
+
 
     private string _search = string.Empty;
     public string Search { get => _search; set { Set(ref _search, value); ApplyFilter(); } }
@@ -1072,11 +1066,6 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             if (Set(ref _selectedSubject, value))
             {
                 ApplyFilter();
-                // Auto-fill the subject field in the form if it's a new question and a subject is selected
-                if (!IsEditing && value != "All subjects")
-                {
-                    Subject = value;
-                }
             }
         } 
     }
@@ -1084,30 +1073,6 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public ObservableCollection<string> YearFilters { get; } = ["All years"];
     private string _selectedYear = "All years";
     public string SelectedYear { get => _selectedYear; set { Set(ref _selectedYear, value); ApplyFilter(); } }
-
-    private string _questionText = string.Empty;
-    public string QuestionText { get => _questionText; set => Set(ref _questionText, value); }
-
-    private string _optionA = string.Empty;
-    public string OptionA { get => _optionA; set => Set(ref _optionA, value); }
-
-    private string _optionB = string.Empty;
-    public string OptionB { get => _optionB; set => Set(ref _optionB, value); }
-
-    private string _optionC = string.Empty;
-    public string OptionC { get => _optionC; set => Set(ref _optionC, value); }
-
-    private string _optionD = string.Empty;
-    public string OptionD { get => _optionD; set => Set(ref _optionD, value); }
-
-    private string _subject = string.Empty;
-    public string Subject { get => _subject; set => Set(ref _subject, value); }
-
-    private int _year = DateTime.Now.Year;
-    public int Year { get => _year; set => Set(ref _year, value); }
-
-    private string _correctAnswer = "A";
-    public string CorrectAnswer { get => _correctAnswer; set => Set(ref _correctAnswer, value); }
 
     private string _status = string.Empty;
     public string Status { get => _status; set => Set(ref _status, value); }
@@ -1133,33 +1098,10 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 
     public ObservableCollection<string> Subjects { get; } = [];
 
-    private bool _isAddingSubject;
-    public bool IsAddingSubject { get => _isAddingSubject; set => Set(ref _isAddingSubject, value); }
-
-    private string _newSubjectName = string.Empty;
-    public string NewSubjectName { get => _newSubjectName; set => Set(ref _newSubjectName, value); }
 
     public RelayCommand RefreshCommand => new(async () => await LoadAsync());
-    public RelayCommand SaveCommand => new(async () => await SaveAsync());
-    public RelayCommand DeleteCommand => new(async () => await DeleteAsync());
-    public RelayCommand ClearCommand => new(Clear);
-    public RelayCommand<QuestionBankRow> PickCommand => new(q => { if (q != null) Pick(_all.FirstOrDefault(x => x.Id == q.Id)); });
     public RelayCommand ImportJsonCommand => new(async () => await ImportJsonAsync());
     public RelayCommand CopyTemplateCommand => new(() => { Clipboard.SetText(BulkJsonTemplate); Status = "Template copied to clipboard!"; StatusOk = true; });
-    public RelayCommand AddSubjectCommand => new(() => { IsAddingSubject = true; NewSubjectName = string.Empty; });
-    
-    public RelayCommand ConfirmAddSubjectCommand => new(() => {
-        if (!string.IsNullOrWhiteSpace(NewSubjectName)) {
-            var name = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(NewSubjectName.Trim().ToLower());
-            _localSubjects.Add(name);
-            if (!Subjects.Contains(name)) Subjects.Add(name);
-            if (!SubjectFilters.Contains(name)) SubjectFilters.Add(name);
-            Subject = name;
-        }
-        IsAddingSubject = false;
-    });
-
-    public RelayCommand CancelAddSubjectCommand => new(() => IsAddingSubject = false);
 
     public RelayCommand BrowseFileCommand => new(async () => {
         var ofd = new Microsoft.Win32.OpenFileDialog
@@ -1433,141 +1375,19 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             Questions.Add(new QuestionBankRow(i++, question.Id, question.Subject, question.Year, question.QuestionNumber, question.Text.Substring(0, Math.Min(100, question.Text.Length)) + "..."));
     }
 
-    private async Task SaveAsync()
-    {
-        if (string.IsNullOrWhiteSpace(QuestionText)) { Status = "Question text is required."; StatusOk = false; return; }
-        if (string.IsNullOrWhiteSpace(Subject)) { Status = "Subject is required."; StatusOk = false; return; }
-        if (string.IsNullOrWhiteSpace(OptionA) || string.IsNullOrWhiteSpace(OptionB) || 
-            string.IsNullOrWhiteSpace(OptionC) || string.IsNullOrWhiteSpace(OptionD))
-        { Status = "All four options are required."; StatusOk = false; return; }
-
-        IsBusy = true;
-        try
-        {
-            // Standardize subject name to Title Case
-            var rawSubject = (Subject ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(rawSubject))
-            {
-                Status = "Subject is required."; StatusOk = false; return;
-            }
-            var standardizedSubject = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(rawSubject.ToLower());
-            Subject = standardizedSubject;
-
-            var options = new List<string> { OptionA, OptionB, OptionC, OptionD };
-            
-            // UI selects A, B, C, D; map it to the actual option content
-            var apiCorrectAnswer = CorrectAnswer switch
-            {
-                "A" => OptionA,
-                "B" => OptionB,
-                "C" => OptionC,
-                "D" => OptionD,
-                _ => CorrectAnswer
-            };
-
-            var dto = new QuestionBankCreateDto(standardizedSubject, Year, 0, QuestionText, options, apiCorrectAnswer);
-
-            HttpResponseMessage resp;
-            if (Selected is not null)
-                resp = await api.UpdateQuestionBankAsync(Selected.Id, dto);
-            else
-                resp = await api.AddQuestionBankAsync(dto);
-
-            if (resp.IsSuccessStatusCode)
-            {
-                Status = "Question saved successfully."; StatusOk = true;
-                Clear();
-                await LoadAsync();
-            }
-            else
-            {
-                var errMsg = await resp.Content.ReadAsStringAsync();
-                Status = $"Error: {(!string.IsNullOrWhiteSpace(errMsg) ? errMsg : "Failed to save question.")}";
-                StatusOk = false;
-            }
-        }
-        finally { IsBusy = false; }
-    }
-
-    private async Task DeleteAsync()
-    {
-        if (Selected is null) return;
-        var resp = await api.DeleteQuestionBankAsync(Selected.Id);
-        if (resp.IsSuccessStatusCode)
-        {
-            Status = "Question deleted successfully."; StatusOk = true;
-            Clear();
-            await LoadAsync();
-        }
-        else
-        {
-            Status = "Failed to delete question."; StatusOk = false;
-        }
-    }
-
-    private void Pick(QuestionBankDto? q)
-    {
-        if (q is null) return;
-        Selected = q;
-        QuestionText = q.Text;
-        Subject = q.Subject;
-        Year = q.Year;
-        
-        try
-        {
-            var options = JsonSerializer.Deserialize<List<string>>(q.OptionsJson);
-            if (options != null && options.Count >= 4)
-            {
-                OptionA = options[0];
-                OptionB = options[1];
-                OptionC = options[2];
-                OptionD = options[3];
-
-                // Map database answer text back to UI dropdown letter
-                if (string.Equals(q.CorrectAnswer, OptionA, StringComparison.OrdinalIgnoreCase)) CorrectAnswer = "A";
-                else if (string.Equals(q.CorrectAnswer, OptionB, StringComparison.OrdinalIgnoreCase)) CorrectAnswer = "B";
-                else if (string.Equals(q.CorrectAnswer, OptionC, StringComparison.OrdinalIgnoreCase)) CorrectAnswer = "C";
-                else if (string.Equals(q.CorrectAnswer, OptionD, StringComparison.OrdinalIgnoreCase)) CorrectAnswer = "D";
-                else CorrectAnswer = q.CorrectAnswer;
-            }
-            else
-            {
-                CorrectAnswer = q.CorrectAnswer;
-            }
-        }
-        catch 
-        { 
-            CorrectAnswer = q.CorrectAnswer; 
-        }
-    }
-
     private async Task ImportJsonAsync()
     {
         if (string.IsNullOrWhiteSpace(JsonImport)) return;
         try
         {
-            var list = JsonSerializer.Deserialize<List<QuestionBankCreateDto>>(JsonImport, 
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var list = System.Text.Json.JsonSerializer.Deserialize<List<CbtExam.Shared.DTOs.QuestionBankCreateDto>>(JsonImport, 
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             
             if (list == null || list.Count == 0)
             {
                 Status = "No questions found in JSON."; StatusOk = false; return;
             }
 
-            // Standardize subject names on import
-            foreach (var q in list)
-            {
-                if (!string.IsNullOrWhiteSpace(q.Subject))
-                {
-                    // Using a private field or logic to not trigger property changes repeatedly if many
-                    var std = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(q.Subject.Trim().ToLower());
-                    // Since record, we can't easily modify properties if they are init-only, 
-                    // but QuestionBankCreateDto is likely a record with positional properties.
-                    // Let's assume we can't modify it directly if it's a record, so we'll map to new objects if needed.
-                }
-            }
-            
-            // Re-map to ensure standardized subjects
             var standardizedList = list.Select(q => q with { 
                 Subject = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(q.Subject?.Trim().ToLower() ?? "Unknown") 
             }).ToList();
@@ -1588,15 +1408,6 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         {
             Status = "Invalid JSON format."; StatusOk = false;
         }
-    }
-
-    private void Clear()
-    {
-        Selected = null;
-        QuestionText = OptionA = OptionB = OptionC = OptionD = Subject = string.Empty;
-        Year = DateTime.Now.Year;
-        CorrectAnswer = "A";
-        Status = string.Empty;
     }
 }
 
