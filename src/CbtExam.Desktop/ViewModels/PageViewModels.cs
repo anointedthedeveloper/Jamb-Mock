@@ -1129,6 +1129,8 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
   }
 ]";
 
+    private readonly HashSet<string> _localSubjects = new(StringComparer.OrdinalIgnoreCase);
+
     public ObservableCollection<string> Subjects { get; } = [];
 
     private bool _isAddingSubject;
@@ -1145,15 +1147,213 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public RelayCommand ImportJsonCommand => new(async () => await ImportJsonAsync());
     public RelayCommand CopyTemplateCommand => new(() => { Clipboard.SetText(BulkJsonTemplate); Status = "Template copied to clipboard!"; StatusOk = true; });
     public RelayCommand AddSubjectCommand => new(() => { IsAddingSubject = true; NewSubjectName = string.Empty; });
+    
     public RelayCommand ConfirmAddSubjectCommand => new(() => {
         if (!string.IsNullOrWhiteSpace(NewSubjectName)) {
             var name = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(NewSubjectName.Trim().ToLower());
+            _localSubjects.Add(name);
             if (!Subjects.Contains(name)) Subjects.Add(name);
+            if (!SubjectFilters.Contains(name)) SubjectFilters.Add(name);
             Subject = name;
         }
         IsAddingSubject = false;
     });
+
     public RelayCommand CancelAddSubjectCommand => new(() => IsAddingSubject = false);
+
+    public RelayCommand BrowseFileCommand => new(async () => {
+        var ofd = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Question Files (*.csv, *.json)|*.csv;*.json|CSV UTF-8 (*.csv)|*.csv|JSON File (*.json)|*.json"
+        };
+        if (ofd.ShowDialog() == true)
+        {
+            if (ofd.FileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                await ParseAndImportJsonFileAsync(ofd.FileName);
+            else
+                await ParseAndImportCsvAsync(ofd.FileName);
+        }
+    });
+
+    public RelayCommand DownloadTemplateCommand => new(() => {
+        var sfd = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "CSV UTF-8 (Comma delimited) (*.csv)|*.csv|JSON File (*.json)|*.json",
+            FileName = "jamb_questions_template",
+            DefaultExt = ".csv"
+        };
+        if (sfd.ShowDialog() == true)
+        {
+            try
+            {
+                if (sfd.FileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                {
+                    File.WriteAllText(sfd.FileName, BulkJsonTemplate);
+                }
+                else
+                {
+                    var csvContent = "Subject,Year,QuestionNumber,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer\n" +
+                                     "Mathematics,2024,1,\"Solve for x: 2x + 5 = 15\",5,10,7,15,5\n" +
+                                     "English Language,2024,2,\"Choose the option opposite in meaning to 'generous'.\",Miserly,Kind,Happy,Sad,Miserly";
+                    File.WriteAllText(sfd.FileName, csvContent, System.Text.Encoding.UTF8);
+                }
+                Status = "Template downloaded successfully!";
+                StatusOk = true;
+            }
+            catch (Exception ex)
+            {
+                Status = $"Error saving template: {ex.Message}";
+                StatusOk = false;
+            }
+        }
+    });
+
+    public async Task ParseAndImportCsvAsync(string filePath)
+    {
+        IsBusy = true;
+        try
+        {
+            var lines = await File.ReadAllLinesAsync(filePath, System.Text.Encoding.UTF8);
+            if (lines.Length <= 1)
+            {
+                Status = "CSV file is empty or only contains headers.";
+                StatusOk = false;
+                return;
+            }
+
+            var questionsList = new List<QuestionBankCreateDto>();
+            for (int i = 1; i < lines.Length; i++)
+            {
+                var line = lines[i];
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var parts = ParseCsvLine(line);
+                if (parts.Count < 9) continue;
+
+                var subject = parts[0].Trim();
+                int.TryParse(parts[1], out int year);
+                int.TryParse(parts[2], out int qNum);
+                var text = parts[3].Trim();
+                var optA = parts[4].Trim();
+                var optB = parts[5].Trim();
+                var optC = parts[6].Trim();
+                var optD = parts[7].Trim();
+                var correct = parts[8].Trim();
+
+                if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(subject)) continue;
+
+                var options = new List<string> { optA, optB, optC, optD };
+                questionsList.Add(new QuestionBankCreateDto(subject, year, qNum, text, options, correct));
+            }
+
+            if (questionsList.Count == 0)
+            {
+                Status = "No valid questions found in CSV file.";
+                StatusOk = false;
+                return;
+            }
+
+            var standardizedList = questionsList.Select(q => q with { 
+                Subject = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(q.Subject?.Trim().ToLower() ?? "Unknown") 
+            }).ToList();
+
+            var resp = await api.ImportQuestionBankAsync(standardizedList);
+            if (resp.IsSuccessStatusCode)
+            {
+                Status = $"{standardizedList.Count} questions imported successfully from CSV.";
+                StatusOk = true;
+                await LoadAsync();
+            }
+            else
+            {
+                Status = "Failed to import questions from CSV.";
+                StatusOk = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Status = $"Error parsing CSV: {ex.Message}";
+            StatusOk = false;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private List<string> ParseCsvLine(string line)
+    {
+        var result = new List<string>();
+        var current = new System.Text.StringBuilder();
+        bool inQuotes = false;
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    current.Append('"');
+                    i++;
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (c == ',' && !inQuotes)
+            {
+                result.Add(current.ToString());
+                current.Clear();
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+        result.Add(current.ToString());
+        return result;
+    }
+
+    public async Task ParseAndImportJsonFileAsync(string filePath)
+    {
+        IsBusy = true;
+        try
+        {
+            var content = await File.ReadAllTextAsync(filePath, System.Text.Encoding.UTF8);
+            var list = JsonSerializer.Deserialize<List<QuestionBankCreateDto>>(content, 
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+            if (list == null || list.Count == 0)
+            {
+                Status = "No questions found in JSON."; StatusOk = false; return;
+            }
+
+            var standardizedList = list.Select(q => q with { 
+                Subject = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(q.Subject?.Trim().ToLower() ?? "Unknown") 
+            }).ToList();
+
+            var resp = await api.ImportQuestionBankAsync(standardizedList);
+            if (resp.IsSuccessStatusCode)
+            {
+                Status = $"{list.Count} questions imported successfully from JSON.";
+                StatusOk = true;
+                await LoadAsync();
+            }
+            else
+            {
+                Status = "Failed to import questions from JSON."; StatusOk = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Status = $"Error parsing JSON: {ex.Message}"; StatusOk = false;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 
     public async Task LoadAsync()
     {
@@ -1163,9 +1363,15 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
             var list = await api.GetQuestionBankAsync();
             _all = list ?? [];
             
-            var subjects = await api.GetQuestionBankSubjectsAsync();
+            var dbSubjects = await api.GetQuestionBankSubjectsAsync() ?? [];
+            var mergedSubjects = dbSubjects
+                .Concat(_localSubjects)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(s => s)
+                .ToList();
+
             Subjects.Clear();
-            subjects?.ForEach(Subjects.Add);
+            mergedSubjects.ForEach(Subjects.Add);
 
             RebuildFilters();
             ApplyFilter();
@@ -1180,7 +1386,15 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 
         SubjectFilters.Clear();
         SubjectFilters.Add("All subjects");
-        foreach (var s in _all.Select(x => x.Subject).Distinct().OrderBy(x => x))
+        
+        var distinctDbSubjects = _all.Select(x => x.Subject);
+        var mergedSubjects = distinctDbSubjects
+            .Concat(_localSubjects)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x)
+            .ToList();
+
+        foreach (var s in mergedSubjects)
             SubjectFilters.Add(s);
 
         YearFilters.Clear();

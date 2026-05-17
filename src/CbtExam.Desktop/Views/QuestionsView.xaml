@@ -87,8 +87,10 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
+                    
                     <!-- Table header -->
-                    <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="14,14,0,0" Padding="0,0,0,0">
+                    <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="14,14,0,0" Padding="0,0,0,0"
+                            Visibility="{Binding Questions.Count, Converter={StaticResource IntToVis}}">
                         <Grid Height="40">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="50"/>
@@ -106,7 +108,10 @@
                             <TextBlock Grid.Column="5" Text="Edit" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </Grid>
                     </Border>
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    
+                    <!-- ScrollViewer for list -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  Visibility="{Binding Questions.Count, Converter={StaticResource IntToVis}}">
                         <ItemsControl ItemsSource="{Binding Questions}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -156,6 +161,14 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
+
+                    <!-- Empty State Panel -->
+                    <StackPanel Grid.RowSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24"
+                                Visibility="{Binding Questions.Count, Converter={StaticResource ZeroToVis}}">
+                        <TextBlock Text="&#xE90A;" FontFamily="Segoe MDL2 Assets" FontSize="64" Foreground="#D1D5DB" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                        <TextBlock Text="No questions in your bank yet" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Get started by adding questions manually or uploading a bulk sheet on the right panel." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,6,0,0" TextAlignment="Center" MaxWidth="360" TextWrapping="Wrap"/>
+                    </StackPanel>
                 </Grid>
             </Border>
         </Grid>
@@ -214,20 +227,29 @@
                                     <ColumnDefinition Width="120"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <Grid Margin="0,0,0,6">
-                                        <TextBlock Text="Subject *" FontSize="12" FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                                        <Button Content="+ New" HorizontalAlignment="Right" Style="{StaticResource PrimaryBtn}" 
-                                                Background="Transparent" Foreground="{DynamicResource AccentBrush}"
-                                                Padding="6,2" FontSize="11" Command="{Binding AddSubjectCommand}"/>
+                                    <TextBlock Text="Subject *" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" 
+                                                  IsEditable="True" ItemsSource="{Binding Subjects}" Height="42" VerticalContentAlignment="Center"/>
+                                        <Button Grid.Column="1" Command="{Binding AddSubjectCommand}" Style="{StaticResource PrimaryBtn}" 
+                                                Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                                Foreground="{DynamicResource AccentBrush}" Padding="10,0" Margin="8,0,0,0" Height="42" Cursor="Hand" ToolTip="Add New Subject">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                <TextBlock Text="New" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
                                     </Grid>
-                                    <ComboBox Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" 
-                                              IsEditable="True" ItemsSource="{Binding Subjects}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Text="Year *" FontSize="12" FontWeight="SemiBold"
                                                Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
-                                    <TextBox Text="{Binding Year, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBox Text="{Binding Year, UpdateSourceTrigger=PropertyChanged}" Height="42" VerticalContentAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
 
@@ -246,27 +268,27 @@
                                 </Grid.RowDefinitions>
                                 
                                 <StackPanel Grid.Row="0" Grid.Column="0">
-                                    <TextBlock Text="Option A" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6"/>
-                                    <TextBox Text="{Binding OptionA, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Option A" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding OptionA, UpdateSourceTrigger=PropertyChanged}" Height="42" VerticalContentAlignment="Center"/>
                                 </StackPanel>
                                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="16,0,0,0">
-                                    <TextBlock Text="Option B" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6"/>
-                                    <TextBox Text="{Binding OptionB, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Option B" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding OptionB, UpdateSourceTrigger=PropertyChanged}" Height="42" VerticalContentAlignment="Center"/>
                                 </StackPanel>
                                 
                                 <StackPanel Grid.Row="2" Grid.Column="0">
-                                    <TextBlock Text="Option C" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6"/>
-                                    <TextBox Text="{Binding OptionC, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Option C" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding OptionC, UpdateSourceTrigger=PropertyChanged}" Height="42" VerticalContentAlignment="Center"/>
                                 </StackPanel>
                                 <StackPanel Grid.Row="2" Grid.Column="1" Margin="16,0,0,0">
-                                    <TextBlock Text="Option D" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6"/>
-                                    <TextBox Text="{Binding OptionD, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Option D" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding OptionD, UpdateSourceTrigger=PropertyChanged}" Height="42" VerticalContentAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
 
                             <TextBlock Text="Correct Answer *" FontSize="12" FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
-                            <ComboBox SelectedValue="{Binding CorrectAnswer}" SelectedValuePath="Content" Margin="0,0,0,24">
+                            <ComboBox SelectedValue="{Binding CorrectAnswer}" SelectedValuePath="Content" Height="42" VerticalContentAlignment="Center" Margin="0,0,0,24">
                                 <ComboBoxItem Content="A"/>
                                 <ComboBoxItem Content="B"/>
                                 <ComboBoxItem Content="C"/>
@@ -298,42 +320,58 @@
 
                         <!-- Bulk Upload Form -->
                         <StackPanel Visibility="{Binding IsChecked, ElementName=BulkTab, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="Bulk Import JSON" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,6"/>
-                            <TextBlock Text="Import questions in bulk using the JSON format below." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,20"/>
+                            <TextBlock Text="Bulk Questions Ingestion" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,6"/>
+                            <TextBlock Text="Upload files to seamlessly import hundreds of questions instantly." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,20" TextWrapping="Wrap"/>
 
-                            <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="12" Padding="16" Margin="0,0,0,20">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,10">
-                                        <TextBlock Text="JSON FORMAT TEMPLATE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
-                                        <Button Command="{Binding CopyTemplateCommand}" HorizontalAlignment="Right" Style="{StaticResource PrimaryBtn}" Background="Transparent" Foreground="{DynamicResource AccentBrush}" Padding="8,4">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0" FontSize="12"/>
-                                                <TextBlock Text="Copy Format" FontSize="11" FontWeight="Bold"/>
-                                            </StackPanel>
-                                        </Button>
-                                    </Grid>
-                                    <Border Background="#1E293B" CornerRadius="8" Padding="12">
-                                        <TextBlock Text="{Binding BulkJsonTemplate}" FontFamily="Consolas" FontSize="12" Foreground="#94A3B8"/>
-                                    </Border>
-                                </StackPanel>
+                            <!-- Dashed Ingestion Zone -->
+                            <Border x:Name="UploadZoneBorder" AllowDrop="True" Background="{DynamicResource FieldBg}" CornerRadius="12" BorderThickness="0" Margin="0,0,0,16" Height="180">
+                                <Grid>
+                                    <Rectangle Stroke="{DynamicResource BorderBrush}" StrokeDashArray="4 3" StrokeThickness="1.5" RadiusX="12" RadiusY="12"/>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
+                                        <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="40" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                        <TextBlock Text="Drag &amp; drop your question file here" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="or browse local files" FontSize="12" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0" Cursor="Hand">
+                                            <TextBlock.InputBindings>
+                                                <MouseBinding MouseAction="LeftClick" Command="{Binding BrowseFileCommand}"/>
+                                            </TextBlock.InputBindings>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
                             </Border>
 
-                            <TextBlock Text="Paste JSON Content *" FontSize="12" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
-                            <TextBox Text="{Binding JsonImport, UpdateSourceTrigger=PropertyChanged}" 
-                                     Height="200" TextWrapping="Wrap" AcceptsReturn="True" 
-                                     FontFamily="Consolas" FontSize="13"
-                                     VerticalScrollBarVisibility="Auto" Margin="0,0,0,20"/>
+                            <TextBlock Text="Supports .csv or .json formatted templates" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,24"/>
 
-                            <Button Command="{Binding ImportJsonCommand}" Style="{StaticResource PrimaryBtn}"
-                                    Background="#059669" Padding="24,11" HorizontalAlignment="Left">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Import Questions" VerticalAlignment="Center"/>
+                            <!-- Action Buttons -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,24">
+                                <Button Command="{Binding DownloadTemplateCommand}" Style="{StaticResource PrimaryBtn}"
+                                        Background="{DynamicResource FieldBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                        Foreground="{DynamicResource TextPrimaryBrush}" Padding="16,10" Margin="0,0,12,0" Cursor="Hand">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Download CSV Template" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{Binding BrowseFileCommand}" Style="{StaticResource PrimaryBtn}"
+                                        Background="{DynamicResource AccentBrush}" Foreground="White" Padding="16,10" Cursor="Hand">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Browse File" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+
+                            <!-- JSON Paste alternative -->
+                            <Expander Header="Alternative: Paste Raw JSON" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" HorizontalAlignment="Stretch">
+                                <StackPanel Margin="0,10,0,0">
+                                    <TextBlock Text="Paste JSON content directly below:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding JsonImport, UpdateSourceTrigger=PropertyChanged}" Height="120" TextWrapping="Wrap" AcceptsReturn="True" FontFamily="Consolas" FontSize="12" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12"/>
+                                    <Button Command="{Binding ImportJsonCommand}" Style="{StaticResource PrimaryBtn}" Background="#059669" Padding="16,8" HorizontalAlignment="Left">
+                                        <TextBlock Text="Parse &amp; Import JSON" FontSize="12" FontWeight="Bold"/>
+                                    </Button>
                                 </StackPanel>
-                            </Button>
-                            
-                            <TextBlock Text="{Binding Status}" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0"
+                            </Expander>
+
+                            <TextBlock Text="{Binding Status}" FontSize="13" TextWrapping="Wrap" Margin="0,16,0,0" HorizontalAlignment="Center"
                                        Foreground="{Binding StatusOk, Converter={StaticResource BoolToColor}}"/>
                         </StackPanel>
                     </Grid>
