@@ -149,16 +149,35 @@ public class SessionsController(AppDbContext db, SnapshotExportService exports) 
     }
 
     [HttpGet("{id}/results")]
-    public async Task<IActionResult> GetResults(int id) =>
-        Ok(await db.StudentExams
+    public async Task<IActionResult> GetResults(int id)
+    {
+        var studentExams = await db.StudentExams
             .Include(se => se.Student)
+            .Include(se => se.Answers).ThenInclude(a => a.Question)
+            .Include(se => se.Session).ThenInclude(s => s!.Exam).ThenInclude(e => e!.Questions)
             .Where(se => se.SessionId == id && se.IsSubmitted)
-            .Select(se => new ResultDto(
+            .ToListAsync();
+
+        var result = studentExams.Select(se => {
+            var breakdownGroup = se.Answers
+                .Where(a => a.Question != null && !string.IsNullOrEmpty(a.Question.Subject))
+                .GroupBy(a => a.Question!.Subject)
+                .Select(g => $"{g.Key}: {g.Count(a => a.IsCorrect)}/{g.Count()}");
+
+            var breakdownStr = string.Join(", ", breakdownGroup);
+            if (string.IsNullOrEmpty(breakdownStr)) breakdownStr = "N/A";
+
+            int totalQs = se.Session?.Exam?.Questions?.Count ?? 0;
+
+            return new ResultDto(
                 se.Id, se.Student!.FullName, se.Student.StudentId,
-                se.Score, se.Session!.Exam!.Questions.Count,
-                se.Session.Exam.Questions.Count == 0 ? 0 : Math.Round((double)se.Score / se.Session.Exam.Questions.Count * 100, 1),
-                se.SubmittedAt))
-            .ToListAsync());
+                se.Score, totalQs,
+                totalQs == 0 ? 0 : Math.Round((double)se.Score / totalQs * 100, 1),
+                se.SubmittedAt, breakdownStr);
+        }).ToList();
+
+        return Ok(result);
+    }
 
     [HttpPost("export")]
     public async Task<IActionResult> Export()

@@ -23,6 +23,8 @@ public class Question
     // Stored as JSON array string: ["A","B","C","D"]
     public string OptionsJson { get; set; } = "[]";
     public string CorrectAnswer { get; set; } = string.Empty;
+    public string Subject { get; set; } = string.Empty;
+    public int Year { get; set; } = 2026;
     public Exam? Exam { get; set; }
 }
 

@@ -11,8 +11,8 @@ public record ExamDto(int Id, string Title, string Subject, int DurationMinutes,
 }
 
 // --- Question DTOs ---
-public record QuestionCreateDto(int QuestionNumber, string Text, List<string> Options, string CorrectAnswer);
-public record QuestionDto(int Id, int ExamId, int QuestionNumber, string Text, string OptionsJson, string CorrectAnswer);
+public record QuestionCreateDto(int QuestionNumber, string Text, List<string> Options, string CorrectAnswer, string Subject = "", int Year = 0);
+public record QuestionDto(int Id, int ExamId, int QuestionNumber, string Text, string OptionsJson, string CorrectAnswer, string Subject = "", int Year = 0);
 
 // --- Session DTOs ---
 public record SessionStartDto(int ExamId);
@@ -51,7 +51,7 @@ public record StudentStatusDto(
     string DeviceId = "");
 
 // --- Results ---
-public record ResultDto(int StudentExamId, string FullName, string StudentId, int Score, int Total, double Percentage, DateTime? SubmittedAt)
+public record ResultDto(int StudentExamId, string FullName, string StudentId, int Score, int Total, double Percentage, DateTime? SubmittedAt, string SubjectBreakdown = "")
 {
     public bool Passed => Percentage >= 50;
 }

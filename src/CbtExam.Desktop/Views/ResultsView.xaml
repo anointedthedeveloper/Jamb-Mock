@@ -135,6 +135,16 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 
+                                <DataGridTextColumn Header="SUBJECT BREAKDOWN" Binding="{Binding SubjectBreakdown}" Width="250">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                            <Setter Property="FontSize" Value="12"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
                                 <DataGridTemplateColumn Header="OUTCOME" Width="120">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>

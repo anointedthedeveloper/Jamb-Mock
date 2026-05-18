@@ -60,8 +60,30 @@ async function runDeviceHeartbeat() {
     }
 }
 
+// --- Smart User & Session Detection ---
+function runSmartSessionDetection() {
+    const currentPath = window.location.pathname;
+    const isLoginPage = currentPath.endsWith('index.html') || currentPath.endsWith('/') || currentPath === '';
+    const hasActiveUser = localStorage.getItem('studentId');
+
+    if (isLoginPage && hasActiveUser) {
+        window.location.href = 'selection.html';
+        return true;
+    }
+
+    if (!isLoginPage && !hasActiveUser) {
+        if (window.location.protocol !== 'file:') {
+            window.location.href = 'index.html';
+            return true;
+        }
+    }
+    return false;
+}
+
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+    if (runSmartSessionDetection()) return;
+    
     updateDynamicYear();
     initConnectionSettings();
     
@@ -217,6 +239,9 @@ async function initializeSelectionPage() {
     document.getElementById('userAvatar').textContent = studentName.charAt(0).toUpperCase();
     
     await fetchAndRenderExams();
+    
+    // Poll for new exams/sessions every 4 seconds to instantly detect started exam sessions!
+    setInterval(fetchAndRenderExams, 4000);
 }
 
 async function fetchAndRenderExams() {
@@ -283,6 +308,8 @@ let responses = {};
 let flagged = {};
 let examCompleted = false;
 let heartbeatInterval = null;
+let subjects = [];
+let activeSubject = '';
 
 // Add initialization checking for exam page
 document.addEventListener('DOMContentLoaded', () => {
@@ -354,6 +381,7 @@ async function initializeExamPage() {
 
     // Initialize UI
     currentIndex = 0;
+    initSubjectTabs();
     renderNavigator();
     renderQuestion(currentIndex);
     updateProgressRing();
@@ -450,17 +478,27 @@ function startHeartbeat() {
     const sendHeartbeat = async () => {
         if (examCompleted) return;
         try {
+            const activeDeviceId = localStorage.getItem('cbt_device_id') || 'NODE-UNKNOWN';
+            const activeDeviceName = getBrowserAndOS();
+            let batteryLevel = 100;
+            try {
+                if (navigator.getBattery) {
+                    const battery = await navigator.getBattery();
+                    batteryLevel = Math.round(battery.level * 100);
+                }
+            } catch (e) { }
+
             const response = await fetch(`${API_BASE}/Student/heartbeat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     studentExamId: parseInt(studentExamId),
                     currentQuestion: currentIndex + 1,
-                    batteryLevel: 100,
+                    batteryLevel: batteryLevel,
                     isOnline: true,
                     connectionState: "Excellent",
-                    deviceName: "Student Browser Session",
-                    deviceId: navigator.userAgent
+                    deviceName: activeDeviceName,
+                    deviceId: activeDeviceId
                 })
             });
             if (response.ok) {
@@ -482,17 +520,91 @@ function startHeartbeat() {
     heartbeatInterval = setInterval(sendHeartbeat, 10000);
 }
 
+function initSubjectTabs() {
+    // Find all unique subjects in the questions
+    subjects = [...new Set(questions.map(q => q.subject || 'General'))];
+    
+    // Sort subjects so English is first, then Mathematics, then others
+    subjects.sort((a, b) => {
+        if (a.toLowerCase() === 'english') return -1;
+        if (b.toLowerCase() === 'english') return 1;
+        return a.localeCompare(b);
+    });
+
+    activeSubject = subjects[0];
+    renderSubjectTabs();
+}
+
+function renderSubjectTabs() {
+    const container = document.getElementById('subject-tabs-bar');
+    if (!container) return;
+    container.innerHTML = '';
+
+    subjects.forEach(sub => {
+        const btn = document.createElement('button');
+        btn.className = `btn btn-tab ${sub === activeSubject ? 'active' : ''}`;
+        btn.textContent = sub;
+        btn.onclick = () => switchSubject(sub);
+        
+        // Custom styling for elegant glassmorphic/flat modern tab buttons
+        btn.style.padding = '10px 20px';
+        btn.style.borderRadius = '10px';
+        btn.style.fontWeight = '700';
+        btn.style.cursor = 'pointer';
+        btn.style.transition = 'all 0.2s ease';
+        btn.style.fontSize = '13px';
+        btn.style.textTransform = 'uppercase';
+        btn.style.letterSpacing = '0.5px';
+        
+        if (sub === activeSubject) {
+            btn.style.background = '#10B981'; // Sleek premium emerald green
+            btn.style.color = '#ffffff';
+            btn.style.border = 'none';
+            btn.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.25)';
+        } else {
+            btn.style.background = 'rgba(255, 255, 255, 0.08)';
+            btn.style.color = '#94A3B8';
+            btn.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+        }
+
+        container.appendChild(btn);
+    });
+}
+
+function switchSubject(sub) {
+    activeSubject = sub;
+    renderSubjectTabs();
+    
+    // Jump to first question of this subject
+    const subQuestions = getFilteredQuestions();
+    const firstSubQ = subQuestions[0];
+    if (firstSubQ) {
+        const globalIndex = questions.findIndex(q => q.questionId === firstSubQ.questionId);
+        if (globalIndex !== -1) {
+            currentIndex = globalIndex;
+            renderQuestion(currentIndex);
+            renderNavigator();
+        }
+    }
+}
+
+function getFilteredQuestions() {
+    return questions.filter(q => (q.subject || 'General') === activeSubject);
+}
+
 function renderNavigator() {
     const grid = document.getElementById('question-nav');
     if (!grid) return;
     grid.innerHTML = "";
 
-    questions.forEach((q, index) => {
+    const subQuestions = getFilteredQuestions();
+    subQuestions.forEach((q, subIndex) => {
         const btn = document.createElement('button');
         btn.className = 'nav-btn';
         
         const qId = q.questionId;
-        const isCurrent = index === currentIndex;
+        const globalIndex = questions.findIndex(x => x.questionId === qId);
+        const isCurrent = globalIndex === currentIndex;
         const isAnswered = responses[qId] !== undefined;
         const isFlagged = flagged[qId] === true;
 
@@ -500,8 +612,8 @@ function renderNavigator() {
         if (isAnswered) btn.classList.add('answered');
         if (isFlagged) btn.classList.add('flagged');
 
-        btn.textContent = index + 1;
-        btn.onclick = () => jumpToQuestion(index);
+        btn.textContent = subIndex + 1;
+        btn.onclick = () => jumpToQuestion(globalIndex);
         grid.appendChild(btn);
     });
 
@@ -516,7 +628,17 @@ function renderQuestion(index) {
     const q = questions[index];
     if (!q) return;
 
-    document.getElementById('current-q-num').textContent = index + 1;
+    // Auto-select subject tab if we navigated to a question belonging to another subject
+    const sub = q.subject || 'General';
+    if (sub !== activeSubject) {
+        activeSubject = sub;
+        renderSubjectTabs();
+    }
+
+    const subQuestions = getFilteredQuestions();
+    const subIndex = subQuestions.findIndex(x => x.questionId === q.questionId);
+
+    document.getElementById('current-q-num').textContent = `${subIndex + 1} (${sub})`;
     document.getElementById('question-text').textContent = q.text;
 
     // Toggle Flag UI status

@@ -231,6 +231,8 @@
 
                 try {
                     // Join Session
+                    const activeDeviceId = localStorage.getItem('cbt_device_id') || 'NODE-UNKNOWN';
+                    const activeDeviceName = typeof getBrowserAndOS === 'function' ? getBrowserAndOS() : 'Student Browser';
                     const joinRes = await fetch(`${API_BASE}/Student/join`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -238,8 +240,8 @@
                             sessionCode: session.sessionCode,
                             fullName: studentName,
                             studentId: studentId,
-                            deviceId: navigator.userAgent,
-                            deviceName: 'Student Device'
+                            deviceId: activeDeviceId,
+                            deviceName: activeDeviceName
                         })
                     });
 

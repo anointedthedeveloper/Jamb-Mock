@@ -318,10 +318,15 @@ public class CreateExamViewModel(ApiClient api) : BaseViewModel, IRefreshable
             var list = JsonSerializer.Deserialize<List<QuestionCreateDto>>(JsonImport,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (list is null || list.Count == 0) { Status = "No questions found in JSON."; IsSuccess = false; return; }
-            var duplicateNumbers = list.GroupBy(x => x.QuestionNumber).Where(g => g.Key > 0 && g.Count() > 1).Select(g => g.Key).ToList();
+            var duplicateNumbers = list
+                .GroupBy(x => new { x.Subject, x.QuestionNumber })
+                .Where(g => g.Key.QuestionNumber > 0 && g.Count() > 1)
+                .Select(g => g.Key.QuestionNumber)
+                .Distinct()
+                .ToList();
             if (duplicateNumbers.Count > 0)
             {
-                Status = $"Invalid format: duplicate questionNumber ({string.Join(", ", duplicateNumbers)}).";
+                Status = $"Invalid format: duplicate questionNumber ({string.Join(", ", duplicateNumbers)}) inside same subject.";
                 IsSuccess = false;
                 return;
             }

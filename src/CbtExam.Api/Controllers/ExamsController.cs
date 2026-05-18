@@ -96,7 +96,9 @@ public class ExamsController(AppDbContext db) : ControllerBase
             QuestionNumber = dto.QuestionNumber,
             Text = dto.Text,
             OptionsJson = JsonSerializer.Serialize(dto.Options),
-            CorrectAnswer = resolvedAnswer
+            CorrectAnswer = resolvedAnswer,
+            Subject = dto.Subject ?? string.Empty,
+            Year = dto.Year
         };
         db.Questions.Add(q);
         await db.SaveChangesAsync();
@@ -123,7 +125,9 @@ public class ExamsController(AppDbContext db) : ControllerBase
                 QuestionNumber = dto.QuestionNumber <= 0 ? valid.Count + 1 : dto.QuestionNumber,
                 Text = dto.Text,
                 OptionsJson = JsonSerializer.Serialize(dto.Options),
-                CorrectAnswer = resolvedAnswer
+                CorrectAnswer = resolvedAnswer,
+                Subject = dto.Subject ?? string.Empty,
+                Year = dto.Year
             });
         }
 
