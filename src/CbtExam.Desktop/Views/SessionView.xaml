@@ -282,41 +282,220 @@
                 </Grid>
             </Border>
             
-            <Border Grid.Row="1" Background="{DynamicResource BgBrush}" Padding="32">
+            <Border Grid.Row="1" Background="#F8FAFC" Padding="32">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
-                        <TextBlock Text="Connected Candidates" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                        <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="12" Padding="12,4" Margin="16,0,0,0">
-                            <TextBlock Text="{Binding RoomStudents.Count}" FontSize="16" FontWeight="Black" Foreground="{DynamicResource AccentBrush}"/>
-                        </Border>
-                    </StackPanel>
                     
-                    <ListBox Grid.Row="1" ItemsSource="{Binding RoomStudents}" Background="Transparent" BorderThickness="0"
+                    <!-- 1. Statistics Cards Row -->
+                    <Grid Margin="0,0,0,24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="24"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="24"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Connected -->
+                        <Border Background="White" BorderBrush="#F1F5F9" BorderThickness="1" CornerRadius="16" Padding="20">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.05" Color="Black"/>
+                            </Border.Effect>
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Connected Candidates" FontSize="14" FontWeight="SemiBold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding ConnectedCandidatesCount}" FontSize="36" FontWeight="Bold" Foreground="#0D9488" Margin="0,4,0,0"/>
+                                </StackPanel>
+                                <Border Background="#F0FDFA" CornerRadius="12" Padding="12" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                    <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#0D9488"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- System Ready -->
+                        <Border Grid.Column="2" Background="White" BorderBrush="#F1F5F9" BorderThickness="1" CornerRadius="16" Padding="20">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.05" Color="Black"/>
+                            </Border.Effect>
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="System Ready" FontSize="14" FontWeight="SemiBold" Foreground="#64748B"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                        <TextBlock Text="{Binding SystemReadyPercent}" FontSize="36" FontWeight="Bold" Foreground="#1E293B"/>
+                                        <TextBlock Text="%" FontSize="24" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Bottom" Margin="2,0,0,6"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Border Background="#F8FAFC" CornerRadius="12" Padding="12" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                    <TextBlock Text="&#xEA18;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#475569"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Issues Flagged -->
+                        <Border Grid.Column="4" Background="White" BorderBrush="#F1F5F9" BorderThickness="1" CornerRadius="16" Padding="20">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.05" Color="Black"/>
+                            </Border.Effect>
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Issues Flagged" FontSize="14" FontWeight="SemiBold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding IssuesFlaggedCount}" FontSize="36" FontWeight="Bold" Foreground="#E11D48" Margin="0,4,0,0"/>
+                                </StackPanel>
+                                <Border Background="#FFF1F2" CornerRadius="12" Padding="12" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                    <TextBlock Text="&#xE783;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#E11D48"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- 2. Controls & Search Bar -->
+                    <Border Grid.Row="1" Background="White" BorderBrush="#F1F5F9" BorderThickness="1" CornerRadius="16" Padding="16" Margin="0,0,0,24">
+                         <Border.Effect>
+                             <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.05" Color="Black"/>
+                         </Border.Effect>
+                         <Grid>
+                             <Grid.ColumnDefinitions>
+                                 <ColumnDefinition Width="300"/>
+                                 <ColumnDefinition Width="*"/>
+                                 <ColumnDefinition Width="Auto"/>
+                             </Grid.ColumnDefinitions>
+                             <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Padding="12,8">
+                                 <Grid>
+                                     <Grid.ColumnDefinitions>
+                                         <ColumnDefinition Width="Auto"/>
+                                         <ColumnDefinition Width="*"/>
+                                     </Grid.ColumnDefinitions>
+                                     <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                     <TextBox Grid.Column="1" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" FontSize="14" Foreground="#334155" VerticalAlignment="Center"/>
+                                 </Grid>
+                             </Border>
+                             
+                             <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                 <Button Command="{Binding BroadcastCommand}" Background="Transparent" BorderBrush="#E2E8F0" BorderThickness="1" Foreground="#475569" Padding="16,10" Margin="0,0,12,0">
+                                     <Button.Resources>
+                                         <Style TargetType="Border">
+                                             <Setter Property="CornerRadius" Value="12"/>
+                                         </Style>
+                                     </Button.Resources>
+                                     <TextBlock Text="Broadcast Message" FontWeight="SemiBold"/>
+                                 </Button>
+                                 <Button Command="{Binding SyncListCommand}" Background="Transparent" BorderBrush="#E2E8F0" BorderThickness="1" Foreground="#475569" Padding="16,10">
+                                     <Button.Resources>
+                                         <Style TargetType="Border">
+                                             <Setter Property="CornerRadius" Value="12"/>
+                                         </Style>
+                                     </Button.Resources>
+                                     <TextBlock Text="Sync List" FontWeight="SemiBold"/>
+                                 </Button>
+                             </StackPanel>
+                         </Grid>
+                    </Border>
+                    
+                    <!-- 3. Candidate Grid -->
+                    <ListBox Grid.Row="2" ItemsSource="{Binding FilteredRoomStudents}" Background="Transparent" BorderThickness="0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel ItemWidth="280" ItemHeight="100"/>
+                                <WrapPanel ItemWidth="320" ItemHeight="140"/>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Style="{StaticResource Card}" Padding="16" Margin="6">
+                                <Border Background="White" BorderBrush="#F1F5F9" BorderThickness="1" CornerRadius="16" Padding="20" Margin="8">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.04" Color="Black"/>
+                                    </Border.Effect>
                                     <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="40" Height="40" CornerRadius="20" Background="{DynamicResource HeaderBgBrush}" Margin="0,0,12,0">
-                                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        
+                                        <!-- Avatar -->
+                                        <Border Grid.RowSpan="2" Width="48" Height="48" CornerRadius="24" Background="#F8FAFC" VerticalAlignment="Top" Margin="0,0,16,0">
+                                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#94A3B8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding FullName}" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding StudentId}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0"/>
+                                        
+                                        <!-- Name & ID -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                            <TextBlock Text="{Binding FullName}" FontWeight="Bold" FontSize="15" Foreground="#1E293B" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding StudentId}" FontSize="12" Foreground="#64748B" Margin="0,2,0,0"/>
                                         </StackPanel>
+
+                                        <!-- Status Pill -->
+                                        <Border Grid.Column="2" CornerRadius="12" Padding="10,4" VerticalAlignment="Top">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#F1F5F9"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                                                            <Setter Property="Background" Value="#F0FDFA"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Ellipse Width="6" Height="6" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                    <Ellipse.Style>
+                                                        <Style TargetType="Ellipse">
+                                                            <Setter Property="Fill" Value="#94A3B8"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                                                                    <Setter Property="Fill" Value="#10B981"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Ellipse.Style>
+                                                </Ellipse>
+                                                <TextBlock FontSize="12" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="Disconnected"/>
+                                                            <Setter Property="Foreground" Value="#64748B"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                                                                    <Setter Property="Text" Value="Ready"/>
+                                                                    <Setter Property="Foreground" Value="#0F766E"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                        
+                                        <!-- Telemetry -->
+                                        <Border Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" BorderThickness="0,1,0,0" BorderBrush="#F1F5F9" Margin="0,12,0,0" Padding="0,12,0,0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,16,0" ToolTip="Device Type">
+                                                    <TextBlock Text="&#xE975;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                    <TextBlock Text="{Binding DeviceName}" FontSize="12" Foreground="#64748B" VerticalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                                
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" ToolTip="Battery Level">
+                                                    <TextBlock Text="&#xEBB8;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                    <TextBlock FontSize="12" Foreground="#64748B" VerticalAlignment="Center">
+                                                        <Run Text="{Binding BatteryLevel, Mode=OneWay}"/><Run Text="%"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

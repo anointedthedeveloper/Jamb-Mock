@@ -874,6 +874,39 @@ public class SessionViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public bool IsNotManagingRoom => !IsManagingRoom;
 
     public ObservableCollection<StudentStatusDto> RoomStudents { get; } = [];
+    public ObservableCollection<StudentStatusDto> FilteredRoomStudents { get; } = [];
+
+    private string _searchQuery = string.Empty;
+    public string SearchQuery
+    {
+        get => _searchQuery;
+        set { Set(ref _searchQuery, value); FilterStudents(); }
+    }
+
+    private int _connectedCandidatesCount;
+    public int ConnectedCandidatesCount { get => _connectedCandidatesCount; set => Set(ref _connectedCandidatesCount, value); }
+
+    private int _systemReadyPercent;
+    public int SystemReadyPercent { get => _systemReadyPercent; set => Set(ref _systemReadyPercent, value); }
+
+    private int _issuesFlaggedCount;
+    public int IssuesFlaggedCount { get => _issuesFlaggedCount; set => Set(ref _issuesFlaggedCount, value); }
+
+    public RelayCommand SyncListCommand => new(async () => await RefreshRoomStudents());
+    public RelayCommand BroadcastCommand => new(() => {
+        System.Windows.MessageBox.Show("Broadcast message feature coming soon.", "Broadcast", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+    });
+
+    private void FilterStudents()
+    {
+        FilteredRoomStudents.Clear();
+        var query = SearchQuery?.Trim() ?? string.Empty;
+        var filtered = string.IsNullOrEmpty(query) 
+            ? RoomStudents 
+            : RoomStudents.Where(s => s.FullName.Contains(query, StringComparison.OrdinalIgnoreCase) || s.StudentId.Contains(query, StringComparison.OrdinalIgnoreCase));
+            
+        foreach(var s in filtered) FilteredRoomStudents.Add(s);
+    }
 
     // Auto-polling timer for waiting room student list
     private System.Timers.Timer? _roomPollTimer;
@@ -950,6 +983,13 @@ public class SessionViewModel(ApiClient api) : BaseViewModel, IRefreshable
             {
                 RoomStudents.Clear();
                 list?.ForEach(RoomStudents.Add);
+
+                ConnectedCandidatesCount = list?.Count(s => s.IsOnline) ?? 0;
+                int total = list?.Count ?? 0;
+                SystemReadyPercent = total == 0 ? 0 : (int)Math.Round((double)ConnectedCandidatesCount / total * 100);
+                IssuesFlaggedCount = list?.Count(s => s.BatteryLevel < 20 || s.ConnectionState == "disconnected") ?? 0;
+
+                FilterStudents();
 
                 // Sync room metadata (IsStarted flag etc.)
                 var updated = ActiveSessions.FirstOrDefault(x => x.Id == CurrentRoom.Id);

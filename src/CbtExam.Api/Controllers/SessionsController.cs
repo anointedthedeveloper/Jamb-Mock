@@ -78,15 +78,36 @@ public class SessionsController(AppDbContext db, SnapshotExportService exports) 
     }
 
     [HttpGet("{id}/students")]
-    public async Task<IActionResult> GetStudents(int id) =>
-        Ok(await db.StudentExams
+    public async Task<IActionResult> GetStudents(int id)
+    {
+        var studentExams = await db.StudentExams
             .Include(se => se.Student)
+            .Include(se => se.Answers)
             .Where(se => se.SessionId == id)
-            .Select(se => new StudentStatusDto(
+            .ToListAsync();
+
+        var studentIds = studentExams.Select(se => se.Student!.StudentId).ToList();
+        var devices = await db.Devices
+            .Where(d => studentIds.Contains(d.StudentId))
+            .ToListAsync();
+
+        var threshold = DateTime.UtcNow.AddSeconds(-30);
+
+        var result = studentExams.Select(se => {
+            var device = devices.FirstOrDefault(d => d.StudentId == se.Student!.StudentId);
+            bool isOnline = device != null && device.LastSeen >= threshold && device.IsOnline;
+            string status = se.IsSubmitted ? "submitted" : (isOnline ? "online" : "disconnected");
+            
+            return new StudentStatusDto(
                 se.Id, se.Student!.FullName, se.Student.StudentId,
                 se.JoinedAt, se.IsSubmitted, se.TabSwitchCount,
-                se.Answers.Count, se.Answers.Count, 0, !se.IsSubmitted, se.IsSubmitted ? "submitted" : "online", "", ""))
-            .ToListAsync());
+                se.Answers.Count, 0, device?.BatteryLevel ?? 0, isOnline, status, 
+                device?.DeviceName ?? "Unknown", 
+                device?.DeviceId ?? "");
+        }).ToList();
+
+        return Ok(result);
+    }
 
     [HttpGet("{id}/results")]
     public async Task<IActionResult> GetResults(int id) =>
