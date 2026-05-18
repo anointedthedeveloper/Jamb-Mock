@@ -330,21 +330,37 @@ public class CreateExamViewModel(ApiClient api) : BaseViewModel, IRefreshable
                 IsSuccess = false;
                 return;
             }
+            var resolvedList = new List<QuestionCreateDto>();
             foreach (var item in list)
             {
                 if (string.IsNullOrWhiteSpace(item.Text) || item.Options is null || item.Options.Count < 2 ||
-                    item.Options.Any(o => string.IsNullOrWhiteSpace(o)) ||
-                    !item.Options.Contains(item.CorrectAnswer, StringComparer.OrdinalIgnoreCase))
+                    item.Options.Any(o => string.IsNullOrWhiteSpace(o)))
                 {
-                    Status = "Invalid format: each row must have text, >=2 options, and correctAnswer matching one option.";
+                    Status = "Invalid format: each row must have text and >=2 options.";
                     IsSuccess = false;
                     return;
                 }
+
+                string resolved = item.CorrectAnswer;
+                var clean = item.CorrectAnswer?.Trim().ToUpper() ?? string.Empty;
+                if (clean == "A" && item.Options.Count >= 1) resolved = item.Options[0];
+                else if (clean == "B" && item.Options.Count >= 2) resolved = item.Options[1];
+                else if (clean == "C" && item.Options.Count >= 3) resolved = item.Options[2];
+                else if (clean == "D" && item.Options.Count >= 4) resolved = item.Options[3];
+
+                if (!item.Options.Contains(resolved, StringComparer.OrdinalIgnoreCase))
+                {
+                    Status = $"Invalid format: correctAnswer '{item.CorrectAnswer}' must match one of the options (or be A, B, C, or D).";
+                    IsSuccess = false;
+                    return;
+                }
+
+                resolvedList.Add(item with { CorrectAnswer = resolved });
             }
-            var resp = await api.ImportQuestionsAsync(CreatedExamId.Value, list);
+            var resp = await api.ImportQuestionsAsync(CreatedExamId.Value, resolvedList);
             if (!resp.IsSuccessStatusCode) { Status = "Import failed."; IsSuccess = false; return; }
             Questions.Clear();
-            foreach (var q in list)
+            foreach (var q in resolvedList)
                 Questions.Add(q);
             JsonImport = string.Empty;
             Status = $"{list.Count} question(s) processed.";
@@ -1714,6 +1730,7 @@ public class ResultsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 {
     public ObservableCollection<SessionDto> Sessions { get; } = [];
     public ObservableCollection<ResultDto>  Results  { get; } = [];
+    public ObservableCollection<ResultDto>  FilteredResults { get; } = [];
 
     private SessionDto? _selectedSession;
     public SessionDto? SelectedSession
@@ -1722,6 +1739,22 @@ public class ResultsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         set { Set(ref _selectedSession, value); _ = LoadResultsAsync(); }
     }
 
+    private string _searchQuery = string.Empty;
+    public string SearchQuery
+    {
+        get => _searchQuery;
+        set { Set(ref _searchQuery, value); FilterResults(); }
+    }
+
+    private string _statusFilter = "All Candidates";
+    public string StatusFilter
+    {
+        get => _statusFilter;
+        set { Set(ref _statusFilter, value); FilterResults(); }
+    }
+
+    public ObservableCollection<string> StatusFilters { get; } = ["All Candidates", "Passed", "Failed"];
+
     private double _avgScore;
     private int _passCount, _failCount;
     public double AvgScore   { get => _avgScore;   set => Set(ref _avgScore,   value); }
@@ -1729,6 +1762,7 @@ public class ResultsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public int    FailCount  { get => _failCount;  set => Set(ref _failCount,  value); }
 
     public RelayCommand RefreshCommand => new(async () => await LoadAsync());
+    public RelayCommand PrintCommand => new(PrintReport);
 
     public async Task LoadAsync()
     {
@@ -1746,6 +1780,244 @@ public class ResultsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         AvgScore  = Results.Count == 0 ? 0 : Math.Round(Results.Average(r => r.Percentage), 1);
         PassCount = Results.Count(r => r.Percentage >= 50);
         FailCount = Results.Count(r => r.Percentage < 50);
+        FilterResults();
+    }
+
+    private void FilterResults()
+    {
+        IEnumerable<ResultDto> filtered = Results;
+
+        var query = SearchQuery.Trim();
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            filtered = filtered.Where(r => 
+                r.FullName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                r.StudentId.Contains(query, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (StatusFilter == "Passed")
+        {
+            filtered = filtered.Where(r => r.Percentage >= 50);
+        }
+        else if (StatusFilter == "Failed")
+        {
+            filtered = filtered.Where(r => r.Percentage < 50);
+        }
+
+        FilteredResults.Clear();
+        foreach (var r in filtered)
+        {
+            FilteredResults.Add(r);
+        }
+    }
+
+    private void PrintReport()
+    {
+        if (SelectedSession is null)
+        {
+            MessageBox.Show("Please select an active exam session from the dropdown first before exporting results.", "No Session Selected", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (FilteredResults.Count == 0)
+        {
+            MessageBox.Show("No candidates fit the active search or status filters. Adjust your search parameters before exporting.", "No Data Fits Filters", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var sfd = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "PDF Files (*.pdf)|*.pdf",
+            FileName = $"Merit_List_{SelectedSession.SessionCode}.pdf",
+            Title = "Save Candidate Merit List PDF"
+        };
+
+        if (sfd.ShowDialog() != true) return;
+
+        try
+        {
+            XImage? logoImage = null;
+            try
+            {
+                var info = Application.GetResourceStream(new Uri("pack://application:,,,/Resources/prep4jamb.png"));
+                if (info != null)
+                {
+                    var ms = new MemoryStream();
+                    info.Stream.CopyTo(ms);
+                    ms.Position = 0;
+                    logoImage = XImage.FromStream(ms);
+                }
+            }
+            catch
+            {
+                try
+                {
+                    var localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "prep4jamb.png");
+                    if (File.Exists(localPath))
+                    {
+                        logoImage = XImage.FromFile(localPath);
+                    }
+                }
+                catch { }
+            }
+
+            using (var document = new PdfDocument())
+            {
+                document.Info.Title = $"Candidate Merit List - Session {SelectedSession.SessionCode}";
+                
+                var page = document.AddPage();
+                page.Size = PdfSharp.PageSize.A4;
+                page.Orientation = PdfSharp.PageOrientation.Portrait;
+                
+                var gfx = XGraphics.FromPdfPage(page);
+                
+#pragma warning disable CS0618
+                var titleFont = new XFont("Segoe UI", 16, XFontStyleEx.Bold);
+                var subTitleFont = new XFont("Segoe UI", 9, XFontStyleEx.Regular);
+                var headerFont = new XFont("Segoe UI", 9, XFontStyleEx.Bold);
+                var dataFont = new XFont("Segoe UI", 9, XFontStyleEx.Regular);
+                var statTitleFont = new XFont("Segoe UI", 8, XFontStyleEx.Bold);
+                var statValueFont = new XFont("Segoe UI", 16, XFontStyleEx.Bold);
+#pragma warning restore CS0618
+
+                var grayBrush = XBrushes.DarkGray;
+                var textCharcoal = new XSolidBrush(XColor.FromArgb(30, 41, 59)); // Slate-800 Charcoal
+                var primaryColorBrush = new XSolidBrush(XColor.FromArgb(13, 148, 136)); // Teal
+                
+                var dividerPen = new XPen(XColor.FromArgb(226, 232, 240), 1.0); 
+                var tableHeaderBg = new XSolidBrush(XColor.FromArgb(241, 245, 249)); // Slate 100
+                var tableBorderPen = new XPen(XColor.FromArgb(226, 232, 240), 1.0);
+
+                double margin = 40;
+                double width = page.Width.Point - (margin * 2);
+                double y = margin;
+                
+                // Left Title
+                gfx.DrawString("CANDIDATE MERIT LIST REPORT", titleFont, textCharcoal, new XRect(margin, y, width - 100, 22), XStringFormats.TopLeft);
+                y += 22;
+                
+                gfx.DrawString($"Session: {SelectedSession.SessionCode} | Exam: {SelectedSession.ExamTitle}", subTitleFont, grayBrush, new XRect(margin, y, width, 15), XStringFormats.TopLeft);
+                
+                // Right Logo
+                if (logoImage != null)
+                {
+                    try
+                    {
+                        double logoH = 30;
+                        double logoW = logoImage.PointWidth * (logoH / logoImage.PointHeight);
+                        gfx.DrawImage(logoImage, page.Width.Point - margin - logoW, margin, logoW, logoH);
+                    }
+                    catch { }
+                }
+                
+                y += 30;
+                gfx.DrawLine(dividerPen, margin, y, page.Width.Point - margin, y);
+                y += 20;
+
+                // Stats Boxes Row
+                double boxW = (width - 20) / 3;
+                double boxH = 45;
+                
+                gfx.DrawRectangle(tableHeaderBg, margin, y, boxW, boxH);
+                gfx.DrawRectangle(tableBorderPen, margin, y, boxW, boxH);
+                gfx.DrawString("AVERAGE SCORE", statTitleFont, grayBrush, new XRect(margin + 10, y + 8, boxW - 20, 10), XStringFormats.TopLeft);
+                gfx.DrawString($"{AvgScore}%", statValueFont, textCharcoal, new XRect(margin + 10, y + 20, boxW - 20, 20), XStringFormats.TopLeft);
+
+                gfx.DrawRectangle(tableHeaderBg, margin + boxW + 10, y, boxW, boxH);
+                gfx.DrawRectangle(tableBorderPen, margin + boxW + 10, y, boxW, boxH);
+                gfx.DrawString("PASSED", statTitleFont, grayBrush, new XRect(margin + boxW + 20, y + 8, boxW - 20, 10), XStringFormats.TopLeft);
+                gfx.DrawString(PassCount.ToString(), statValueFont, primaryColorBrush, new XRect(margin + boxW + 20, y + 20, boxW - 20, 20), XStringFormats.TopLeft);
+
+                gfx.DrawRectangle(tableHeaderBg, margin + (boxW * 2) + 20, y, boxW, boxH);
+                gfx.DrawRectangle(tableBorderPen, margin + (boxW * 2) + 20, y, boxW, boxH);
+                gfx.DrawString("FAILED", statTitleFont, grayBrush, new XRect(margin + (boxW * 2) + 30, y + 8, boxW - 20, 10), XStringFormats.TopLeft);
+                gfx.DrawString(FailCount.ToString(), statValueFont, new XSolidBrush(XColor.FromArgb(220, 38, 38)), new XRect(margin + (boxW * 2) + 30, y + 20, boxW - 20, 20), XStringFormats.TopLeft);
+
+                y += boxH + 30;
+
+                gfx.DrawString($"Candidates ({FilteredResults.Count} matching active filters)", headerFont, textCharcoal, new XRect(margin, y, width, 15), XStringFormats.TopLeft);
+                y += 20;
+
+                // Table Headers
+                double[] colWidths = { 150, 70, 50, 50, 195 }; // total = 515
+                double colX = margin;
+
+                gfx.DrawRectangle(tableHeaderBg, margin, y, width, 20);
+                gfx.DrawRectangle(tableBorderPen, margin, y, width, 20);
+
+                string[] headers = { "CANDIDATE", "REG NO", "SCORE", "PERCENT", "SUBJECT BREAKDOWN" };
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    gfx.DrawString(headers[i], headerFont, textCharcoal, new XRect(colX + 5, y, colWidths[i] - 10, 20), XStringFormats.CenterLeft);
+                    colX += colWidths[i];
+                }
+                y += 20;
+
+                // Table Rows
+                foreach (var row in FilteredResults)
+                {
+                    colX = margin;
+                    gfx.DrawRectangle(tableBorderPen, margin, y, width, 20);
+
+                    gfx.DrawString(row.FullName, dataFont, textCharcoal, new XRect(colX + 5, y, colWidths[0] - 10, 20), XStringFormats.CenterLeft);
+                    colX += colWidths[0];
+
+                    gfx.DrawString(row.StudentId, dataFont, primaryColorBrush, new XRect(colX + 5, y, colWidths[1] - 10, 20), XStringFormats.CenterLeft);
+                    colX += colWidths[1];
+
+                    gfx.DrawString(row.Score.ToString(), dataFont, textCharcoal, new XRect(colX + 5, y, colWidths[2] - 10, 20), XStringFormats.CenterLeft);
+                    colX += colWidths[2];
+
+                    gfx.DrawString(row.Percentage.ToString("F1") + "%", dataFont, primaryColorBrush, new XRect(colX + 5, y, colWidths[3] - 10, 20), XStringFormats.CenterLeft);
+                    colX += colWidths[3];
+
+                    gfx.DrawString(row.SubjectBreakdown, dataFont, grayBrush, new XRect(colX + 5, y, colWidths[4] - 10, 20), XStringFormats.CenterLeft);
+
+                    y += 20;
+
+                    // Page break handling
+                    if (y > page.Height.Point - margin - 30)
+                    {
+                        DrawFooter(gfx, page, margin, 1, 1);
+                        page = document.AddPage();
+                        page.Size = PdfSharp.PageSize.A4;
+                        gfx = XGraphics.FromPdfPage(page);
+                        y = margin;
+                    }
+                }
+
+                DrawFooter(gfx, page, margin, 1, 1);
+                document.Save(sfd.FileName);
+            }
+            MessageBox.Show("Candidate Merit List PDF exported successfully!", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (IOException)
+        {
+            MessageBox.Show("Export failed: The PDF file is open in another program (like a PDF reader or browser). Please close it and try again.", "Export Locked", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to export PDF: {ex.Message}", "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void DrawFooter(XGraphics gfx, PdfPage page, double margin, int pageNum, int totalPages)
+    {
+        try
+        {
+#pragma warning disable CS0618
+            var footerFont = new XFont("Segoe UI", 8, XFontStyleEx.Regular);
+#pragma warning restore CS0618
+            var footerMuted = XBrushes.DarkGray;
+            var dividerPen = new XPen(XColor.FromArgb(226, 232, 240), 0.75);
+            
+            double footerY = page.Height.Point - margin + 10;
+            
+            gfx.DrawLine(dividerPen, margin, footerY, page.Width.Point - margin, footerY);
+            gfx.DrawString("Powered by Anobyte Technologies", footerFont, footerMuted, new XRect(margin, footerY + 4, page.Width.Point - (margin * 2), 15), XStringFormats.TopLeft);
+            gfx.DrawString($"Page {pageNum} of {totalPages}", footerFont, footerMuted, new XRect(margin, footerY + 4, page.Width.Point - (margin * 2), 15), XStringFormats.TopRight);
+        }
+        catch { }
     }
 }
 
@@ -1760,6 +2032,7 @@ public class ReportsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public int TotalStudents { get => _totalStudents; set => Set(ref _totalStudents, value); }
 
     public RelayCommand RefreshCommand => new(async () => await LoadAsync());
+    public RelayCommand PrintCommand => new(PrintReport);
 
     public async Task LoadAsync()
     {
@@ -1786,6 +2059,226 @@ public class ReportsViewModel(ApiClient api) : BaseViewModel, IRefreshable
                 results.Count(r => r.Percentage < 50)));
         }
         TotalStudents = grandTotal;
+    }
+
+    private void DrawFooter(XGraphics gfx, PdfPage page, double margin, int pageNum, int totalPages)
+    {
+        try
+        {
+#pragma warning disable CS0618
+            var footerFont = new XFont("Segoe UI", 8, XFontStyleEx.Regular);
+#pragma warning restore CS0618
+            var footerMuted = XBrushes.DarkGray;
+            var dividerPen = new XPen(XColor.FromArgb(226, 232, 240), 0.75);
+            
+            double footerY = page.Height.Point - margin + 10;
+            
+            gfx.DrawLine(dividerPen, margin, footerY, page.Width.Point - margin, footerY);
+            gfx.DrawString("Powered by Anobyte Technologies", footerFont, footerMuted, new XRect(margin, footerY + 4, page.Width.Point - (margin * 2), 15), XStringFormats.TopLeft);
+            gfx.DrawString($"Page {pageNum} of {totalPages}", footerFont, footerMuted, new XRect(margin, footerY + 4, page.Width.Point - (margin * 2), 15), XStringFormats.TopRight);
+        }
+        catch { }
+    }
+
+    private void PrintReport()
+    {
+        if (TotalExams == 0)
+        {
+            MessageBox.Show("No exam templates found. Please create an exam template and complete at least one exam session before exporting reports.", "No Exam Data Available", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (Rows.Count == 0)
+        {
+            MessageBox.Show("No completed exam sessions found. Candidates must complete their exam sessions before report generation can proceed.", "No Session Data Available", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var sfd = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "PDF Files (*.pdf)|*.pdf",
+            FileName = "System_Exam_Audit_Report.pdf",
+            Title = "Save Audit Report PDF"
+        };
+
+        if (sfd.ShowDialog() != true) return;
+
+        try
+        {
+            XImage? logoImage = null;
+            try
+            {
+                var info = Application.GetResourceStream(new Uri("pack://application:,,,/Resources/prep4jamb.png"));
+                if (info != null)
+                {
+                    var ms = new MemoryStream();
+                    info.Stream.CopyTo(ms);
+                    ms.Position = 0;
+                    logoImage = XImage.FromStream(ms);
+                }
+            }
+            catch
+            {
+                try
+                {
+                    var localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "prep4jamb.png");
+                    if (File.Exists(localPath))
+                    {
+                        logoImage = XImage.FromFile(localPath);
+                    }
+                }
+                catch { }
+            }
+
+            using (var document = new PdfDocument())
+            {
+                document.Info.Title = "System Exam & Session Audit Report";
+                
+                var page = document.AddPage();
+                page.Size = PdfSharp.PageSize.A4;
+                page.Orientation = PdfSharp.PageOrientation.Portrait;
+                
+                var gfx = XGraphics.FromPdfPage(page);
+                
+#pragma warning disable CS0618
+                var titleFont = new XFont("Segoe UI", 16, XFontStyleEx.Bold);
+                var subTitleFont = new XFont("Segoe UI", 9, XFontStyleEx.Regular);
+                var headerFont = new XFont("Segoe UI", 9, XFontStyleEx.Bold);
+                var dataFont = new XFont("Segoe UI", 9, XFontStyleEx.Regular);
+                var statTitleFont = new XFont("Segoe UI", 8, XFontStyleEx.Bold);
+                var statValueFont = new XFont("Segoe UI", 16, XFontStyleEx.Bold);
+#pragma warning restore CS0618
+
+                var grayBrush = XBrushes.DarkGray;
+                var textCharcoal = new XSolidBrush(XColor.FromArgb(30, 41, 59)); // Slate-800 Charcoal
+                var primaryColorBrush = new XSolidBrush(XColor.FromArgb(13, 148, 136)); // Teal
+                
+                var dividerPen = new XPen(XColor.FromArgb(226, 232, 240), 1.0); 
+                var tableHeaderBg = new XSolidBrush(XColor.FromArgb(241, 245, 249)); // Slate 100
+                var tableBorderPen = new XPen(XColor.FromArgb(226, 232, 240), 1.0);
+
+                double margin = 40;
+                double width = page.Width.Point - (margin * 2);
+                double y = margin;
+                
+                // Left Title
+                gfx.DrawString("SYSTEM EXAM & SESSION AUDIT REPORT", titleFont, textCharcoal, new XRect(margin, y, width - 100, 22), XStringFormats.TopLeft);
+                y += 22;
+                
+                gfx.DrawString("Generated on " + DateTime.Now.ToString("dd MMMM yyyy HH:mm"), subTitleFont, grayBrush, new XRect(margin, y, width, 15), XStringFormats.TopLeft);
+                
+                // Right Logo
+                if (logoImage != null)
+                {
+                    try
+                    {
+                        double logoH = 30;
+                        double logoW = logoImage.PointWidth * (logoH / logoImage.PointHeight);
+                        gfx.DrawImage(logoImage, page.Width.Point - margin - logoW, margin, logoW, logoH);
+                    }
+                    catch { }
+                }
+                
+                y += 30;
+                gfx.DrawLine(dividerPen, margin, y, page.Width.Point - margin, y);
+                y += 20;
+
+                // Stats Boxes Row (Exams, Sessions, Candidates)
+                double boxW = (width - 20) / 3;
+                double boxH = 45;
+                
+                // Stat 1: Total Exams
+                gfx.DrawRectangle(tableHeaderBg, margin, y, boxW, boxH);
+                gfx.DrawRectangle(tableBorderPen, margin, y, boxW, boxH);
+                gfx.DrawString("TOTAL EXAMS", statTitleFont, grayBrush, new XRect(margin + 10, y + 8, boxW - 20, 10), XStringFormats.TopLeft);
+                gfx.DrawString(TotalExams.ToString(), statValueFont, textCharcoal, new XRect(margin + 10, y + 20, boxW - 20, 20), XStringFormats.TopLeft);
+
+                // Stat 2: Total Sessions
+                gfx.DrawRectangle(tableHeaderBg, margin + boxW + 10, y, boxW, boxH);
+                gfx.DrawRectangle(tableBorderPen, margin + boxW + 10, y, boxW, boxH);
+                gfx.DrawString("TOTAL SESSIONS", statTitleFont, grayBrush, new XRect(margin + boxW + 20, y + 8, boxW - 20, 10), XStringFormats.TopLeft);
+                gfx.DrawString(TotalSessions.ToString(), statValueFont, primaryColorBrush, new XRect(margin + boxW + 20, y + 20, boxW - 20, 20), XStringFormats.TopLeft);
+
+                // Stat 3: Candidates Tested
+                gfx.DrawRectangle(tableHeaderBg, margin + (boxW * 2) + 20, y, boxW, boxH);
+                gfx.DrawRectangle(tableBorderPen, margin + (boxW * 2) + 20, y, boxW, boxH);
+                gfx.DrawString("CANDIDATES TESTED", statTitleFont, grayBrush, new XRect(margin + (boxW * 2) + 30, y + 8, boxW - 20, 10), XStringFormats.TopLeft);
+                gfx.DrawString(TotalStudents.ToString(), statValueFont, new XSolidBrush(XColor.FromArgb(59, 130, 246)), new XRect(margin + (boxW * 2) + 30, y + 20, boxW - 20, 20), XStringFormats.TopLeft);
+
+                y += boxH + 30;
+
+                // Completed Session Audit Table Header
+                gfx.DrawString("Completed Session Audit Logs", headerFont, textCharcoal, new XRect(margin, y, width, 15), XStringFormats.TopLeft);
+                y += 20;
+
+                // Table Headers
+                double[] colWidths = { 160, 65, 105, 55, 45, 45, 40 }; // total = 515 (matches width on A4)
+                double colX = margin;
+
+                gfx.DrawRectangle(tableHeaderBg, margin, y, width, 20);
+                gfx.DrawRectangle(tableBorderPen, margin, y, width, 20);
+
+                string[] headers = { "EXAM TITLE", "SESSION", "DATE", "STUDENTS", "AVG %", "PASSED", "FAILED" };
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    var align = (i >= 3) ? XStringFormats.CenterLeft : XStringFormats.CenterLeft;
+                    gfx.DrawString(headers[i], headerFont, textCharcoal, new XRect(colX + 5, y, colWidths[i] - 10, 20), align);
+                    colX += colWidths[i];
+                }
+                y += 20;
+
+                // Table Rows
+                foreach (var row in Rows)
+                {
+                    colX = margin;
+                    gfx.DrawRectangle(tableBorderPen, margin, y, width, 20);
+
+                    gfx.DrawString(row.ExamTitle, dataFont, textCharcoal, new XRect(colX + 5, y, colWidths[0] - 10, 20), XStringFormats.CenterLeft);
+                    colX += colWidths[0];
+
+                    gfx.DrawString(row.SessionCode, dataFont, primaryColorBrush, new XRect(colX + 5, y, colWidths[1] - 10, 20), XStringFormats.CenterLeft);
+                    colX += colWidths[1];
+
+                    gfx.DrawString(row.Date, dataFont, textCharcoal, new XRect(colX + 5, y, colWidths[2] - 10, 20), XStringFormats.CenterLeft);
+                    colX += colWidths[2];
+
+                    gfx.DrawString(row.Students.ToString(), dataFont, textCharcoal, new XRect(colX, y, colWidths[3], 20), XStringFormats.Center);
+                    colX += colWidths[3];
+
+                    gfx.DrawString(row.AvgPct.ToString("F1") + "%", dataFont, primaryColorBrush, new XRect(colX, y, colWidths[4], 20), XStringFormats.Center);
+                    colX += colWidths[4];
+
+                    gfx.DrawString(row.Passed.ToString(), dataFont, textCharcoal, new XRect(colX, y, colWidths[5], 20), XStringFormats.Center);
+                    colX += colWidths[5];
+
+                    gfx.DrawString(row.Failed.ToString(), dataFont, textCharcoal, new XRect(colX, y, colWidths[6], 20), XStringFormats.Center);
+
+                    y += 20;
+
+                    // Page break handling
+                    if (y > page.Height.Point - margin - 30)
+                    {
+                        DrawFooter(gfx, page, margin, 1, 1);
+                        page = document.AddPage();
+                        page.Size = PdfSharp.PageSize.A4;
+                        gfx = XGraphics.FromPdfPage(page);
+                        y = margin;
+                    }
+                }
+
+                DrawFooter(gfx, page, margin, 1, 1);
+                document.Save(sfd.FileName);
+            }
+            MessageBox.Show("Audit Report PDF exported successfully!", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (IOException)
+        {
+            MessageBox.Show("Export failed: The PDF file is open in another program (like a PDF reader or browser). Please close it and try again.", "Export Locked", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to export PDF: {ex.Message}", "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }
 

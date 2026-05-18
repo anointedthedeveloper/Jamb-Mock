@@ -80,12 +80,25 @@
             <!-- Results table -->
             <Border Style="{StaticResource Card}" Padding="0">
                 <StackPanel>
-                    <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="16,16,0,0" Padding="24,14">
-                        <TextBlock Text="Candidate Merit List" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="16,16,0,0" Padding="24,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Candidate Merit List" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            
+                            <!-- Search filter -->
+                            <TextBox Grid.Column="1" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Width="220" Height="32" Margin="0,0,12,0" VerticalContentAlignment="Center" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" Padding="8,2"/>
+                            
+                            <!-- Status filter -->
+                            <ComboBox Grid.Column="2" ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding StatusFilter}" Width="150" Height="32" VerticalContentAlignment="Center"/>
+                        </Grid>
                     </Border>
                     
                     <Border Padding="12">
-                         <DataGrid ItemsSource="{Binding Results}" AutoGenerateColumns="False" CanUserAddRows="False"
+                         <DataGrid ItemsSource="{Binding FilteredResults}" AutoGenerateColumns="False" CanUserAddRows="False"
                                   Background="Transparent" BorderThickness="0" RowHeight="50" GridLinesVisibility="None"
                                   HeadersVisibility="Column">
                             <DataGrid.Columns>

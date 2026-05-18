@@ -897,6 +897,20 @@ async function submitExam(manual = true) {
 
         if (submitRes.ok) {
             const scoreResult = await submitRes.json();
+            
+            // Save final scores and details in localStorage for high-fidelity client-side review!
+            localStorage.setItem('lastExamResult', JSON.stringify({
+                examTitle: localStorage.getItem('selectedExamTitle') || 'Examination',
+                studentName: localStorage.getItem('studentName') || 'Candidate',
+                studentId: localStorage.getItem('studentId') || '00000000',
+                score: scoreResult.score,
+                total: scoreResult.totalQuestions,
+                percentage: scoreResult.percentage,
+                submittedAt: new Date().toLocaleString(),
+                answers: answersList,
+                questions: questions
+            }));
+
             // Display animated completion card
             document.getElementById('score-text').textContent = `${scoreResult.percentage}%`;
             document.getElementById('completion-modal').classList.remove('hidden');
@@ -921,5 +935,5 @@ function exitExamPortal() {
     localStorage.removeItem('selectedExamTitle');
     localStorage.removeItem('examDuration');
     
-    window.location.href = 'index.html';
+    window.location.href = 'results.html';
 }

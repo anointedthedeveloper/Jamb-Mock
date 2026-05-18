@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Exam Results & Review | CBT Portal</title>
+<link rel="stylesheet" href="/css/style.css"/>
+<link rel="stylesheet" href="/css/results.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="results-layout">
+
+<header class="results-header">
+  <div class="header-content">
+    <div class="brand">
+      <img src="/img/prep4jamb.png" alt="Logo"/>
+      <h1>UTME CBT Results</h1>
+    </div>
+    <button class="btn-back" onclick="goToDashboard()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Back to Dashboard
+    </button>
+  </div>
+</header>
+
+<main class="results-container">
+  <!-- Performance Summary Card -->
+  <div class="score-hero-card">
+    <div class="candidate-meta">
+      <h2 id="student-name">Candidate Name</h2>
+      <p id="student-id">Registration Number: 00000000</p>
+      <p id="exam-info" style="font-weight: 700; color: #38bdf8; margin-top: 8px; font-size: 15px;">Exam Title</p>
+      <p id="exam-date" style="font-size: 11px; margin-top: 4px;">Attempted on: --/--/----</p>
+    </div>
+
+    <!-- Circular Progress Ring -->
+    <div class="score-ring-large">
+      <svg width="180" height="180">
+        <circle stroke="rgba(255,255,255,0.06)" stroke-width="8" fill="transparent" r="80" cx="90" cy="90"/>
+        <circle id="pct-ring" stroke="#10b981" stroke-width="8" fill="transparent" r="80" cx="90" cy="90" stroke-dasharray="502.6" stroke-dashoffset="502.6"/>
+      </svg>
+      <span class="pct-text" id="pct-text">0%</span>
+    </div>
+
+    <!-- Breakdown Stats Row -->
+    <div class="stats-grid-row">
+      <div class="stat-metric-card">
+        <span class="value" id="stat-total">0</span>
+        <span class="label">Questions</span>
+      </div>
+      <div class="stat-metric-card correct">
+        <span class="value" id="stat-correct">0</span>
+        <span class="label">Correct</span>
+      </div>
+      <div class="stat-metric-card incorrect">
+        <span class="value" id="stat-incorrect">0</span>
+        <span class="label">Incorrect</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Review Title -->
+  <h3 class="review-section-title">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+    Detailed Question Review & Corrections
+  </h3>
+
+  <!-- Detailed Questions List -->
+  <div class="review-list" id="review-list">
+    <!-- Question cards injected here -->
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const dataStr = localStorage.getItem('lastExamResult');
+      if (!dataStr) {
+          window.location.href = 'selection.html';
+          return;
+      }
+
+      const result = JSON.parse(dataStr);
+
+      // Hydrate candidate and exam headers
+      document.getElementById('student-name').textContent = result.studentName;
+      document.getElementById('student-id').textContent = `Registration Number: ${result.studentId}`;
+      document.getElementById('exam-info').textContent = result.examTitle;
+      document.getElementById('exam-date').textContent = `Submitted on: ${result.submittedAt}`;
+
+      // Hydrate score text and circular ring
+      const pct = parseFloat(result.percentage) || 0;
+      document.getElementById('pct-text').textContent = `${pct}%`;
+
+      const ring = document.getElementById('pct-ring');
+      const circumference = 2 * Math.PI * 80; // 502.65
+      const offset = circumference - (pct / 100) * circumference;
+      ring.style.strokeDasharray = `${circumference} ${circumference}`;
+      ring.style.strokeDashoffset = offset;
+
+      // Color ring red/yellow/green based on score
+      if (pct < 40) {
+          ring.setAttribute('stroke', '#ef4444');
+          document.getElementById('pct-text').style.color = '#ef4444';
+      } else if (pct < 70) {
+          ring.setAttribute('stroke', '#f59e0b');
+          document.getElementById('pct-text').style.color = '#f59e0b';
+      } else {
+          ring.setAttribute('stroke', '#10b981');
+          document.getElementById('pct-text').style.color = '#10b981';
+      }
+
+      // Hydrate breakdown metrics
+      document.getElementById('stat-total').textContent = result.total;
+      document.getElementById('stat-correct').textContent = result.score;
+      document.getElementById('stat-incorrect').textContent = result.total - result.score;
+
+      // Hydrate question review cards
+      const container = document.getElementById('review-list');
+      container.innerHTML = '';
+
+      if (!result.questions || result.questions.length === 0) {
+          container.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px;">No question review details available.</div>';
+          return;
+      }
+
+      result.questions.forEach((q, index) => {
+          // Find if candidate answered this question
+          const answerRecord = result.answers.find(a => a.questionId === q.questionId);
+          const selectedAnswer = answerRecord ? answerRecord.selectedAnswer : null;
+          
+          // Check correctness
+          let isCorrect = false;
+          let isUnanswered = true;
+          
+          if (selectedAnswer !== null) {
+              isUnanswered = false;
+              isCorrect = q.correctAnswer.trim().toLowerCase() === selectedAnswer.trim().toLowerCase();
+          }
+
+          const card = document.createElement('div');
+          card.className = `review-card ${isUnanswered ? 'unanswered-item' : (isCorrect ? 'correct-item' : 'incorrect-item')}`;
+
+          // Header badge
+          let badgeHtml = '';
+          if (isUnanswered) {
+              badgeHtml = '<span class="badge unanswered">Unanswered</span>';
+          } else if (isCorrect) {
+              badgeHtml = '<span class="badge correct">Correct</span>';
+          } else {
+              badgeHtml = '<span class="badge incorrect">Incorrect</span>';
+          }
+
+          const qNumLabel = `${index + 1} (${q.subject || 'General'})`;
+
+          let optionsHtml = '';
+          q.options.forEach((opt, optIdx) => {
+              const letter = String.fromCharCode(65 + optIdx);
+              let optClass = '';
+
+              const isOptSelected = selectedAnswer !== null && opt.trim().toLowerCase() === selectedAnswer.trim().toLowerCase();
+              const isOptCorrect = q.correctAnswer.trim().toLowerCase() === opt.trim().toLowerCase();
+
+              if (isOptSelected) {
+                  optClass = isCorrect ? 'selected-correct' : 'selected-incorrect';
+              } else if (isOptCorrect && !isCorrect) {
+                  optClass = 'correct-answer-outline';
+              }
+
+              optionsHtml += `
+                  <div class="review-opt ${optClass}">
+                      <div class="indicator">${letter}</div>
+                      <div class="option-text">${opt}</div>
+                  </div>
+              `;
+          });
+
+          card.innerHTML = `
+              <div class="review-card-header">
+                  <span style="font-weight: 700; color: #94a3b8;">Question ${qNumLabel}</span>
+                  ${badgeHtml}
+              </div>
+              <p class="q-text">${q.text}</p>
+              <div class="review-options">
+                  ${optionsHtml}
+              </div>
+          `;
+
+          container.appendChild(card);
+      });
+  });
+
+  function goToDashboard() {
+      // Keep result, just return to dashboard to take other active exams
+      window.location.href = 'selection.html';
+  }
+</script>
+
+</body>
+</html>
