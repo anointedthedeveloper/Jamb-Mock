@@ -94,8 +94,7 @@ public static class ApiBootstrap
             
             // Allow public access to certain endpoints
             if (!path.StartsWith("/api/exams") &&
-                !path.StartsWith("/api/sessions") &&
-                !path.StartsWith("/api/student"))
+                !path.StartsWith("/api/sessions"))
             {
                 await next();
                 return;
@@ -103,6 +102,13 @@ public static class ApiBootstrap
 
             // Allow students to GET exams and sessions publicly
             if ((path.StartsWith("/api/exams") || path.StartsWith("/api/sessions")) && ctx.Request.Method == "GET")
+            {
+                await next();
+                return;
+            }
+
+            // Allow student endpoints to be publicly accessible
+            if (path.StartsWith("/api/student"))
             {
                 await next();
                 return;
