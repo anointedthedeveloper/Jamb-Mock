@@ -33,6 +33,13 @@
                             Padding="12,9" Margin="0,0,8,0" ToolTip="Refresh">
                         <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets"/>
                     </Button>
+                    <Button Command="{Binding DownloadQuestionsCommand}" Style="{StaticResource PrimaryBtn}"
+                            Background="{DynamicResource AccentBrush}" Foreground="White" Padding="14,9" Margin="0,0,8,0" ToolTip="Export Questions">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Export Questions" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                     <Button Command="{Binding BulkUploadCommand}" Style="{StaticResource PrimaryBtn}"
                             Background="#059669" Padding="14,9">
                         <StackPanel Orientation="Horizontal">
@@ -81,65 +88,95 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     
-                    <!-- Table header -->
-                    <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="14,14,0,0" Padding="0,0,0,0"
+                    <!-- Dynamic List Header -->
+                    <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="14,14,0,0" Padding="16,12"
                             Visibility="{Binding Questions.Count, Converter={StaticResource IntToVis}}">
-                        <Grid Height="40">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="#" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="1" Text="Subject" Margin="12,0,0,0" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="2" Text="Year" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="3" Text="#" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Column="4" Text="Preview" Margin="12,0,0,0" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        </Grid>
+                        <TextBlock Text="Repository Subject &amp; Year Folders" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                     </Border>
                     
-                    <!-- ScrollViewer for list -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                    <!-- ScrollViewer for hierarchical grouping -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="12"
                                   Visibility="{Binding Questions.Count, Converter={StaticResource IntToVis}}">
-                        <ItemsControl ItemsSource="{Binding Questions}">
+                        <ItemsControl ItemsSource="{Binding GroupedSubjects}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
-                                            Background="Transparent">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource RowHoverBrush}"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <Grid Height="46">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="50"/>
-                                                <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition Width="80"/>
-                                                <ColumnDefinition Width="60"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Serial}" Margin="16,0,0,0" VerticalAlignment="Center"
-                                                       FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding Subject}" Margin="12,0,0,0"
-                                                       VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding Year}" VerticalAlignment="Center"
-                                                       FontSize="12" Foreground="{DynamicResource AccentBrush}"/>
-                                            <TextBlock Grid.Column="3" Text="{Binding QuestionNumber}" VerticalAlignment="Center"
-                                                       FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                            <TextBlock Grid.Column="4" Text="{Binding Preview}" Margin="12,0,0,0"
-                                                       VerticalAlignment="Center" FontSize="12" 
-                                                       TextTrimming="CharacterEllipsis"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                        </Grid>
-                                    </Border>
+                                    <!-- Subject Expander -->
+                                    <Expander IsExpanded="{Binding IsExpanded, Mode=TwoWay}" Margin="0,0,0,12" Background="Transparent" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <Expander.Header>
+                                            <Grid HorizontalAlignment="Stretch" Width="500">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="&#xED41;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding SubjectName}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                                <Border Grid.Column="2" Background="{DynamicResource NavActiveBrush}" CornerRadius="10" Padding="8,3" VerticalAlignment="Center">
+                                                    <TextBlock FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}">
+                                                        <Run Text="{Binding Years.Count, Mode=OneWay}"/>
+                                                        <Run Text=" Years"/>
+                                                    </TextBlock>
+                                                </Border>
+                                            </Grid>
+                                        </Expander.Header>
+                                        
+                                        <!-- Years under Subject -->
+                                        <ItemsControl ItemsSource="{Binding Years}" Margin="24,8,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <!-- Year Expander -->
+                                                    <Expander IsExpanded="{Binding IsExpanded, Mode=TwoWay}" Margin="0,0,0,8" Background="Transparent" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                                        <Expander.Header>
+                                                            <Grid HorizontalAlignment="Stretch" Width="460">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                                <TextBlock Grid.Column="1" Text="{Binding Year, StringFormat='Year {0}'}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                                                <Border Grid.Column="2" Background="{DynamicResource HeaderBgBrush}" CornerRadius="10" Padding="8,3" VerticalAlignment="Center">
+                                                                    <TextBlock FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}">
+                                                                        <Run Text="{Binding Questions.Count, Mode=OneWay}"/>
+                                                                        <Run Text=" Questions"/>
+                                                                    </TextBlock>
+                                                                </Border>
+                                                            </Grid>
+                                                        </Expander.Header>
+                                                        
+                                                        <!-- Questions under Year -->
+                                                        <ItemsControl ItemsSource="{Binding Questions}" Margin="16,4,0,8">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Background="Transparent" Padding="8,6">
+                                                                        <Border.Style>
+                                                                            <Style TargetType="Border">
+                                                                                <Style.Triggers>
+                                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                                        <Setter Property="Background" Value="{DynamicResource RowHoverBrush}"/>
+                                                                                    </Trigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </Border.Style>
+                                                                        <Grid Height="36">
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="35"/>
+                                                                                <ColumnDefinition Width="65"/>
+                                                                                <ColumnDefinition Width="*"/>
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Text="{Binding Serial}" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                                            <TextBlock Grid.Column="1" Text="{Binding QuestionNumber, StringFormat='Q{0}'}" FontWeight="Bold" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource AccentBrush}"/>
+                                                                            <TextBlock Grid.Column="2" Text="{Binding Preview}" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
+                                                                        </Grid>
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </Expander>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Expander>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

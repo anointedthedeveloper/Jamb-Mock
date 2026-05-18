@@ -1360,9 +1360,38 @@ public record QuestionBankRow(int Serial, int Id, string Subject, int Year, int 
 public record StudentRow(int Serial, int Id, string FullName, string StudentId, bool IsActive);
 
 // ─── Questions Management ────────────────────────────────────────────────────
+public class SubjectGroupVM : BaseViewModel
+{
+    public string SubjectName { get; }
+    public ObservableCollection<YearGroupVM> Years { get; } = [];
+
+    private bool _isExpanded = true;
+    public bool IsExpanded { get => _isExpanded; set => Set(ref _isExpanded, value); }
+
+    public SubjectGroupVM(string subjectName)
+    {
+        SubjectName = subjectName;
+    }
+}
+
+public class YearGroupVM : BaseViewModel
+{
+    public int Year { get; }
+    public ObservableCollection<QuestionBankRow> Questions { get; } = [];
+
+    private bool _isExpanded;
+    public bool IsExpanded { get => _isExpanded; set => Set(ref _isExpanded, value); }
+
+    public YearGroupVM(int year)
+    {
+        Year = year;
+    }
+}
+
 public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
 {
     public ObservableCollection<QuestionBankRow> Questions { get; } = [];
+    public ObservableCollection<SubjectGroupVM> GroupedSubjects { get; } = [];
     private List<QuestionBankDto> _all = [];
 
 
@@ -1416,6 +1445,62 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
     public RelayCommand RefreshCommand => new(async () => await LoadAsync());
     public RelayCommand ImportJsonCommand => new(async () => await ImportJsonAsync());
     public RelayCommand CopyTemplateCommand => new(() => { Clipboard.SetText(BulkJsonTemplate); Status = "Template copied to clipboard!"; StatusOk = true; });
+    public RelayCommand DownloadQuestionsCommand => new(async () => {
+        if (_all == null || _all.Count == 0)
+        {
+            MessageBox.Show("There are no questions in the bank to export.", "No Questions Available", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var sfd = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "JSON File (*.json)|*.json|CSV UTF-8 (*.csv)|*.csv",
+            FileName = "exported_questions",
+            DefaultExt = ".json"
+        };
+
+        if (sfd.ShowDialog() == true)
+        {
+            try
+            {
+                if (sfd.FileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                {
+                    var jsonContent = JsonSerializer.Serialize(_all, new JsonSerializerOptions { WriteIndented = true });
+                    await File.WriteAllTextAsync(sfd.FileName, jsonContent, System.Text.Encoding.UTF8);
+                }
+                else
+                {
+                    var sb = new System.Text.StringBuilder();
+                    sb.AppendLine("Subject,Year,QuestionNumber,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer");
+                    foreach (var q in _all)
+                    {
+                        List<string> opts = [];
+                        try
+                        {
+                            opts = JsonSerializer.Deserialize<List<string>>(q.OptionsJson) ?? [];
+                        }
+                        catch {}
+
+                        var optA = opts.Count > 0 ? opts[0] : "";
+                        var optB = opts.Count > 1 ? opts[1] : "";
+                        var optC = opts.Count > 2 ? opts[2] : "";
+                        var optD = opts.Count > 3 ? opts[3] : "";
+
+                        string Escape(string value) => $"\"{value.Replace("\"", "\"\"")}\"";
+
+                        sb.AppendLine($"{Escape(q.Subject)},{q.Year},{q.QuestionNumber},{Escape(q.Text)},{Escape(optA)},{Escape(optB)},{Escape(optC)},{Escape(optD)},{Escape(q.CorrectAnswer)}");
+                    }
+                    await File.WriteAllTextAsync(sfd.FileName, sb.ToString(), System.Text.Encoding.UTF8);
+                }
+
+                MessageBox.Show($"{_all.Count} questions exported successfully!", "Export Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error exporting questions: {ex.Message}", "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    });
 
     public RelayCommand BrowseFileCommand => new(async () => {
         var ofd = new Microsoft.Win32.OpenFileDialog
@@ -1687,6 +1772,44 @@ public class QuestionsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         int i = 1;
         foreach (var question in result.OrderBy(qb => qb.Subject).ThenBy(qb => qb.Year).ThenBy(qb => qb.QuestionNumber))
             Questions.Add(new QuestionBankRow(i++, question.Id, question.Subject, question.Year, question.QuestionNumber, question.Text.Substring(0, Math.Min(100, question.Text.Length)) + "..."));
+
+        // Rebuild GroupedSubjects hierarchical collection
+        GroupedSubjects.Clear();
+        var groups = result
+            .GroupBy(q => q.Subject, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(g => g.Key);
+
+        int serial = 1;
+        foreach (var subGroup in groups)
+        {
+            var subVM = new SubjectGroupVM(subGroup.Key);
+
+            var yearGroups = subGroup
+                .GroupBy(q => q.Year)
+                .OrderByDescending(g => g.Key);
+
+            foreach (var yearGroup in yearGroups)
+            {
+                var yearVM = new YearGroupVM(yearGroup.Key);
+
+                var orderedQuestions = yearGroup.OrderBy(q => q.QuestionNumber);
+                foreach (var q in orderedQuestions)
+                {
+                    yearVM.Questions.Add(new QuestionBankRow(
+                        serial++,
+                        q.Id,
+                        q.Subject,
+                        q.Year,
+                        q.QuestionNumber,
+                        q.Text.Substring(0, Math.Min(100, q.Text.Length)) + "..."
+                    ));
+                }
+
+                subVM.Years.Add(yearVM);
+            }
+
+            GroupedSubjects.Add(subVM);
+        }
     }
 
     private async Task ImportJsonAsync()
@@ -2085,6 +2208,12 @@ public class ReportsViewModel(ApiClient api) : BaseViewModel, IRefreshable
         if (TotalExams == 0)
         {
             MessageBox.Show("No exam templates found. Please create an exam template and complete at least one exam session before exporting reports.", "No Exam Data Available", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (TotalSessions == 0)
+        {
+            MessageBox.Show("No active or completed exam sessions found. Please launch a session and complete at least one candidate exam before generating reports.", "No Session Data Available", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
