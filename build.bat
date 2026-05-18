@@ -25,6 +25,7 @@ if exist "%OUTPUT%" (
 if not exist "%OUTPUT%" mkdir "%OUTPUT%"
 
 echo [3/4] Restoring NuGet packages...
+dotnet restore CbtExam.sln
 dotnet restore "%PROJECT%" --runtime win-x64
 
 echo [4/4] Building and Publishing (Release win-x64)...

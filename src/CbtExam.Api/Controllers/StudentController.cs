@@ -56,6 +56,31 @@ public class StudentController(AppDbContext db, IHubContext<ExamHub> hub, Snapsh
         return Ok(new StudentAdminDto(student.Id, student.FullName, student.StudentId, student.IsActive, student.Password));
     }
 
+    // GET /api/student/active-session/{examId}
+    // Public endpoint — students poll this to detect when admin opens a room for their exam
+    [HttpGet("active-session/{examId}")]
+    public async Task<IActionResult> GetActiveSession(int examId)
+    {
+        var session = await db.ExamSessions
+            .Include(s => s.Exam)
+            .Where(s => s.ExamId == examId && s.IsActive)
+            .OrderByDescending(s => s.StartedAt)
+            .FirstOrDefaultAsync();
+
+        if (session is null) return Ok(new { found = false });
+
+        return Ok(new
+        {
+            found      = true,
+            id         = session.Id,
+            examId     = session.ExamId,
+            examTitle  = session.Exam?.Title ?? "",
+            sessionCode = session.SessionCode,
+            isActive   = session.IsActive,
+            isStarted  = session.IsStarted
+        });
+    }
+
     // POST /api/student/join
     [HttpPost("join")]
     public async Task<IActionResult> Join(JoinExamDto dto)

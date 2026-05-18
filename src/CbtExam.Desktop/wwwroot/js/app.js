@@ -97,6 +97,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start device heartbeat loop
     runDeviceHeartbeat();
     setInterval(runDeviceHeartbeat, 5000);
+
+    // --- SignalR: instant broadcast receiver ---
+    try {
+        const hubUrl = API_BASE.replace('/api', '') + '/hubs/exam';
+        const examHub = new signalR.HubConnectionBuilder()
+            .withUrl(hubUrl)
+            .withAutomaticReconnect()
+            .build();
+
+        examHub.on('BroadcastMessage', (payload) => {
+            const msg = payload?.message || payload;
+            if (!msg) return;
+            const lastBroadcast = localStorage.getItem('last_broadcast_msg');
+            if (lastBroadcast !== msg) {
+                localStorage.setItem('last_broadcast_msg', msg);
+                if (typeof showToast === 'function')
+                    showToast('📢 Broadcast from Coordinator', msg, 'info');
+            }
+        });
+
+        examHub.start().catch(() => { /* offline — heartbeat poll is fallback */ });
+    } catch (e) { /* signalR not loaded (e.g. on non-exam pages) */ }
 });
 
 // --- Connection Settings for file:// Protocol ---

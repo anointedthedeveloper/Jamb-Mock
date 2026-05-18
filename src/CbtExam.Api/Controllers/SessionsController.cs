@@ -1,8 +1,10 @@
+using CbtExam.Api.Hubs;
 using CbtExam.Data;
 using CbtExam.Api.Services;
 using CbtExam.Shared.DTOs;
 using CbtExam.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
 
@@ -10,7 +12,7 @@ namespace CbtExam.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class SessionsController(AppDbContext db, SnapshotExportService exports) : ControllerBase
+public class SessionsController(AppDbContext db, SnapshotExportService exports, IHubContext<ExamHub> hub) : ControllerBase
 {
     private static readonly ConcurrentDictionary<int, string> _broadcasts = new();
 
@@ -142,9 +144,11 @@ public class SessionsController(AppDbContext db, SnapshotExportService exports) 
     }
 
     [HttpPost("{id}/broadcast")]
-    public IActionResult Broadcast(int id, [FromBody] BroadcastDto dto)
+    public async Task<IActionResult> Broadcast(int id, [FromBody] BroadcastDto dto)
     {
         _broadcasts[id] = dto.Message;
+        // Push instant SignalR notification so students get it immediately
+        await hub.Clients.All.SendAsync("BroadcastMessage", new { sessionId = id, message = dto.Message });
         return Ok();
     }
 

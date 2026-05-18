@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/login.css" />
     <link rel="stylesheet" href="/css/waiting.css" />
+    <!-- SignalR client for instant server push -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 </head>
 
 <body>
@@ -209,6 +211,27 @@
             const selectedExamId = parseInt(localStorage.getItem('selectedExamId')) || 0;
             const currentYear = new Date().getFullYear();
 
+            // --- SignalR Hub Connection for instant broadcast ---
+            const hubUrl = API_BASE.replace('/api', '') + '/hubs/exam';
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(hubUrl)
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on('BroadcastMessage', (payload) => {
+                const msg = payload?.message || payload;
+                if (!msg) return;
+                const lastBroadcast = localStorage.getItem('last_broadcast_msg');
+                if (lastBroadcast !== msg) {
+                    localStorage.setItem('last_broadcast_msg', msg);
+                    if (typeof showToast === 'function')
+                        showToast('📢 Broadcast from Coordinator', msg, 'info');
+                }
+            });
+
+            connection.start().catch(() => {/* offline — fall back to heartbeat poll */});
+            // ----------------------------------------------------
+
             document.getElementById('wait-candidate-name').textContent = studentName;
             document.getElementById('wait-exam-name').textContent = examTitle;
             document.getElementById('userAvatar').textContent = studentName.charAt(0).toUpperCase();
@@ -225,23 +248,29 @@
             let currentSession = null;
             let starting = false;
 
-            // Step 1: Poll for active session
+            // Step 1: Poll for active session via public student endpoint
             const checkSession = async () => {
                 if (downloading) return; // Prevent multiple joins
                 try {
-                    const response = await fetch(`${API_BASE}/Sessions`);
+                    const response = await fetch(`${API_BASE}/Student/active-session/${selectedExamId}`);
                     if (!response.ok) return;
-                    
-                    const sessions = await response.json();
-                    const activeSession = sessions.find(s => s.examId === selectedExamId && s.isActive);
-                    
-                    if (activeSession) {
+
+                    const data = await response.json();
+                    if (data.found && data.isActive) {
                         clearInterval(pollingInterval);
-                        currentSession = activeSession;
-                        startExamProcess(activeSession);
+                        // Shape into the format startExamProcess expects
+                        currentSession = {
+                            id: data.id,
+                            examId: data.examId,
+                            examTitle: data.examTitle,
+                            sessionCode: data.sessionCode,
+                            isActive: data.isActive,
+                            isStarted: data.isStarted
+                        };
+                        startExamProcess(currentSession);
                     }
                 } catch (err) {
-                    console.error('Polling error', err);
+                    // Silent — network may not be ready yet
                 }
             };
 
